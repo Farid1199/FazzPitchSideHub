@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4 text-center">Dashboard</h1>
+
+    <div class="row">
+        <!-- Players Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card border-primary h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Players</h5>
+                    <p class="card-text">Manage and view all registered players.</p>
+                    <a href="{% url 'players-list' %}" class="btn btn-primary">View Players</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Clubs Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card border-success h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Clubs</h5>
+                    <p class="card-text">Overview of all clubs on the platform.</p>
+                    <a href="{% url 'clubs-list' %}" class="btn btn-success">View Clubs</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Coaches Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card border-warning h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Coaches</h5>
+                    <p class="card-text">Access details and insights on coaches.</p>
+                    <a href="{% url 'coaches-list' %}" class="btn btn-warning">View Coaches</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scouts Card -->
+        <div class="col-md-6 mb-4">
+            <div class="card border-info h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Scouts</h5>
+                    <p class="card-text">Connect and manage scouting personnel.</p>
+                    <a href="{% url 'scouts-list' %}" class="btn btn-info">View Scouts</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Volunteers Card -->
+        <div class="col-md-6 mb-4">
+            <div class="card border-secondary h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Volunteers</h5>
+                    <p class="card-text">Keep track of volunteers and their roles.</p>
+                    <a href="{% url 'volunteers-list' %}" class="btn btn-secondary">View Volunteers</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

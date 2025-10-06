@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block title %}Players - FazzPitchSideHub{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-3">
+            <!-- Search Filters -->
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-search"></i> Search Players</h5>
+                </div>
+                <div class="card-body">
+                    <form method="get">
+                        {{ form.as_p }}
+                        <button type="submit" class="btn btn-primary w-100">Search</button>
+                        <a href="{% url 'public_players_list' %}" class="btn btn-outline-secondary w-100 mt-2">Clear Filters</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Players ({{ total_count }})</h2>
+                {% if not user.is_authenticated %}
+                    <a href="{% url 'register' %}" class="btn btn-primary">Join as Player</a>
+                {% elif user.user_type == 'PLAYER' %}
+                    <a href="{% url 'profile_edit' %}" class="btn btn-outline-primary">Edit My Profile</a>
+                {% endif %}
+            </div>
+            
+            {% if players %}
+                <div class="row">
+                    {% for player in players %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card social-card h-100">
+                            <div class="card-body">
+                                <div class="text-center mb-3">
+                                    {% if player.profile_image %}
+                                        <img src="{{ player.profile_image.url }}" alt="{{ player.username }}" class="rounded-circle" style="width: 80px; height: 80px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="bg-secondary rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                                            <i class="fas fa-user fa-2x text-white"></i>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    {% if player.is_verified %}
+                                        <span class="badge bg-success mt-2 d-block"><i class="fas fa-check-circle"></i> Verified</span>
+                                    {% endif %}
+                                </div>
+                                
+                                <h5 class="card-title text-center">{{ player.get_full_name|default:player.username }}</h5>
+                                
+                                <div class="text-center text-muted small mb-3">
+                                    {% if player.position %}
+                                        <span class="badge bg-primary">{{ player.position }}</span>
+                                    {% endif %}
+                                    {% if player.age %}
+                                        <span class="badge bg-secondary">Age {{ player.age }}</span>
+                                    {% endif %}
+                                </div>
+                                
+                                {% if player.location %}
+                                    <p class="text-center small"><i class="fas fa-map-marker-alt"></i> {{ player.location }}</p>
+                                {% endif %}
+                                
+                                {% if player.bio %}
+                                    <p class="small">{{ player.bio|truncatechars:80 }}</p>
+                                {% endif %}
+                                
+                                {% if player.playing_level %}
+                                    <p class="small"><strong>Level:</strong> {{ player.playing_level }}</p>
+                                {% endif %}
+                            </div>
+                            <div class="card-footer text-center">
+                                <a href="{% url 'public_profile' player.username %}" class="btn btn-outline-primary btn-sm">View Profile</a>
+                                {% if user.is_authenticated and user != player %}
+                                    <a href="{% url 'send_message_to' player.username %}" class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-envelope"></i>
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Pagination -->
+                {% if players.has_other_pages %}
+                <nav aria-label="Players pagination">
+                    <ul class="pagination justify-content-center">
+                        {% if players.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ players.previous_page_number }}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}{% if request.GET.location %}&location={{ request.GET.location }}{% endif %}{% if request.GET.position %}&position={{ request.GET.position }}{% endif %}{% if request.GET.verified_only %}&verified_only=on{% endif %}">Previous</a>
+                            </li>
+                        {% endif %}
+                        
+                        {% for num in players.paginator.page_range %}
+                            {% if players.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% elif num > players.number|add:'-3' and num < players.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}{% if request.GET.location %}&location={{ request.GET.location }}{% endif %}{% if request.GET.position %}&position={{ request.GET.position }}{% endif %}{% if request.GET.verified_only %}&verified_only=on{% endif %}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if players.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ players.next_page_number }}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}{% if request.GET.location %}&location={{ request.GET.location }}{% endif %}{% if request.GET.position %}&position={{ request.GET.position }}{% endif %}{% if request.GET.verified_only %}&verified_only=on{% endif %}">Next</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-users fa-4x text-muted mb-3"></i>
+                    <h4>No players found</h4>
+                    <p class="text-muted">Try adjusting your search criteria or check back later.</p>
+                    {% if not user.is_authenticated %}
+                        <a href="{% url 'register' %}" class="btn btn-primary">Be the first to join as a player!</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ profile_user.get_full_name|default:profile_user.username }} - Profile{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Profile Header -->
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    {% if profile_user.profile_image %}
+                        <img src="{{ profile_user.profile_image.url }}" alt="{{ profile_user.username }}" class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                    {% else %}
+                        <div class="bg-secondary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 150px; height: 150px;">
+                            <i class="fas fa-user fa-4x text-white"></i>
+                        </div>
+                    {% endif %}
+                    
+                    <h3>{{ profile_user.get_full_name|default:profile_user.username }}</h3>
+                    <p class="text-muted">{{ profile_user.get_user_type_display }}</p>
+                    
+                    {% if profile_user.is_verified %}
+                        <span class="badge bg-success mb-2"><i class="fas fa-check-circle"></i> Verified</span>
+                    {% endif %}
+                    
+                    {% if profile_user.location %}
+                        <p><i class="fas fa-map-marker-alt"></i> {{ profile_user.location }}</p>
+                    {% endif %}
+                    
+                    {% if user.is_authenticated and user != profile_user %}
+                        <div class="mt-3">
+                            <a href="{% url 'send_message_to' profile_user.username %}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-envelope"></i> Send Message
+                            </a>
+                            {% if can_endorse %}
+                                <a href="{% url 'endorse_user' profile_user.username %}" class="btn btn-outline-success btn-sm">
+                                    <i class="fas fa-thumbs-up"></i> Endorse
+                                </a>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <!-- Basic Info -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-info-circle"></i> About</h5>
+                </div>
+                <div class="card-body">
+                    {% if profile_user.bio %}
+                        <p>{{ profile_user.bio }}</p>
+                    {% else %}
+                        <p class="text-muted">No bio available.</p>
+                    {% endif %}
+                    
+                    <div class="row">
+                        {% if profile_user.user_type == 'PLAYER' %}
+                            {% if profile_user.position %}
+                                <div class="col-md-6">
+                                    <strong>Position:</strong> {{ profile_user.position }}
+                                </div>
+                            {% endif %}
+                            {% if profile_user.playing_level %}
+                                <div class="col-md-6">
+                                    <strong>Playing Level:</strong> {{ profile_user.playing_level }}
+                                </div>
+                            {% endif %}
+                            {% if profile_user.age %}
+                                <div class="col-md-6">
+                                    <strong>Age:</strong> {{ profile_user.age }}
+                                </div>
+                            {% endif %}
+                            {% if profile_user.previous_clubs %}
+                                <div class="col-12 mt-2">
+                                    <strong>Previous Clubs:</strong> {{ profile_user.previous_clubs }}
+                                </div>
+                            {% endif %}
+                        {% elif profile_user.user_type == 'CLUB' %}
+                            {% if profile_user.founded_year %}
+                                <div class="col-md-6">
+                                    <strong>Founded:</strong> {{ profile_user.founded_year }}
+                                </div>
+                            {% endif %}
+                            {% if profile_user.club_type %}
+                                <div class="col-md-6">
+                                    <strong>Club Type:</strong> {{ profile_user.club_type }}
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                        
+                        {% if profile_user.website %}
+                            <div class="col-12 mt-2">
+                                <strong>Website:</strong> <a href="{{ profile_user.website }}" target="_blank">{{ profile_user.website }}</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Endorsements -->
+            {% if endorsements %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-thumbs-up"></i> Endorsements ({{ endorsements.count }})</h5>
+                </div>
+                <div class="card-body">
+                    {% for endorsement in endorsements %}
+                        <div class="border-bottom pb-3 mb-3">
+                            <div class="d-flex justify-content-between">
+                                <strong>{{ endorsement.endorser.get_full_name|default:endorsement.endorser.username }}</strong>
+                                <small class="text-muted">{{ endorsement.created_at|date:"M d, Y" }}</small>
+                            </div>
+                            <p class="mt-2">{{ endorsement.message }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Media Gallery -->
+            {% if media_items %}
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-photo-video"></i> Media Gallery</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for media in media_items %}
+                        <div class="col-md-4 mb-3">
+                            <div class="card">
+                                {% if media.media_type == 'VIDEO' %}
+                                    <div class="card-img-top bg-dark text-white text-center py-5">
+                                        <i class="fas fa-play-circle fa-3x"></i>
+                                    </div>
+                                {% else %}
+                                    {% if media.file %}
+                                        <img src="{{ media.file.url }}" class="card-img-top" style="height: 150px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="card-img-top bg-light text-center py-5">
+                                            <i class="fas fa-image fa-3x text-muted"></i>
+                                        </div>
+                                    {% endif %}
+                                {% endif %}
+                                <div class="card-body">
+                                    <h6 class="card-title">{{ media.title }}</h6>
+                                    {% if media.description %}
+                                        <p class="card-text small">{{ media.description|truncatechars:50 }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
