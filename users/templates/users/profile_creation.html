@@ -1,0 +1,27 @@
+{% extends 'users/base.html' %}
+
+{% block content %}
+<div class="auth-container">
+    <h2>Complete Your Profile</h2>
+    <p>Tell us a bit more about yourself.</p>
+    
+    <form method="post" class="auth-form">
+        {% csrf_token %}
+        
+        {% for field in form %}
+        <div class="form-group">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}
+            <small class="form-text text-muted">{{ field.help_text }}</small>
+            {% endif %}
+            {% for error in field.errors %}
+            <div class="error-message">{{ error }}</div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+        
+        <button type="submit" class="btn btn-primary">Save Profile</button>
+    </form>
+</div>
+{% endblock %}

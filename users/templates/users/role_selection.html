@@ -1,0 +1,43 @@
+{% extends 'users/base.html' %}
+
+{% block content %}
+<div style="text-align: center;">
+    <h2>Select Your Role</h2>
+    <p>Tell us who you are to get started.</p>
+
+    <form method="post" id="roleForm">
+        {% csrf_token %}
+        <input type="hidden" name="role" id="selectedRole">
+        
+        <div class="role-cards">
+            <!-- Player Card -->
+            <div class="role-card" onclick="selectRole('PLAYER')">
+                <div class="role-icon">⚽</div>
+                <h3 class="role-title">Player</h3>
+                <p class="role-description">Showcase your skills and find a club.</p>
+            </div>
+
+            <!-- Club Card -->
+            <div class="role-card" onclick="selectRole('CLUB')">
+                <div class="role-icon">🛡️</div>
+                <h3 class="role-title">Club</h3>
+                <p class="role-description">Recruit talent and manage your team.</p>
+            </div>
+
+            <!-- Scout Card -->
+            <div class="role-card" onclick="selectRole('SCOUT')">
+                <div class="role-icon">🔍</div>
+                <h3 class="role-title">Scout</h3>
+                <p class="role-description">Discover the next big star.</p>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    function selectRole(role) {
+        document.getElementById('selectedRole').value = role;
+        document.getElementById('roleForm').submit();
+    }
+</script>
+{% endblock %}

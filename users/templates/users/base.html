@@ -1,0 +1,46 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fazz PitchSideHub</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <a href="{% url 'dashboard' %}" class="navbar-brand">Fazz PitchSideHub</a>
+        <ul class="navbar-nav">
+            {% if user.is_authenticated %}
+                <li><span class="nav-link">Hello, {{ user.username }}</span></li>
+                <li><a href="{% url 'dashboard' %}" class="nav-link">Dashboard</a></li>
+                <li>
+                    <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="nav-link" style="background:none; border:none; cursor:pointer;">Logout</button>
+                    </form>
+                </li>
+            {% else %}
+                <li><a href="{% url 'login' %}" class="nav-link">Login</a></li>
+                <li><a href="{% url 'signup' %}" class="nav-link">Sign Up</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="main-content">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 Fazz PitchSideHub. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>

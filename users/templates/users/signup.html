@@ -1,0 +1,31 @@
+{% extends 'users/base.html' %}
+
+{% block content %}
+<div style="max-width: 500px; margin: 0 auto;">
+    <h2>Sign Up</h2>
+    <p>Join Fazz PitchSideHub today.</p>
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}
+                    <p class="help-text">{{ field.help_text }}</p>
+                {% endif %}
+                {% for error in field.errors %}
+                    <p style="color: red;">{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endfor %}
+        
+        <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+    </form>
+    
+    <p style="margin-top: 1rem; text-align: center;">
+        Already have an account? <a href="{% url 'login' %}">Log in here</a>.
+    </p>
+</div>
+{% endblock %}
