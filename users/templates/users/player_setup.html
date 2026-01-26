@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+
+{% block title %}Player Profile Setup - FazzPitchSideHub{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-3xl mx-auto">
+        <div class="bg-white rounded-lg shadow-xl p-8">
+            <div class="mb-8">
+                <div class="flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4 mx-auto">
+                    <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-900 text-center">Complete Your Player Profile</h1>
+                <p class="text-gray-600 text-center mt-2">Tell us about yourself so clubs and scouts can find you</p>
+            </div>
+
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                <!-- Position -->
+                <div>
+                    <label for="{{ form.position.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        Position <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.position }}
+                    {% if form.position.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.position.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Location Postcode -->
+                <div>
+                    <label for="{{ form.location_postcode.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        Location (Postcode) <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.location_postcode }}
+                    {% if form.location_postcode.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.location_postcode.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-xs text-gray-500">e.g., SW1A 1AA</p>
+                </div>
+
+                <!-- Playing Level -->
+                <div>
+                    <label for="{{ form.playing_level.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        Playing Level <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.playing_level }}
+                    {% if form.playing_level.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.playing_level.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Height -->
+                <div>
+                    <label for="{{ form.height.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        Height (cm)
+                    </label>
+                    {{ form.height }}
+                    {% if form.height.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.height.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Preferred Foot -->
+                <div>
+                    <label for="{{ form.preferred_foot.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        Preferred Foot
+                    </label>
+                    {{ form.preferred_foot }}
+                    {% if form.preferred_foot.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.preferred_foot.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- YouTube Highlight URL -->
+                <div>
+                    <label for="{{ form.youtube_highlight_url.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        YouTube Highlight Video (Optional)
+                    </label>
+                    {{ form.youtube_highlight_url }}
+                    {% if form.youtube_highlight_url.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.youtube_highlight_url.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-xs text-gray-500">Share your best moments with clubs and scouts</p>
+                </div>
+
+                <!-- Previous Clubs -->
+                <div>
+                    <label for="{{ form.previous_clubs.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        Previous Clubs
+                    </label>
+                    {{ form.previous_clubs }}
+                    {% if form.previous_clubs.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.previous_clubs.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-xs text-gray-500">List your previous clubs and playing history</p>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="pt-4">
+                    <button type="submit" 
+                            class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-300 flex items-center justify-center">
+                        Complete Profile
+                        <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="mt-6 text-center">
+            <p class="text-sm text-gray-500">You can edit your profile anytime from your dashboard</p>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Style form inputs */
+    input[type="text"],
+    input[type="number"],
+    input[type="url"],
+    select,
+    textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.5rem;
+        font-size: 1rem;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+    
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    input[type="url"]:focus,
+    select:focus,
+    textarea:focus {
+        outline: none;
+        border-color: #10b981;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+    
+    textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+</style>
+{% endblock %}

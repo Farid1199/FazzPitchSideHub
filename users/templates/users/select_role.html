@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}Select Your Role - FazzPitchSideHub{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-green-50 to-green-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">Welcome to FazzPitchSideHub!</h1>
+            <p class="text-xl text-gray-600">Let's get started. What best describes you?</p>
+        </div>
+
+        <form method="post" class="grid md:grid-cols-3 gap-8">
+            {% csrf_token %}
+            
+            <!-- Player Card -->
+            <button type="submit" name="role" value="PLAYER" 
+                    class="group bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 p-8 text-center hover:scale-105 border-2 border-transparent hover:border-green-500">
+                <div class="mb-6">
+                    <svg class="w-20 h-20 mx-auto text-green-600 group-hover:text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-3">Player</h2>
+                <p class="text-gray-600 mb-4">Looking for trials, clubs, and opportunities to showcase your talent</p>
+                <div class="inline-flex items-center text-green-600 font-semibold group-hover:text-green-700">
+                    Continue as Player
+                    <svg class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                </div>
+            </button>
+
+            <!-- Club Card -->
+            <button type="submit" name="role" value="CLUB" 
+                    class="group bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 p-8 text-center hover:scale-105 border-2 border-transparent hover:border-blue-500">
+                <div class="mb-6">
+                    <svg class="w-20 h-20 mx-auto text-blue-600 group-hover:text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-3">Club</h2>
+                <p class="text-gray-600 mb-4">Represent your club and connect with talented grassroots players</p>
+                <div class="inline-flex items-center text-blue-600 font-semibold group-hover:text-blue-700">
+                    Continue as Club
+                    <svg class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                </div>
+            </button>
+
+            <!-- Scout Card -->
+            <button type="submit" name="role" value="SCOUT" 
+                    class="group bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 p-8 text-center hover:scale-105 border-2 border-transparent hover:border-purple-500">
+                <div class="mb-6">
+                    <svg class="w-20 h-20 mx-auto text-purple-600 group-hover:text-purple-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-3">Scout</h2>
+                <p class="text-gray-600 mb-4">Discover and track promising players from grassroots football</p>
+                <div class="inline-flex items-center text-purple-600 font-semibold group-hover:text-purple-700">
+                    Continue as Scout
+                    <svg class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                </div>
+            </button>
+        </form>
+
+        <div class="mt-8 text-center">
+            <p class="text-sm text-gray-500">You can update your role settings later from your dashboard</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

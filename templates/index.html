@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Fazz PitchSide Hub{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="bg-gradient-to-r from-green-700 to-emerald-600 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div class="text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">
+                Welcome to Fazz PitchSide Hub
+            </h1>
+            <p class="text-xl md:text-2xl mb-8 text-green-100">
+                Connecting Grassroots Football Players with Clubs & Opportunities
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="{% url 'signup' %}" class="bg-white text-green-700 px-8 py-3 rounded-lg font-bold hover:bg-green-50 transition duration-200">
+                    Get Started
+                </a>
+                <a href="#opportunities" class="bg-green-800 text-white px-8 py-3 rounded-lg font-bold hover:bg-green-900 transition duration-200 border-2 border-white">
+                    View Opportunities
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+        <div class="bg-white p-6 rounded-lg shadow-md text-center">
+            <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-users text-green-700 text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2">Find Players</h3>
+            <p class="text-gray-600">Discover talented players at all levels, from Step 1 to Sunday League.</p>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow-md text-center">
+            <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-shield-alt text-green-600 text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2">Find Clubs</h3>
+            <p class="text-gray-600">Connect with clubs actively recruiting new talent across the UK.</p>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow-md text-center">
+            <div class="bg-amber-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-bullhorn text-amber-600 text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2">Trial Opportunities</h3>
+            <p class="text-gray-600">Stay updated with the latest trials and recruitment opportunities.</p>
+        </div>
+    </div>
+
+    <!-- Latest Opportunities Section -->
+    <div id="opportunities" class="mb-16">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-3xl font-bold text-gray-800">
+                <i class="fas fa-fire text-red-500 mr-2"></i>
+                Latest Opportunities
+            </h2>
+            <a href="#" class="text-green-600 hover:text-green-800 font-medium">
+                View All <i class="fas fa-arrow-right ml-1"></i>
+            </a>
+        </div>
+
+        {% if latest_opportunities %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {% for opportunity in latest_opportunities %}
+                    <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition duration-200 overflow-hidden border-l-4 border-green-600">
+                        <div class="p-6">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex-1">
+                                    <h3 class="text-xl font-bold text-gray-800 mb-2">
+                                        {{ opportunity.title }}
+                                    </h3>
+                                    <div class="flex items-center text-sm text-gray-600 mb-2">
+                                        <i class="fas fa-shield-alt mr-2 text-green-600"></i>
+                                        <span class="font-medium">{{ opportunity.club.club_name }}</span>
+                                    </div>
+                                </div>
+                                <span class="bg-red-100 text-red-800 text-xs font-semibold px-3 py-1 rounded-full">
+                                    TRIAL
+                                </span>
+                            </div>
+
+                            {% if opportunity.target_position %}
+                                <div class="flex items-center text-sm text-gray-600 mb-3">
+                                    <i class="fas fa-running mr-2 text-green-600"></i>
+                                    <span>Position: <strong>{{ opportunity.target_position }}</strong></span>
+                                </div>
+                            {% endif %}
+
+                            <p class="text-gray-600 text-sm mb-4 line-clamp-2">
+                                {{ opportunity.description|truncatewords:25 }}
+                            </p>
+
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-gray-500">
+                                    <i class="far fa-clock mr-1"></i>
+                                    {{ opportunity.published_date|timesince }} ago
+                                </span>
+                                <a href="{{ opportunity.link }}" target="_blank" class="text-green-600 hover:text-green-800 font-medium text-sm">
+                                    View Details <i class="fas fa-external-link-alt ml-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="bg-gray-100 rounded-lg p-8 text-center">
+                <i class="fas fa-inbox text-gray-400 text-4xl mb-4"></i>
+                <p class="text-gray-600">No opportunities available at the moment. Check back soon!</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Latest News Section -->
+    <div class="mb-16">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-3xl font-bold text-gray-800">
+                <i class="fas fa-newspaper text-green-600 mr-2"></i>
+                Latest News
+            </h2>
+            <a href="#" class="text-green-600 hover:text-green-800 font-medium">
+                View All <i class="fas fa-arrow-right ml-1"></i>
+            </a>
+        </div>
+
+        {% if latest_news %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {% for news in latest_news %}
+                    <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition duration-200 overflow-hidden">
+                        <div class="p-6">
+                            <div class="flex items-start justify-between mb-3">
+                                <h3 class="text-xl font-bold text-gray-800 mb-2 flex-1">
+                                    {{ news.title }}
+                                </h3>
+                            </div>
+
+                            <div class="flex items-center text-sm text-gray-600 mb-3">
+                                <i class="fas fa-shield-alt mr-2 text-green-600"></i>
+                                <span class="font-medium">{{ news.club.club_name }}</span>
+                            </div>
+
+                            <p class="text-gray-600 text-sm mb-4 line-clamp-3">
+                                {{ news.description|truncatewords:30 }}
+                            </p>
+
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-gray-500">
+                                    <i class="far fa-clock mr-1"></i>
+                                    {{ news.published_date|timesince }} ago
+                                </span>
+                                <a href="{{ news.link }}" target="_blank" class="text-green-600 hover:text-green-800 font-medium text-sm">
+                                    Read More <i class="fas fa-external-link-alt ml-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="bg-gray-100 rounded-lg p-8 text-center">
+                <i class="fas fa-inbox text-gray-400 text-4xl mb-4"></i>
+                <p class="text-gray-600">No news available at the moment. Check back soon!</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Call to Action Section -->
+    <div class="bg-gradient-to-r from-green-700 to-emerald-600 rounded-lg p-8 text-center text-white">
+        <h2 class="text-3xl font-bold mb-4">Ready to Take Your Football Career Further?</h2>
+        <p class="text-xl mb-6 text-green-100">Join thousands of players and clubs already using Fazz PitchSide Hub</p>
+        <a href="{% url 'signup' %}" class="inline-block bg-white text-green-700 px-8 py-3 rounded-lg font-bold hover:bg-green-50 transition duration-200">
+            Sign Up Now - It's Free!
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<style>
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .line-clamp-3 {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+</style>
+{% endblock %}
