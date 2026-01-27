@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import User, PlayerProfile, ClubProfile, ScoutProfile
+from .models import User, PlayerProfile, ClubProfile, ScoutProfile, ManagerProfile
 
 class CustomUserCreationForm(UserCreationForm):
     """
@@ -73,4 +73,23 @@ class ScoutProfileForm(forms.ModelForm):
     class Meta:
         model = ScoutProfile
         fields = ['organization', 'region']
+
+
+class ManagerProfileForm(forms.ModelForm):
+    """
+    Form for creating/updating a Manager Profile.
+    """
+    class Meta:
+        model = ManagerProfile
+        fields = [
+            'club_name',
+            'years_of_experience',
+            'coaching_qualifications',
+            'preferred_formation',
+            'location_postcode'
+        ]
+        widgets = {
+            'coaching_qualifications': forms.Textarea(attrs={'rows': 3}),
+        }
+
 

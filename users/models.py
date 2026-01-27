@@ -10,6 +10,7 @@ class User(AbstractUser):
         ('PLAYER', 'Player'),
         ('CLUB', 'Club'),
         ('SCOUT', 'Scout'),
+        ('MANAGER', 'Manager'),
         ('FAN', 'Fan'),
     ]
 
@@ -207,6 +208,41 @@ class ScoutProfile(models.Model):
         return f"Scout: {self.user.username}"
 
 
+class ManagerProfile(models.Model):
+    """
+    Profile model for Managers.
+    Linked to User via OneToOneField.
+    """
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='manager_profile')
+    club_name = models.CharField(
+        max_length=100,
+        help_text="Name of the club currently managing.",
+        blank=True
+    )
+    years_of_experience = models.PositiveIntegerField(
+        help_text="Years of managerial experience.",
+        null=True,
+        blank=True
+    )
+    coaching_qualifications = models.TextField(
+        blank=True,
+        help_text="Coaching qualifications and certifications (e.g., UEFA B, FA Level 2)."
+    )
+    preferred_formation = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="Preferred tactical formation (e.g., 4-4-2, 4-3-3)."
+    )
+    location_postcode = models.CharField(
+        max_length=10,
+        help_text="Postcode for manager's location.",
+        blank=True
+    )
+
+    def __str__(self):
+        return f"Manager: {self.user.username}"
+
+
 # Django Signals for automatic profile creation
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -225,6 +261,8 @@ def create_user_profile(sender, instance, created, **kwargs):
             ClubProfile.objects.get_or_create(user=instance)
         elif instance.role == 'SCOUT':
             ScoutProfile.objects.get_or_create(user=instance)
+        elif instance.role == 'MANAGER':
+            ManagerProfile.objects.get_or_create(user=instance)
 
 
 @receiver(post_save, sender=User)
@@ -239,6 +277,8 @@ def save_user_profile(sender, instance, **kwargs):
             instance.club_profile.save()
         elif instance.role == 'SCOUT' and hasattr(instance, 'scout_profile'):
             instance.scout_profile.save()
+        elif instance.role == 'MANAGER' and hasattr(instance, 'manager_profile'):
+            instance.manager_profile.save()
 
 
 class NewsItem(models.Model):

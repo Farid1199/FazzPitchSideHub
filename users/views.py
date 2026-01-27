@@ -3,7 +3,7 @@ from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.db.models import Q
-from .forms import CustomUserCreationForm, PlayerProfileForm, ClubProfileForm, ScoutProfileForm
+from .forms import CustomUserCreationForm, PlayerProfileForm, ClubProfileForm, ScoutProfileForm, ManagerProfileForm
 from .models import User, NewsItem, Opportunity, PlayerProfile
 from .utils import get_recommendations
 
@@ -25,7 +25,7 @@ def signup_view(request):
 
 def select_role(request):
     """
-    Role selection page - user chooses between Player, Club, or Scout.
+    Role selection page - user chooses between Player, Club, Scout, or Manager.
     """
     # If user already has a role, redirect to appropriate setup or dashboard
     if request.user.is_authenticated:
@@ -37,6 +37,8 @@ def select_role(request):
                 return redirect('dashboard')
             elif request.user.role == 'SCOUT' and hasattr(request.user, 'scout_profile'):
                 return redirect('dashboard')
+            elif request.user.role == 'MANAGER' and hasattr(request.user, 'manager_profile'):
+                return redirect('dashboard')
             # If role set but no profile, redirect to appropriate setup
             else:
                 if request.user.role == 'PLAYER':
@@ -45,10 +47,12 @@ def select_role(request):
                     return redirect('club_setup')
                 elif request.user.role == 'SCOUT':
                     return redirect('scout_setup')
+                elif request.user.role == 'MANAGER':
+                    return redirect('manager_setup')
     
     if request.method == 'POST':
         role = request.POST.get('role')
-        if role in ['PLAYER', 'CLUB', 'SCOUT']:
+        if role in ['PLAYER', 'CLUB', 'SCOUT', 'MANAGER']:
             request.user.role = role
             request.user.save()
             
@@ -59,6 +63,8 @@ def select_role(request):
                 return redirect('club_setup')
             elif role == 'SCOUT':
                 return redirect('scout_setup')
+            elif role == 'MANAGER':
+                return redirect('manager_setup')
     
     return render(request, 'users/select_role.html')
 
@@ -139,6 +145,31 @@ def scout_setup(request):
         form = ScoutProfileForm()
     
     return render(request, 'users/scout_setup.html', {'form': form})
+
+@login_required
+def manager_setup(request):
+    """
+    Manager profile setup form.
+    """
+    # Ensure user selected MANAGER role
+    if request.user.role != 'MANAGER':
+        return redirect('select_role')
+    
+    # Check if profile already exists
+    if hasattr(request.user, 'manager_profile'):
+        return redirect('dashboard')
+    
+    if request.method == 'POST':
+        form = ManagerProfileForm(request.POST)
+        if form.is_valid():
+            profile = form.save(commit=False)
+            profile.user = request.user
+            profile.save()
+            return redirect('dashboard')
+    else:
+        form = ManagerProfileForm()
+    
+    return render(request, 'users/manager_setup.html', {'form': form})
 
 def login_view(request):
     """
