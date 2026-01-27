@@ -1,10 +1,17 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
+from django.contrib import messages
 from django.db.models import Q
-from .forms import CustomUserCreationForm, PlayerProfileForm, ClubProfileForm, ScoutProfileForm, ManagerProfileForm
-from .models import User, NewsItem, Opportunity, PlayerProfile
+from .forms import (
+    CustomUserCreationForm, PlayerProfileForm, ClubProfileForm, 
+    ScoutProfileForm, ManagerProfileForm, QualificationVerificationForm
+)
+from .models import (
+    User, NewsItem, Opportunity, PlayerProfile, ClubProfile, 
+    ScoutProfile, ManagerProfile, QualificationVerification
+)
 from .utils import get_recommendations
 
 def signup_view(request):
@@ -83,7 +90,7 @@ def player_setup(request):
         return redirect('dashboard')
     
     if request.method == 'POST':
-        form = PlayerProfileForm(request.POST)
+        form = PlayerProfileForm(request.POST, request.FILES)
         if form.is_valid():
             profile = form.save(commit=False)
             profile.user = request.user
@@ -170,7 +177,6 @@ def manager_setup(request):
         form = ManagerProfileForm()
     
     return render(request, 'users/manager_setup.html', {'form': form})
-
 def login_view(request):
     """
     Handles user login.
@@ -218,6 +224,7 @@ def dashboard_view(request):
     Main dashboard view.
     Ensures user has selected a role before showing content.
     For players, includes recommended trials based on their profile.
+    For managers, includes verification status and career stats.
     """
     if not request.user.role:
         return redirect('select_role')
@@ -228,6 +235,16 @@ def dashboard_view(request):
     if request.user.role == 'PLAYER' and hasattr(request.user, 'player_profile'):
         recommended_trials = get_recommendations(request.user.player_profile)
         context['recommended_trials'] = recommended_trials
+    
+    # Add manager-specific data
+    if request.user.role == 'MANAGER' and hasattr(request.user, 'manager_profile'):
+        manager_profile = request.user.manager_profile
+        context['manager_profile'] = manager_profile
+        # Get pending verification requests
+        pending_verifications = manager_profile.verification_requests.filter(status='PENDING').count()
+        context['pending_verifications'] = pending_verifications
+        # Get all verification requests
+        context['verification_requests'] = manager_profile.verification_requests.all()[:5]
     
     return render(request, 'users/dashboard.html', context)
 
@@ -304,3 +321,144 @@ def search_players(request):
     
     return render(request, 'users/search_results.html', context)
 
+
+@login_required
+def edit_profile(request):
+    """
+    Edit profile view for all user types.
+    Routes to appropriate profile edit based on user role.
+    """
+    if not request.user.role:
+        messages.error(request, "Please select a role first.")
+        return redirect('select_role')
+    
+    if request.user.role == 'PLAYER':
+        return edit_player_profile(request)
+    elif request.user.role == 'CLUB':
+        return edit_club_profile(request)
+    elif request.user.role == 'SCOUT':
+        return edit_scout_profile(request)
+    elif request.user.role == 'MANAGER':
+        return edit_manager_profile(request)
+    else:
+        messages.error(request, "Invalid role.")
+        return redirect('dashboard')
+
+
+@login_required
+def edit_player_profile(request):
+    """
+    Edit player profile.
+    """
+    if request.user.role != 'PLAYER':
+        messages.error(request, "Access denied.")
+        return redirect('dashboard')
+    
+    profile = get_object_or_404(PlayerProfile, user=request.user)
+    
+    if request.method == 'POST':
+        form = PlayerProfileForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Profile updated successfully!")
+            return redirect('dashboard')
+    else:
+        form = PlayerProfileForm(instance=profile)
+    
+    return render(request, 'users/player_setup.html', {'form': form, 'edit_mode': True})
+
+
+@login_required
+def edit_club_profile(request):
+    """
+    Edit club profile.
+    """
+    if request.user.role != 'CLUB':
+        messages.error(request, "Access denied.")
+        return redirect('dashboard')
+    
+    profile = get_object_or_404(ClubProfile, user=request.user)
+    
+    if request.method == 'POST':
+        form = ClubProfileForm(request.POST, instance=profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Profile updated successfully!")
+            return redirect('dashboard')
+    else:
+        form = ClubProfileForm(instance=profile)
+    
+    return render(request, 'users/club_setup.html', {'form': form, 'edit_mode': True})
+
+
+@login_required
+def edit_scout_profile(request):
+    """
+    Edit scout profile.
+    """
+    if request.user.role != 'SCOUT':
+        messages.error(request, "Access denied.")
+        return redirect('dashboard')
+    
+    profile = get_object_or_404(ScoutProfile, user=request.user)
+    
+    if request.method == 'POST':
+        form = ScoutProfileForm(request.POST, instance=profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Profile updated successfully!")
+            return redirect('dashboard')
+    else:
+        form = ScoutProfileForm(instance=profile)
+    
+    return render(request, 'users/scout_setup.html', {'form': form, 'edit_mode': True})
+
+
+@login_required
+def edit_manager_profile(request):
+    """
+    Edit manager profile.
+    """
+    if request.user.role != 'MANAGER':
+        messages.error(request, "Access denied.")
+        return redirect('dashboard')
+    
+    profile = get_object_or_404(ManagerProfile, user=request.user)
+    
+    if request.method == 'POST':
+        form = ManagerProfileForm(request.POST, instance=profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Profile updated successfully!")
+            return redirect('dashboard')
+    else:
+        form = ManagerProfileForm(instance=profile)
+    
+    return render(request, 'users/manager_setup.html', {'form': form, 'edit_mode': True})
+
+
+@login_required
+def submit_qualification_verification(request):
+    """
+    Allow managers to submit coaching certificates for verification.
+    """
+    if request.user.role != 'MANAGER':
+        messages.error(request, "Access denied.")
+        return redirect('dashboard')
+    
+    if not hasattr(request.user, 'manager_profile'):
+        messages.error(request, "Please complete your profile first.")
+        return redirect('manager_setup')
+    
+    if request.method == 'POST':
+        form = QualificationVerificationForm(request.POST, request.FILES)
+        if form.is_valid():
+            verification = form.save(commit=False)
+            verification.manager = request.user.manager_profile
+            verification.save()
+            messages.success(request, "Certificate submitted successfully! It will be reviewed by our admin team.")
+            return redirect('dashboard')
+    else:
+        form = QualificationVerificationForm()
+    
+    return render(request, 'users/submit_verification.html', {'form': form})

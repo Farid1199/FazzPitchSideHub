@@ -16,7 +16,7 @@
                 <p class="text-gray-600 text-center mt-2">Tell us about yourself so clubs and scouts can find you</p>
             </div>
 
-            <form method="post" class="space-y-6">
+            <form method="post" enctype="multipart/form-data" class="space-y-6">
                 {% csrf_token %}
                 
                 {% if form.non_field_errors %}
@@ -34,6 +34,32 @@
                     {% if form.position.errors %}
                         <p class="mt-1 text-sm text-red-600">{{ form.position.errors.0 }}</p>
                     {% endif %}
+                </div>
+
+                <!-- Current Team -->
+                <div>
+                    <label for="{{ form.current_team.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        {{ form.current_team.label }}
+                    </label>
+                    {{ form.current_team }}
+                    {% if form.current_team.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.current_team.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-xs text-gray-500">{{ form.current_team.help_text }}</p>
+                </div>
+
+                <!-- Availability Status -->
+                <div>
+                    <div class="flex items-center">
+                        {{ form.available_for_club }}
+                        <label for="{{ form.available_for_club.id_for_label }}" class="ml-2 text-sm font-medium text-gray-700">
+                            {{ form.available_for_club.label }}
+                        </label>
+                    </div>
+                    {% if form.available_for_club.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.available_for_club.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-xs text-gray-500">{{ form.available_for_club.help_text }}</p>
                 </div>
 
                 <!-- Location Postcode -->
@@ -84,13 +110,33 @@
                 <!-- YouTube Highlight URL -->
                 <div>
                     <label for="{{ form.youtube_highlight_url.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-                        YouTube Highlight Video (Optional)
+                        {{ form.youtube_highlight_url.label }}
                     </label>
                     {{ form.youtube_highlight_url }}
                     {% if form.youtube_highlight_url.errors %}
                         <p class="mt-1 text-sm text-red-600">{{ form.youtube_highlight_url.errors.0 }}</p>
                     {% endif %}
-                    <p class="mt-1 text-xs text-gray-500">Share your best moments with clubs and scouts</p>
+                    <p class="mt-1 text-xs text-gray-500">Paste a YouTube link to your highlight video</p>
+                </div>
+
+                <!-- Video File Upload -->
+                <div>
+                    <label for="{{ form.video_file.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        Or Upload Video File
+                    </label>
+                    {{ form.video_file }}
+                    {% if form.video_file.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.video_file.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-xs text-gray-500">{{ form.video_file.help_text }}</p>
+                    {% if edit_mode and user.player_profile.video_file %}
+                        <div class="mt-2 p-2 bg-blue-50 rounded border border-blue-200">
+                            <p class="text-sm text-blue-800">
+                                <i class="fas fa-video mr-1"></i> Current video: 
+                                <a href="{{ user.player_profile.video_file.url }}" target="_blank" class="underline">View uploaded video</a>
+                            </p>
+                        </div>
+                    {% endif %}
                 </div>
 
                 <!-- Previous Clubs -->
@@ -109,7 +155,11 @@
                 <div class="pt-4">
                     <button type="submit" 
                             class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-300 flex items-center justify-center">
-                        Complete Profile
+                        {% if edit_mode %}
+                            <i class="fas fa-save mr-2"></i> Save Changes
+                        {% else %}
+                            Complete Profile
+                        {% endif %}
                         <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
@@ -129,6 +179,7 @@
     input[type="text"],
     input[type="number"],
     input[type="url"],
+    input[type="file"],
     select,
     textarea {
         width: 100%;
@@ -142,11 +193,25 @@
     input[type="text"]:focus,
     input[type="number"]:focus,
     input[type="url"]:focus,
+    input[type="file"]:focus,
     select:focus,
     textarea:focus {
         outline: none;
         border-color: #10b981;
         box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+    
+    input[type="checkbox"] {
+        width: 1.25rem;
+        height: 1.25rem;
+        border-radius: 0.25rem;
+        border: 2px solid #d1d5db;
+        cursor: pointer;
+    }
+    
+    input[type="checkbox"]:checked {
+        background-color: #10b981;
+        border-color: #10b981;
     }
     
     textarea {

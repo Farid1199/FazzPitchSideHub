@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+
+{% block title %}Submit Qualification Verification - FazzPitchSideHub{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-3xl mx-auto">
+        <div class="bg-white rounded-lg shadow-xl p-8">
+            <!-- Header -->
+            <div class="mb-8">
+                <div class="flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4 mx-auto">
+                    <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                    </svg>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-900 text-center">Verify Your Coaching Qualifications</h1>
+                <p class="text-gray-600 text-center mt-2">Upload your certificate to get verified and build trust with players and clubs</p>
+            </div>
+
+            <!-- Information Box -->
+            <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-blue-800">What You Need:</h3>
+                        <div class="mt-2 text-sm text-blue-700">
+                            <ul class="list-disc list-inside space-y-1">
+                                <li>A clear photo or scan of your coaching certificate</li>
+                                <li>Make sure your name is visible on the certificate</li>
+                                <li>The certificate should show the qualification level</li>
+                                <li>Optional: Your FA FAN Number for faster verification</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form -->
+            <form method="post" enctype="multipart/form-data" class="space-y-6">
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                <!-- Qualification Type -->
+                <div>
+                    <label for="{{ form.qualification_type.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        {{ form.qualification_type.label }} <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.qualification_type }}
+                    {% if form.qualification_type.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.qualification_type.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Certificate Image -->
+                <div>
+                    <label for="{{ form.certificate_image.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        {{ form.certificate_image.label }} <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.certificate_image }}
+                    {% if form.certificate_image.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.certificate_image.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-xs text-gray-500">{{ form.certificate_image.help_text }}</p>
+                </div>
+
+                <!-- FA FAN Number -->
+                <div>
+                    <label for="{{ form.fa_fan_number.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        {{ form.fa_fan_number.label }}
+                    </label>
+                    {{ form.fa_fan_number }}
+                    {% if form.fa_fan_number.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.fa_fan_number.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-xs text-gray-500">{{ form.fa_fan_number.help_text }}</p>
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex space-x-4 pt-4">
+                    <button type="submit" 
+                            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-300 flex items-center justify-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                        </svg>
+                        Submit for Verification
+                    </button>
+                    <a href="{% url 'dashboard' %}" 
+                       class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-3 px-6 rounded-lg transition duration-300 text-center">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+
+            <!-- Process Information -->
+            <div class="mt-8 p-4 bg-gray-50 rounded-lg">
+                <h3 class="text-sm font-semibold text-gray-900 mb-2">Verification Process:</h3>
+                <ol class="text-sm text-gray-700 space-y-2">
+                    <li class="flex items-start">
+                        <span class="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-bold mr-2">1</span>
+                        <span>You upload your coaching certificate</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-bold mr-2">2</span>
+                        <span>Our admin team reviews your certificate (typically within 24-48 hours)</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-bold mr-2">3</span>
+                        <span>You'll see a "Verified" badge on your profile once approved</span>
+                    </li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="mt-6 text-center">
+            <p class="text-sm text-gray-500">
+                Your certificate information is kept secure and will only be used for verification purposes.
+            </p>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Style form inputs */
+    input[type="text"],
+    input[type="file"],
+    select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.5rem;
+        font-size: 1rem;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+    
+    input[type="text"]:focus,
+    input[type="file"]:focus,
+    select:focus {
+        outline: none;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+</style>
+{% endblock %}

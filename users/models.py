@@ -104,9 +104,24 @@ class PlayerProfile(models.Model):
         help_text="YouTube link to player highlights.", 
         blank=True
     )
+    video_file = models.FileField(
+        upload_to='player_videos/',
+        blank=True,
+        null=True,
+        help_text="Upload a highlight video (MP4, AVI, MOV). Max size: 50MB."
+    )
     previous_clubs = models.TextField(
         blank=True, 
         help_text="List of previous clubs."
+    )
+    current_team = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text="Current team/club name."
+    )
+    available_for_club = models.BooleanField(
+        default=False,
+        help_text="Whether the player is looking for a club."
     )
 
     def __str__(self):
@@ -210,37 +225,162 @@ class ScoutProfile(models.Model):
 
 class ManagerProfile(models.Model):
     """
-    Profile model for Managers.
+    Profile model for Managers/Coaches.
     Linked to User via OneToOneField.
     """
+    QUALIFICATION_CHOICES = [
+        ('NONE', 'No Formal Qualification'),
+        ('INTRO', 'Introduction to Coaching Football (Level 1)'),
+        ('UEFA_C', 'UEFA C Licence (Level 2)'),
+        ('UEFA_B', 'UEFA B Licence (Level 3)'),
+        ('UEFA_A', 'UEFA A Licence (Level 4)'),
+        ('UEFA_PRO', 'UEFA Pro Licence (Level 5)'),
+    ]
+    
+    AVAILABILITY_CHOICES = [
+        ('EMPLOYED', 'Currently Employed'),
+        ('OPEN', 'Open to Offers'),
+    ]
+    
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='manager_profile')
+    
+    # Basic Info
     club_name = models.CharField(
         max_length=100,
         help_text="Name of the club currently managing.",
         blank=True
     )
-    years_of_experience = models.PositiveIntegerField(
-        help_text="Years of managerial experience.",
-        null=True,
+    current_role = models.CharField(
+        max_length=100,
+        help_text="e.g., First Team Manager, Assistant Manager, U23 Coach.",
         blank=True
-    )
-    coaching_qualifications = models.TextField(
-        blank=True,
-        help_text="Coaching qualifications and certifications (e.g., UEFA B, FA Level 2)."
-    )
-    preferred_formation = models.CharField(
-        max_length=50,
-        blank=True,
-        help_text="Preferred tactical formation (e.g., 4-4-2, 4-3-3)."
     )
     location_postcode = models.CharField(
         max_length=10,
         help_text="Postcode for manager's location.",
         blank=True
     )
+    
+    # Professional Details
+    coaching_philosophy = models.TextField(
+        blank=True,
+        help_text="Describe your coaching style and philosophy (e.g., 'High pressing', 'Possession-based')."
+    )
+    preferred_formation = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="Preferred tactical formation (e.g., 4-4-2, 4-3-3)."
+    )
+    years_of_experience = models.PositiveIntegerField(
+        help_text="Years of managerial experience.",
+        null=True,
+        blank=True
+    )
+    
+    # Career History
+    career_history = models.TextField(
+        blank=True,
+        help_text="List previous clubs, roles, and dates (e.g., '2020-2022: First Team Manager at FC United')."
+    )
+    achievements = models.TextField(
+        blank=True,
+        help_text="List trophies, titles, and notable achievements (e.g., 'Isthmian League North Winner 2022')."
+    )
+    
+    # Statistics
+    games_managed = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        help_text="Total number of games managed."
+    )
+    win_rate = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Win percentage (e.g., 65.50 for 65.5%)."
+    )
+    
+    # Qualifications
+    highest_qualification = models.CharField(
+        max_length=20,
+        choices=QUALIFICATION_CHOICES,
+        default='NONE',
+        help_text="Highest coaching qualification held."
+    )
+    additional_badges = models.TextField(
+        blank=True,
+        help_text="Additional qualifications (e.g., 'FA Youth Award', 'Goalkeeping Level 2')."
+    )
+    qualification_verified = models.BooleanField(
+        default=False,
+        help_text="Whether the coaching qualification has been verified by admin."
+    )
+    
+    # Availability
+    availability = models.CharField(
+        max_length=20,
+        choices=AVAILABILITY_CHOICES,
+        default='EMPLOYED',
+        help_text="Current employment status."
+    )
 
     def __str__(self):
         return f"Manager: {self.user.username}"
+    
+    def get_win_percentage(self):
+        """Calculate and return win percentage if stats are available."""
+        if self.games_managed and self.win_rate:
+            return f"{self.win_rate}%"
+        return "N/A"
+
+
+class QualificationVerification(models.Model):
+    """
+    Model to store uploaded coaching certificates for verification.
+    """
+    STATUS_CHOICES = [
+        ('PENDING', 'Pending Review'),
+        ('APPROVED', 'Approved'),
+        ('REJECTED', 'Rejected'),
+    ]
+    
+    manager = models.ForeignKey(
+        ManagerProfile, 
+        on_delete=models.CASCADE, 
+        related_name='verification_requests'
+    )
+    qualification_type = models.CharField(
+        max_length=20,
+        choices=ManagerProfile.QUALIFICATION_CHOICES,
+        help_text="Type of qualification being verified."
+    )
+    certificate_image = models.ImageField(
+        upload_to='coaching_certificates/',
+        help_text="Upload a photo/scan of your coaching certificate."
+    )
+    fa_fan_number = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="Optional: FA FAN (Football Affiliate Number)."
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='PENDING'
+    )
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    admin_notes = models.TextField(
+        blank=True,
+        help_text="Admin notes on the verification decision."
+    )
+    
+    class Meta:
+        ordering = ['-submitted_at']
+    
+    def __str__(self):
+        return f"{self.manager.user.username} - {self.get_qualification_type_display()} ({self.status})"
 
 
 # Django Signals for automatic profile creation

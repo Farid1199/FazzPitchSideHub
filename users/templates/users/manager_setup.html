@@ -1,22 +1,24 @@
 {% extends 'base.html' %}
 
-{% block title %}Manager Profile Setup - FazzPitchSideHub{% endblock %}
+{% block title %}{% if edit_mode %}Edit Manager Profile{% else %}Manager Profile Setup{% endif %} - FazzPitchSideHub{% endblock %}
 
 {% block content %}
 <div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-3xl mx-auto">
+    <div class="max-w-4xl mx-auto">
         <div class="bg-white rounded-lg shadow-xl p-8">
             <div class="mb-8">
-                <div class="flex items-center justify-center w-16 h-16 bg-orange-100 rounded-full mb-4 mx-auto">
-                    <svg class="w-10 h-10 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4 mx-auto">
+                    <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                     </svg>
                 </div>
-                <h1 class="text-3xl font-bold text-gray-900 text-center">Complete Your Manager Profile</h1>
-                <p class="text-gray-600 text-center mt-2">Tell us about your managerial experience and expertise</p>
+                <h1 class="text-3xl font-bold text-gray-900 text-center">
+                    {% if edit_mode %}Edit Your Manager Profile{% else %}Complete Your Manager Profile{% endif %}
+                </h1>
+                <p class="text-gray-600 text-center mt-2">Build your professional coaching portfolio</p>
             </div>
 
-            <form method="post" class="space-y-6">
+            <form method="post" class="space-y-8">
                 {% csrf_token %}
                 
                 {% if form.non_field_errors %}
@@ -25,90 +27,205 @@
                     </div>
                 {% endif %}
 
-                <!-- Club Name -->
-                <div>
-                    <label for="{{ form.club_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-                        Current Club
-                    </label>
-                    {{ form.club_name }}
-                    {% if form.club_name.errors %}
-                        <p class="mt-1 text-sm text-red-600">{{ form.club_name.errors.0 }}</p>
-                    {% endif %}
-                    <p class="mt-1 text-xs text-gray-500">Name of the club you currently manage (if applicable)</p>
-                </div>
-
-                <!-- Years of Experience -->
-                <div>
-                    <label for="{{ form.years_of_experience.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-                        Years of Experience
-                    </label>
-                    {{ form.years_of_experience }}
-                    {% if form.years_of_experience.errors %}
-                        <p class="mt-1 text-sm text-red-600">{{ form.years_of_experience.errors.0 }}</p>
-                    {% endif %}
-                    <p class="mt-1 text-xs text-gray-500">Total years of managerial or coaching experience</p>
-                </div>
-
-                <!-- Coaching Qualifications -->
-                <div>
-                    <label for="{{ form.coaching_qualifications.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-                        Coaching Qualifications
-                    </label>
-                    {{ form.coaching_qualifications }}
-                    {% if form.coaching_qualifications.errors %}
-                        <p class="mt-1 text-sm text-red-600">{{ form.coaching_qualifications.errors.0 }}</p>
-                    {% endif %}
-                    <p class="mt-1 text-xs text-gray-500">List your coaching badges and certifications (e.g., UEFA B License, FA Level 2)</p>
-                </div>
-
-                <!-- Preferred Formation -->
-                <div>
-                    <label for="{{ form.preferred_formation.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-                        Preferred Formation
-                    </label>
-                    {{ form.preferred_formation }}
-                    {% if form.preferred_formation.errors %}
-                        <p class="mt-1 text-sm text-red-600">{{ form.preferred_formation.errors.0 }}</p>
-                    {% endif %}
-                    <p class="mt-1 text-xs text-gray-500">Your favored tactical formation (e.g., 4-4-2, 4-3-3, 3-5-2)</p>
-                </div>
-
-                <!-- Location Postcode -->
-                <div>
-                    <label for="{{ form.location_postcode.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-                        Location (Postcode)
-                    </label>
-                    {{ form.location_postcode }}
-                    {% if form.location_postcode.errors %}
-                        <p class="mt-1 text-sm text-red-600">{{ form.location_postcode.errors.0 }}</p>
-                    {% endif %}
-                    <p class="mt-1 text-xs text-gray-500">Your postcode for location-based opportunities</p>
-                </div>
-
-                <!-- Info Box -->
-                <div class="bg-orange-50 border border-orange-200 rounded-lg p-6">
-                    <div class="flex items-start">
-                        <svg class="w-6 h-6 text-orange-600 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+                <!-- Basic Information Section -->
+                <div class="border-b border-gray-200 pb-6">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4">Basic Information</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Club Name -->
                         <div>
-                            <h3 class="font-semibold text-orange-900 mb-2">Manager Access Features</h3>
-                            <ul class="text-sm text-orange-800 space-y-1">
-                                <li>• Search and recruit talented players for your team</li>
-                                <li>• Post trial opportunities and recruitment notices</li>
-                                <li>• Access detailed player statistics and profiles</li>
-                                <li>• Connect with scouts and other managers</li>
-                                <li>• Manage team roster and player development</li>
-                            </ul>
+                            <label for="{{ form.club_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                {{ form.club_name.label }}
+                            </label>
+                            {{ form.club_name }}
+                            {% if form.club_name.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.club_name.errors.0 }}</p>
+                            {% endif %}
+                            <p class="mt-1 text-xs text-gray-500">{{ form.club_name.help_text }}</p>
+                        </div>
+
+                        <!-- Current Role -->
+                        <div>
+                            <label for="{{ form.current_role.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                {{ form.current_role.label }}
+                            </label>
+                            {{ form.current_role }}
+                            {% if form.current_role.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.current_role.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Availability -->
+                        <div>
+                            <label for="{{ form.availability.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Availability <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.availability }}
+                            {% if form.availability.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.availability.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Location Postcode -->
+                        <div>
+                            <label for="{{ form.location_postcode.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Location (Postcode)
+                            </label>
+                            {{ form.location_postcode }}
+                            {% if form.location_postcode.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.location_postcode.errors.0 }}</p>
+                            {% endif %}
                         </div>
                     </div>
+                </div>
+
+                <!-- Coaching Details Section -->
+                <div class="border-b border-gray-200 pb-6">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4">Coaching Details</h2>
+                    
+                    <!-- Coaching Philosophy -->
+                    <div class="mb-6">
+                        <label for="{{ form.coaching_philosophy.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Coaching Philosophy
+                        </label>
+                        {{ form.coaching_philosophy }}
+                        {% if form.coaching_philosophy.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.coaching_philosophy.errors.0 }}</p>
+                        {% endif %}
+                        <p class="mt-1 text-xs text-gray-500">{{ form.coaching_philosophy.help_text }}</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Preferred Formation -->
+                        <div>
+                            <label for="{{ form.preferred_formation.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                {{ form.preferred_formation.label }}
+                            </label>
+                            {{ form.preferred_formation }}
+                            {% if form.preferred_formation.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.preferred_formation.errors.0 }}</p>
+                            {% endif %}
+                            <p class="mt-1 text-xs text-gray-500">{{ form.preferred_formation.help_text }}</p>
+                        </div>
+
+                        <!-- Years of Experience -->
+                        <div>
+                            <label for="{{ form.years_of_experience.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Years of Experience
+                            </label>
+                            {{ form.years_of_experience }}
+                            {% if form.years_of_experience.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.years_of_experience.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Career History Section -->
+                <div class="border-b border-gray-200 pb-6">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4">Career History</h2>
+                    
+                    <!-- Career History -->
+                    <div class="mb-6">
+                        <label for="{{ form.career_history.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Career History
+                        </label>
+                        {{ form.career_history }}
+                        {% if form.career_history.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.career_history.errors.0 }}</p>
+                        {% endif %}
+                        <p class="mt-1 text-xs text-gray-500">{{ form.career_history.help_text }}</p>
+                    </div>
+
+                    <!-- Achievements -->
+                    <div>
+                        <label for="{{ form.achievements.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Achievements & Honours
+                        </label>
+                        {{ form.achievements }}
+                        {% if form.achievements.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.achievements.errors.0 }}</p>
+                        {% endif %}
+                        <p class="mt-1 text-xs text-gray-500">{{ form.achievements.help_text }}</p>
+                    </div>
+                </div>
+
+                <!-- Statistics Section -->
+                <div class="border-b border-gray-200 pb-6">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4">Management Statistics</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Games Managed -->
+                        <div>
+                            <label for="{{ form.games_managed.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Games Managed
+                            </label>
+                            {{ form.games_managed }}
+                            {% if form.games_managed.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.games_managed.errors.0 }}</p>
+                            {% endif %}
+                            <p class="mt-1 text-xs text-gray-500">{{ form.games_managed.help_text }}</p>
+                        </div>
+
+                        <!-- Win Rate -->
+                        <div>
+                            <label for="{{ form.win_rate.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                {{ form.win_rate.label }}
+                            </label>
+                            {{ form.win_rate }}
+                            {% if form.win_rate.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.win_rate.errors.0 }}</p>
+                            {% endif %}
+                            <p class="mt-1 text-xs text-gray-500">{{ form.win_rate.help_text }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Qualifications Section -->
+                <div class="pb-6">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4">Coaching Qualifications</h2>
+                    
+                    <!-- Highest Qualification -->
+                    <div class="mb-6">
+                        <label for="{{ form.highest_qualification.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            {{ form.highest_qualification.label }} <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.highest_qualification }}
+                        {% if form.highest_qualification.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.highest_qualification.errors.0 }}</p>
+                        {% endif %}
+                        <p class="mt-1 text-xs text-gray-500">{{ form.highest_qualification.help_text }}</p>
+                    </div>
+
+                    <!-- Additional Badges -->
+                    <div>
+                        <label for="{{ form.additional_badges.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Additional Badges & Certifications
+                        </label>
+                        {{ form.additional_badges }}
+                        {% if form.additional_badges.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.additional_badges.errors.0 }}</p>
+                        {% endif %}
+                        <p class="mt-1 text-xs text-gray-500">{{ form.additional_badges.help_text }}</p>
+                    </div>
+
+                    {% if edit_mode %}
+                        <div class="mt-4 p-4 bg-blue-50 rounded-lg">
+                            <p class="text-sm text-blue-800">
+                                <strong>💡 Tip:</strong> After saving your profile, you can verify your qualifications by uploading your coaching certificate. 
+                                This will give you a verified badge and increase trust with players and clubs.
+                            </p>
+                        </div>
+                    {% endif %}
                 </div>
 
                 <!-- Submit Button -->
                 <div class="pt-4">
                     <button type="submit" 
-                            class="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-300 flex items-center justify-center">
-                        Complete Profile
+                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-300 flex items-center justify-center">
+                        {% if edit_mode %}
+                            Save Changes
+                        {% else %}
+                            Complete Profile
+                        {% endif %}
                         <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
@@ -118,7 +235,13 @@
         </div>
 
         <div class="mt-6 text-center">
-            <p class="text-sm text-gray-500">You can edit your profile anytime from your dashboard</p>
+            <p class="text-sm text-gray-500">
+                {% if edit_mode %}
+                    <a href="{% url 'dashboard' %}" class="text-blue-600 hover:text-blue-800">← Back to Dashboard</a>
+                {% else %}
+                    You can edit your profile anytime from your dashboard
+                {% endif %}
+            </p>
         </div>
     </div>
 </div>
@@ -136,16 +259,16 @@
         font-size: 1rem;
         transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
     }
-
+    
     input[type="text"]:focus,
     input[type="number"]:focus,
     select:focus,
     textarea:focus {
         outline: none;
-        border-color: #f97316;
-        box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
     }
-
+    
     textarea {
         min-height: 100px;
         resize: vertical;
