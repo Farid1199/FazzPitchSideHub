@@ -1,0 +1,218 @@
+{% extends 'base.html' %}
+{% load youtube_filters %}
+
+{% block title %}{{ player_user.username }} - Player Profile{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Back Button -->
+        <div class="mb-6">
+            <a href="{% url 'search_players' %}" class="text-green-600 hover:text-green-700 font-medium inline-flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Back to Search
+            </a>
+        </div>
+
+        <!-- Player Profile Card -->
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+            
+            <!-- Header with Position Icon -->
+            <div class="relative bg-gradient-to-r from-green-700 to-emerald-600 px-8 py-12">
+                <!-- Position Icon Badge - Top Right -->
+                <div class="absolute top-6 right-6">
+                    <div class="{{ position_color }} text-white rounded-full p-4 shadow-lg">
+                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                            {% if player.position == 'GK' %}
+                                <!-- Goalkeeper gloves icon -->
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+                            {% elif player.position == 'LB' or player.position == 'CB' or player.position == 'RB' or player.position == 'LWB' or player.position == 'RWB' %}
+                                <!-- Defender shield icon -->
+                                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+                            {% elif player.position == 'CDM' or player.position == 'CM' or player.position == 'CAM' or player.position == 'LM' or player.position == 'RM' %}
+                                <!-- Midfielder gear icon -->
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                            {% elif player.position == 'LW' or player.position == 'RW' %}
+                                <!-- Winger lightning icon -->
+                                <path d="M7 2v11h3v9l7-12h-4l4-8z"/>
+                            {% else %}
+                                <!-- Forward/Striker target icon -->
+                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                            {% endif %}
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Player Info -->
+                <div class="flex items-center space-x-6">
+                    <div class="w-32 h-32 bg-white rounded-full flex items-center justify-center shadow-xl">
+                        <svg class="w-20 h-20 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <h1 class="text-4xl font-bold text-white mb-2">{{ player_user.username }}</h1>
+                        <div class="flex items-center space-x-4">
+                            <span class="bg-white bg-opacity-20 text-white px-4 py-1 rounded-full text-lg font-semibold">
+                                {{ player.get_position_display }}
+                            </span>
+                            {% if player.available_for_club %}
+                                <span class="bg-green-400 text-green-900 px-4 py-1 rounded-full text-sm font-bold">
+                                    ✓ Available
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Content -->
+            <div class="p-8">
+                
+                <!-- Key Stats Grid -->
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">Player Information</h2>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="bg-gray-50 rounded-lg p-4 text-center">
+                            <p class="text-sm text-gray-500 mb-1">Position</p>
+                            <p class="text-lg font-bold text-gray-900">{{ player.get_position_display }}</p>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-4 text-center">
+                            <p class="text-sm text-gray-500 mb-1">Playing Level</p>
+                            <p class="text-lg font-bold text-gray-900">{{ player.get_playing_level_display }}</p>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-4 text-center">
+                            <p class="text-sm text-gray-500 mb-1">Location</p>
+                            <p class="text-lg font-bold text-gray-900">{{ player.location_postcode|default:"N/A" }}</p>
+                        </div>
+                        {% if player.height %}
+                            <div class="bg-gray-50 rounded-lg p-4 text-center">
+                                <p class="text-sm text-gray-500 mb-1">Height</p>
+                                <p class="text-lg font-bold text-gray-900">{{ player.height }} m</p>
+                            </div>
+                        {% endif %}
+                        {% if player.preferred_foot %}
+                            <div class="bg-gray-50 rounded-lg p-4 text-center">
+                                <p class="text-sm text-gray-500 mb-1">Preferred Foot</p>
+                                <p class="text-lg font-bold text-gray-900">{{ player.get_preferred_foot_display }}</p>
+                            </div>
+                        {% endif %}
+                        {% if player.current_team %}
+                            <div class="bg-gray-50 rounded-lg p-4 text-center">
+                                <p class="text-sm text-gray-500 mb-1">Current Team</p>
+                                <p class="text-lg font-bold text-gray-900">{{ player.current_team }}</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Previous Clubs -->
+                {% if player.previous_clubs %}
+                    <div class="mb-8">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-4">Previous Clubs</h2>
+                        <div class="bg-gray-50 rounded-lg p-6">
+                            <p class="text-gray-700 whitespace-pre-line">{{ player.previous_clubs }}</p>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- Video Highlights -->
+                {% if player.youtube_highlight_url or player.video_file %}
+                    <div class="mb-8">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-4">Highlights</h2>
+                        
+                        {% if player.youtube_highlight_url %}
+                            <div class="bg-gray-900 rounded-lg overflow-hidden mb-4">
+                                <div class="aspect-video">
+                                    <iframe 
+                                        width="100%" 
+                                        height="100%" 
+                                        src="{{ player.youtube_highlight_url|youtube_embed_url }}" 
+                                        frameborder="0" 
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                        allowfullscreen
+                                        class="w-full h-full">
+                                    </iframe>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        {% if player.video_file %}
+                            <div class="bg-gray-900 rounded-lg overflow-hidden">
+                                <video controls class="w-full">
+                                    <source src="{{ player.video_file.url }}" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+                <!-- Contact Section -->
+                <div class="border-t pt-8">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">Interested in This Player?</h2>
+                    
+                    {% if user.is_authenticated %}
+                        {% if user.role == 'CLUB' or user.role == 'SCOUT' or user.role == 'MANAGER' %}
+                            <div class="bg-blue-50 border-l-4 border-blue-400 p-6 rounded mb-6">
+                                <div class="flex">
+                                    <div class="flex-shrink-0">
+                                        <svg class="h-6 w-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                    </div>
+                                    <div class="ml-3 flex-1">
+                                        <h3 class="text-lg font-medium text-blue-800">Send a Message</h3>
+                                        <p class="mt-2 text-sm text-blue-700">
+                                            Use the messaging feature below to contact {{ player_user.username }} about trial opportunities, club information, or any questions you may have.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col sm:flex-row gap-4">
+                                <button onclick="alert('Messaging feature coming soon! For now, you can view the player\'s contact information in your dashboard.')" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 rounded-lg transition duration-300 flex items-center justify-center">
+                                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                    </svg>
+                                    Send Message
+                                </button>
+                                
+                                <button onclick="alert('Email: {{ player_user.email }}')" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-lg transition duration-300 flex items-center justify-center">
+                                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                                    </svg>
+                                    View Contact Info
+                                </button>
+                            </div>
+                        {% else %}
+                            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-6 rounded">
+                                <p class="text-yellow-800">
+                                    Only clubs, scouts, and managers can contact players. If you're interested in finding opportunities, check out our <a href="{% url 'home' %}" class="font-semibold underline">latest trials</a>.
+                                </p>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="bg-gray-50 border-l-4 border-gray-400 p-6 rounded">
+                            <p class="text-gray-800">
+                                <a href="{% url 'login' %}" class="font-semibold text-green-600 hover:text-green-700 underline">Log in</a> or 
+                                <a href="{% url 'signup' %}" class="font-semibold text-green-600 hover:text-green-700 underline">sign up</a> 
+                                to contact this player.
+                            </p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .aspect-video {
+        aspect-ratio: 16 / 9;
+    }
+</style>
+{% endblock %}

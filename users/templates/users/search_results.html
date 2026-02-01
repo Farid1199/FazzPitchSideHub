@@ -88,7 +88,7 @@
         </div>
 
         <!-- Results Count -->
-        <div class="mb-6">
+        <div class="mb-6 flex items-center justify-between">
             <p class="text-gray-700 font-medium">
                 {% if total_results > 0 %}
                     Found {{ total_results }} player{{ total_results|pluralize }}
@@ -96,13 +96,73 @@
                     No players found matching your criteria
                 {% endif %}
             </p>
+            
+            <!-- Position Color Legend -->
+            <div class="flex items-center space-x-4 text-sm">
+                <span class="text-gray-600 font-medium">Position Colors:</span>
+                <div class="flex items-center space-x-1">
+                    <div class="w-4 h-4 rounded-full bg-yellow-500" title="Goalkeeper"></div>
+                    <span class="text-gray-600">GK</span>
+                </div>
+                <div class="flex items-center space-x-1">
+                    <div class="w-4 h-4 rounded-full bg-blue-600" title="Defender"></div>
+                    <span class="text-gray-600">DEF</span>
+                </div>
+                <div class="flex items-center space-x-1">
+                    <div class="w-4 h-4 rounded-full bg-green-600" title="Midfielder"></div>
+                    <span class="text-gray-600">MID</span>
+                </div>
+                <div class="flex items-center space-x-1">
+                    <div class="w-4 h-4 rounded-full bg-red-500" title="Winger"></div>
+                    <span class="text-gray-600">WING</span>
+                </div>
+                <div class="flex items-center space-x-1">
+                    <div class="w-4 h-4 rounded-full bg-purple-600" title="Forward"></div>
+                    <span class="text-gray-600">FWD</span>
+                </div>
+            </div>
         </div>
 
         <!-- Player Cards Grid -->
         {% if players %}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {% for player in players %}
-                    <div class="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden">
+                    <div class="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden relative">
+                        <!-- Position Icon Badge - Top Right -->
+                        <div class="absolute top-4 right-4 z-10">
+                            {% if player.position == 'GK' %}
+                                <div class="bg-yellow-500 text-white rounded-full p-3 shadow-lg" title="Goalkeeper">
+                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+                                    </svg>
+                                </div>
+                            {% elif player.position == 'LB' or player.position == 'CB' or player.position == 'RB' or player.position == 'LWB' or player.position == 'RWB' %}
+                                <div class="bg-blue-600 text-white rounded-full p-3 shadow-lg" title="Defender">
+                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+                                    </svg>
+                                </div>
+                            {% elif player.position == 'CDM' or player.position == 'CM' or player.position == 'CAM' or player.position == 'LM' or player.position == 'RM' %}
+                                <div class="bg-green-600 text-white rounded-full p-3 shadow-lg" title="Midfielder">
+                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                    </svg>
+                                </div>
+                            {% elif player.position == 'LW' or player.position == 'RW' %}
+                                <div class="bg-red-500 text-white rounded-full p-3 shadow-lg" title="Winger">
+                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M7 2v11h3v9l7-12h-4l4-8z"/>
+                                    </svg>
+                                </div>
+                            {% else %}
+                                <div class="bg-purple-600 text-white rounded-full p-3 shadow-lg" title="Forward">
+                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                                    </svg>
+                                </div>
+                            {% endif %}
+                        </div>
+
                         <!-- Player Header with Avatar -->
                         <div class="bg-gradient-to-r from-green-500 to-green-600 p-6">
                             <div class="flex items-center space-x-4">
@@ -182,12 +242,12 @@
                             {% endif %}
 
                             <!-- Contact Button -->
-                            <button class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 flex items-center justify-center">
+                            <a href="{% url 'player_profile' player.user.username %}" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 flex items-center justify-center">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                 </svg>
-                                Contact Player
-                            </button>
+                                View Profile
+                            </a>
                         </div>
                     </div>
                 {% endfor %}

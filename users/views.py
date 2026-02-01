@@ -4,9 +4,11 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
 from django.db.models import Q
+from django.utils import timezone
 from .forms import (
     CustomUserCreationForm, PlayerProfileForm, ClubProfileForm, 
-    ScoutProfileForm, ManagerProfileForm, QualificationVerificationForm
+    ScoutProfileForm, ManagerProfileForm, QualificationVerificationForm,
+    OpportunityForm
 )
 from .models import (
     User, NewsItem, Opportunity, PlayerProfile, ClubProfile, 
@@ -462,3 +464,84 @@ def submit_qualification_verification(request):
         form = QualificationVerificationForm()
     
     return render(request, 'users/submit_verification.html', {'form': form})
+
+
+@login_required
+def post_opportunity(request):
+    """
+    Allow clubs to post trial opportunities.
+    """
+    if request.user.role != 'CLUB':
+        messages.error(request, "Only clubs can post opportunities.")
+        return redirect('dashboard')
+    
+    if not hasattr(request.user, 'club_profile'):
+        messages.error(request, "Please complete your club profile first.")
+        return redirect('club_setup')
+    
+    if request.method == 'POST':
+        form = OpportunityForm(request.POST)
+        if form.is_valid():
+            opportunity = form.save(commit=False)
+            opportunity.club = request.user.club_profile
+            # If no link provided, use a placeholder
+            if not opportunity.link:
+                opportunity.link = '#'
+            opportunity.save()
+            messages.success(request, "Trial opportunity posted successfully! It will now appear on the homepage.")
+            return redirect('dashboard')
+    else:
+        form = OpportunityForm()
+    
+    return render(request, 'users/post_opportunity.html', {'form': form})
+
+
+def opportunity_detail(request, pk):
+    """
+    Display full details of a trial opportunity.
+    """
+    opportunity = get_object_or_404(Opportunity, pk=pk)
+    
+    context = {
+        'opportunity': opportunity,
+    }
+    
+    return render(request, 'users/opportunity_detail.html', context)
+
+
+def news_detail(request, pk):
+    """
+    Display full details of a news item.
+    """
+    news = get_object_or_404(NewsItem, pk=pk)
+    
+    context = {
+        'news': news,
+    }
+    
+    return render(request, 'users/news_detail.html', context)
+
+
+def player_profile(request, username):
+    """
+    Display full player profile with option to message them.
+    """
+    player_user = get_object_or_404(User, username=username, role='PLAYER')
+    player = get_object_or_404(PlayerProfile, user=player_user)
+    
+    # Position color mapping
+    position_colors = {
+        'GK': 'bg-yellow-500',  # Yellow for goalkeepers
+        'LB': 'bg-blue-500', 'CB': 'bg-blue-600', 'RB': 'bg-blue-500', 'LWB': 'bg-blue-400', 'RWB': 'bg-blue-400',  # Blue shades for defenders
+        'CDM': 'bg-green-500', 'CM': 'bg-green-600', 'CAM': 'bg-green-700', 'LM': 'bg-green-500', 'RM': 'bg-green-500',  # Green shades for midfielders
+        'LW': 'bg-red-500', 'RW': 'bg-red-500',  # Red for wingers
+        'ST': 'bg-purple-600', 'CF': 'bg-purple-700',  # Purple for forwards
+    }
+    
+    context = {
+        'player': player,
+        'player_user': player_user,
+        'position_color': position_colors.get(player.position, 'bg-gray-500'),
+    }
+    
+    return render(request, 'users/player_profile.html', context)

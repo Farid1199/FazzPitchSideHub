@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+
+{% block title %}Post Trial Opportunity - FazzPitchSideHub{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Header -->
+        <div class="mb-8">
+            <a href="{% url 'dashboard' %}" class="text-green-600 hover:text-green-700 font-medium mb-4 inline-flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Back to Dashboard
+            </a>
+            <h1 class="text-4xl font-bold text-gray-900 mt-4 mb-2">Post Trial Opportunity</h1>
+            <p class="text-gray-600">
+                Create a trial opportunity that will be visible to players on the public homepage
+            </p>
+        </div>
+
+        <!-- Success/Error Messages -->
+        {% if messages %}
+            <div class="mb-6">
+                {% for message in messages %}
+                    <div class="{% if message.tags == 'success' %}bg-green-50 border-l-4 border-green-400{% elif message.tags == 'error' %}bg-red-50 border-l-4 border-red-400{% else %}bg-blue-50 border-l-4 border-blue-400{% endif %} p-4 rounded mb-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                {% if message.tags == 'success' %}
+                                    <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                {% elif message.tags == 'error' %}
+                                    <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                    </svg>
+                                {% endif %}
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm {% if message.tags == 'success' %}text-green-800{% elif message.tags == 'error' %}text-red-800{% else %}text-blue-800{% endif %}">
+                                    {{ message }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Form Card -->
+        <div class="bg-white rounded-lg shadow-md p-8">
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                
+                <!-- Trial Title -->
+                <div>
+                    <label for="{{ form.title.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        {{ form.title.label }}
+                        <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.title }}
+                    {% if form.title.help_text %}
+                        <p class="mt-1 text-sm text-gray-500">{{ form.title.help_text }}</p>
+                    {% endif %}
+                    {% if form.title.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.title.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Position Needed -->
+                <div>
+                    <label for="{{ form.target_position.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        {{ form.target_position.label }}
+                        <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.target_position }}
+                    {% if form.target_position.help_text %}
+                        <p class="mt-1 text-sm text-gray-500">{{ form.target_position.help_text }}</p>
+                    {% endif %}
+                    {% if form.target_position.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.target_position.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Trial Date -->
+                <div>
+                    <label for="{{ form.published_date.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        {{ form.published_date.label }}
+                        <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.published_date }}
+                    {% if form.published_date.help_text %}
+                        <p class="mt-1 text-sm text-gray-500">{{ form.published_date.help_text }}</p>
+                    {% endif %}
+                    {% if form.published_date.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.published_date.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Description -->
+                <div>
+                    <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        {{ form.description.label }}
+                        <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.description }}
+                    {% if form.description.help_text %}
+                        <p class="mt-1 text-sm text-gray-500">{{ form.description.help_text }}</p>
+                    {% endif %}
+                    {% if form.description.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.description.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- More Information Link (Optional) -->
+                <div>
+                    <label for="{{ form.link.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        {{ form.link.label }}
+                    </label>
+                    {{ form.link }}
+                    {% if form.link.help_text %}
+                        <p class="mt-1 text-sm text-gray-500">{{ form.link.help_text }}</p>
+                    {% endif %}
+                    {% if form.link.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.link.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Info Box -->
+                <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-blue-700">
+                                <strong>Note:</strong> Once posted, your trial opportunity will appear on the public homepage where players can see it. Make sure all information is accurate before submitting.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="flex space-x-4">
+                    <button type="submit" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 flex items-center justify-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        Post Opportunity
+                    </button>
+                    <a href="{% url 'dashboard' %}" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-3 px-6 rounded-lg transition duration-300 text-center">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    input[type="text"],
+    input[type="url"],
+    input[type="datetime-local"],
+    textarea {
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.375rem;
+        font-size: 1rem;
+        line-height: 1.5;
+    }
+    
+    input[type="text"]:focus,
+    input[type="url"]:focus,
+    input[type="datetime-local"]:focus,
+    textarea:focus {
+        outline: none;
+        border-color: #10b981;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+    
+    textarea {
+        resize: vertical;
+    }
+</style>
+{% endblock %}

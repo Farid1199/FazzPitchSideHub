@@ -5,7 +5,8 @@ from .views import (
     player_setup, club_setup, scout_setup, manager_setup,
     role_selection_view, profile_creation_view, 
     dashboard_view, home_view, search_players,
-    edit_profile, submit_qualification_verification
+    edit_profile, submit_qualification_verification, post_opportunity,
+    opportunity_detail, news_detail, player_profile
 )
 
 urlpatterns = [
@@ -27,6 +28,10 @@ urlpatterns = [
     path('dashboard/', dashboard_view, name='dashboard'),
     path('edit-profile/', edit_profile, name='edit_profile'),
     path('submit-verification/', submit_qualification_verification, name='submit_verification'),
+    path('post-opportunity/', post_opportunity, name='post_opportunity'),
+    path('opportunity/<int:pk>/', opportunity_detail, name='opportunity_detail'),
+    path('news/<int:pk>/', news_detail, name='news_detail'),
+    path('player/<str:username>/', player_profile, name='player_profile'),
     path('search-players/', search_players, name='search_players'),
     path('', home_view, name='home'),
 ]

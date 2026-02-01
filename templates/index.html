@@ -99,8 +99,8 @@
                                     <i class="far fa-clock mr-1"></i>
                                     {{ opportunity.published_date|timesince }} ago
                                 </span>
-                                <a href="{{ opportunity.link }}" target="_blank" class="text-green-600 hover:text-green-800 font-medium text-sm">
-                                    View Details <i class="fas fa-external-link-alt ml-1"></i>
+                                <a href="{% url 'opportunity_detail' opportunity.pk %}" class="text-green-600 hover:text-green-800 font-medium text-sm">
+                                    View Details <i class="fas fa-arrow-right ml-1"></i>
                                 </a>
                             </div>
                         </div>
@@ -152,8 +152,8 @@
                                     <i class="far fa-clock mr-1"></i>
                                     {{ news.published_date|timesince }} ago
                                 </span>
-                                <a href="{{ news.link }}" target="_blank" class="text-green-600 hover:text-green-800 font-medium text-sm">
-                                    Read More <i class="fas fa-external-link-alt ml-1"></i>
+                                <a href="{% url 'news_detail' news.pk %}" class="text-green-600 hover:text-green-800 font-medium text-sm">
+                                    Read More <i class="fas fa-arrow-right ml-1"></i>
                                 </a>
                             </div>
                         </div>

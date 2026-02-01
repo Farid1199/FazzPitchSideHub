@@ -3,7 +3,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
 from .models import (
     User, PlayerProfile, ClubProfile, ScoutProfile, 
-    ManagerProfile, QualificationVerification
+    ManagerProfile, QualificationVerification, Opportunity
 )
 
 def validate_video_file_size(file):
@@ -175,6 +175,43 @@ class QualificationVerificationForm(forms.ModelForm):
         help_texts = {
             'certificate_image': 'Take a clear photo or scan of your coaching certificate.',
             'fa_fan_number': 'Your FA Football Affiliate Number, if you have one.',
+        }
+
+
+class OpportunityForm(forms.ModelForm):
+    """
+    Form for clubs to post trial opportunities.
+    """
+    published_date = forms.DateTimeField(
+        widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+        label='Trial Date & Time',
+        help_text='When is the trial taking place?'
+    )
+    
+    class Meta:
+        model = Opportunity
+        fields = [
+            'title',
+            'target_position',
+            'description',
+            'published_date',
+            'link',
+        ]
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 5, 'placeholder': 'Provide details about the trial...'}),
+            'link': forms.URLInput(attrs={'placeholder': 'https://example.com/trial-info (optional)'}),
+        }
+        labels = {
+            'title': 'Trial Title',
+            'target_position': 'Position Needed',
+            'description': 'Trial Description',
+            'link': 'More Information Link (Optional)',
+        }
+        help_texts = {
+            'title': 'e.g., "Striker Trial - Open Day"',
+            'target_position': 'e.g., "Striker", "Midfielder", "All Positions"',
+            'description': 'Include any additional details players should know.',
+            'link': 'Link to your website or social media post with more details.',
         }
 
 

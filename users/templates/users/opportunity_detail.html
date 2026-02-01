@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ opportunity.title }} - FazzPitchSideHub{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Back Button -->
+        <div class="mb-6">
+            <a href="{% url 'home' %}" class="text-green-600 hover:text-green-700 font-medium inline-flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Back to Home
+            </a>
+        </div>
+
+        <!-- Opportunity Header -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <!-- Header with Badge -->
+            <div class="bg-gradient-to-r from-green-700 to-emerald-600 px-8 py-6">
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center mb-3">
+                            <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">
+                                Trial Opportunity
+                            </span>
+                            {% if opportunity.is_open %}
+                                <span class="ml-3 bg-green-400 text-green-900 text-xs font-bold px-3 py-1 rounded-full">
+                                    Open
+                                </span>
+                            {% else %}
+                                <span class="ml-3 bg-gray-400 text-gray-900 text-xs font-bold px-3 py-1 rounded-full">
+                                    Closed
+                                </span>
+                            {% endif %}
+                        </div>
+                        <h1 class="text-3xl md:text-4xl font-bold text-white mb-2">
+                            {{ opportunity.title }}
+                        </h1>
+                        <p class="text-green-100 text-lg">
+                            Posted {{ opportunity.published_date|timesince }} ago
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Opportunity Details -->
+            <div class="px-8 py-6">
+                
+                <!-- Club Information -->
+                <div class="mb-8 pb-8 border-b border-gray-200">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                        <svg class="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                        </svg>
+                        Club Information
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 rounded-lg p-6">
+                        <div>
+                            <p class="text-sm text-gray-500 mb-1">Club Name</p>
+                            <p class="text-lg font-semibold text-gray-900">{{ opportunity.club.club_name }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500 mb-1">League Level</p>
+                            <p class="text-lg font-semibold text-gray-900">{{ opportunity.club.get_league_level_display }}</p>
+                        </div>
+                        {% if opportunity.club.location %}
+                            <div>
+                                <p class="text-sm text-gray-500 mb-1">Location</p>
+                                <p class="text-lg font-semibold text-gray-900">{{ opportunity.club.location }}</p>
+                            </div>
+                        {% endif %}
+                        {% if opportunity.club.location_postcode %}
+                            <div>
+                                <p class="text-sm text-gray-500 mb-1">Postcode</p>
+                                <p class="text-lg font-semibold text-gray-900">{{ opportunity.club.location_postcode }}</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Trial Details -->
+                <div class="mb-8 pb-8 border-b border-gray-200">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                        <svg class="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Trial Details
+                    </h2>
+                    
+                    <div class="space-y-4">
+                        {% if opportunity.target_position %}
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 mt-1">
+                                    <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm text-gray-500">Position Needed</p>
+                                    <p class="text-lg font-semibold text-gray-900">{{ opportunity.target_position }}</p>
+                                </div>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 mt-1">
+                                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-gray-500">Trial Date & Time</p>
+                                <p class="text-lg font-semibold text-gray-900">{{ opportunity.published_date|date:"l, F j, Y \a\t g:i A" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="mb-8">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                        <svg class="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        Description
+                    </h2>
+                    <div class="prose max-w-none">
+                        <p class="text-gray-700 text-lg leading-relaxed whitespace-pre-line">{{ opportunity.description }}</p>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row gap-4">
+                    {% if opportunity.link and opportunity.link != '#' %}
+                        <a href="{{ opportunity.link }}" target="_blank" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 rounded-lg transition duration-300 text-center flex items-center justify-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                            </svg>
+                            Visit Club Website for More Info
+                        </a>
+                    {% endif %}
+                    
+                    {% if user.is_authenticated and user.role == 'PLAYER' %}
+                        <button class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-lg transition duration-300 text-center flex items-center justify-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+                            </svg>
+                            Save Opportunity
+                        </button>
+                    {% endif %}
+                </div>
+
+                <!-- Info Box -->
+                <div class="mt-8 bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-blue-700">
+                                <strong>Interested in this trial?</strong> Make sure to arrive early and bring appropriate football gear. Contact the club directly if you have any questions.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Opportunities (Optional - for future enhancement) -->
+        <div class="mt-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">More Opportunities</h2>
+            <a href="{% url 'home' %}#opportunities" class="text-green-600 hover:text-green-700 font-medium">
+                View all trial opportunities →
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
