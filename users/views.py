@@ -268,6 +268,55 @@ def home_view(request):
     return render(request, 'index.html', context)
 
 
+def search_clubs(request):
+    """
+    Search view for Players/Managers to find Clubs.
+    Accepts GET parameters: name, level, postcode, league
+    """
+    # Get search parameters from GET request
+    name = request.GET.get('name', '')
+    level = request.GET.get('level', '')
+    postcode = request.GET.get('postcode', '')
+    league = request.GET.get('league', '')
+    
+    # Start with all club profiles
+    clubs = ClubProfile.objects.all()
+    
+    # Apply filters if provided
+    if name:
+        # Search by club name (case-insensitive partial match)
+        clubs = clubs.filter(club_name__icontains=name.strip())
+    
+    if level:
+        clubs = clubs.filter(league_level=level)
+    
+    if postcode:
+        # Basic postcode filtering - match clubs whose postcode starts with the search term
+        clubs = clubs.filter(location_postcode__istartswith=postcode.strip())
+    
+    if league:
+        # Search by league name (case-insensitive partial match)
+        clubs = clubs.filter(league__icontains=league.strip())
+    
+    # Sort by club name
+    clubs = clubs.order_by('club_name')
+    
+    # Get choices for the filter form
+    level_choices = ClubProfile.LEAGUE_LEVEL_CHOICES
+    
+    context = {
+        'clubs': clubs,
+        'level_choices': level_choices,
+        'search_name': name,
+        'search_level': level,
+        'search_postcode': postcode,
+        'search_league': league,
+        'total_results': clubs.count(),
+    }
+    
+    return render(request, 'users/search_clubs.html', context)
+
+
 def search_players(request):
     """
     Search view for Scouts/Clubs to find Players.
@@ -278,27 +327,25 @@ def search_players(request):
     position = request.GET.get('position', '')
     level = request.GET.get('level', '')
     postcode = request.GET.get('postcode', '')
+    name = request.GET.get('name', '')
     
-    # Start with all player profiles
-    players = PlayerProfile.objects.select_related('user').all()
+    # Start with all player profiles that are available
+    players = PlayerProfile.objects.select_related('user').filter(available_for_club=True)
     
-    # Build query using Q objects for filtering
-    query = Q()
-    
+    # Apply filters if provided
     if position:
-        query &= Q(position=position)
+        players = players.filter(position=position)
     
     if level:
-        query &= Q(playing_level=level)
+        players = players.filter(playing_level=level)
     
     if postcode:
-        # Basic postcode filtering - sort by similarity
-        # For now, we'll filter players whose postcode starts with the search term
-        query &= Q(location_postcode__istartswith=postcode.strip())
+        # Basic postcode filtering - match players whose postcode starts with the search term
+        players = players.filter(location_postcode__istartswith=postcode.strip())
     
-    # Apply filters
-    if query:
-        players = players.filter(query)
+    if name:
+        # Search by username (case-insensitive partial match)
+        players = players.filter(user__username__icontains=name.strip())
     
     # Sort by postcode if postcode search is active
     if postcode:
@@ -318,6 +365,7 @@ def search_players(request):
         'search_position': position,
         'search_level': level,
         'search_postcode': postcode,
+        'search_name': name,
         'total_results': players.count(),
     }
     

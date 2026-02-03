@@ -1,0 +1,238 @@
+{% extends 'base.html' %}
+
+{% block title %}Search Clubs - FazzPitchSideHub{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 mb-2">Find Clubs</h1>
+            <p class="text-gray-600">Discover grassroots football clubs looking for players</p>
+        </div>
+
+        <!-- Search Filters -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <form method="get" action="{% url 'search_clubs' %}" class="space-y-4">
+                <!-- Club Name Search -->
+                <div class="mb-4">
+                    <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+                        Club Name
+                    </label>
+                    <input type="text" name="name" id="name" 
+                           value="{{ search_name }}"
+                           placeholder="Search by club name (e.g., United, City, Rangers)"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    
+                    <!-- League Level Filter -->
+                    <div>
+                        <label for="level" class="block text-sm font-medium text-gray-700 mb-2">
+                            League Level
+                        </label>
+                        <select name="level" id="level" 
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                            <option value="">All Levels</option>
+                            {% for value, label in level_choices %}
+                                <option value="{{ value }}" {% if search_level == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- League Name Filter -->
+                    <div>
+                        <label for="league" class="block text-sm font-medium text-gray-700 mb-2">
+                            League Name
+                        </label>
+                        <input type="text" name="league" id="league" 
+                               value="{{ search_league }}"
+                               placeholder="e.g., Premier, County"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                    </div>
+
+                    <!-- Postcode Filter -->
+                    <div>
+                        <label for="postcode" class="block text-sm font-medium text-gray-700 mb-2">
+                            Postcode
+                        </label>
+                        <input type="text" name="postcode" id="postcode" 
+                               value="{{ search_postcode }}"
+                               placeholder="e.g., SW1A"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                    </div>
+
+                    <!-- Search Button -->
+                    <div class="flex items-end">
+                        <button type="submit" 
+                                class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded-lg transition duration-300 flex items-center justify-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                            Search
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Clear Filters -->
+                {% if search_name or search_level or search_postcode or search_league %}
+                    <div class="flex justify-end">
+                        <a href="{% url 'search_clubs' %}" 
+                           class="text-sm text-gray-600 hover:text-gray-900 flex items-center">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            Clear Filters
+                        </a>
+                    </div>
+                {% endif %}
+            </form>
+        </div>
+
+        <!-- Results Count -->
+        <div class="mb-6">
+            <p class="text-gray-700 font-medium">
+                {% if total_results > 0 %}
+                    Found {{ total_results }} club{{ total_results|pluralize }}
+                {% else %}
+                    No clubs found matching your criteria
+                {% endif %}
+            </p>
+        </div>
+
+        <!-- Clubs Grid -->
+        {% if clubs %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for club in clubs %}
+                    <div class="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden">
+                        <!-- Club Header -->
+                        <div class="bg-gradient-to-r from-green-600 to-green-700 p-6">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg">
+                                    <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                    </svg>
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-xl font-bold text-white">{{ club.club_name }}</h3>
+                                    <p class="text-green-100 text-sm">{{ club.get_league_level_display }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Club Details -->
+                        <div class="p-6 space-y-4">
+                            
+                            <!-- Key Info Grid -->
+                            <div class="grid grid-cols-2 gap-4">
+                                <!-- League -->
+                                {% if club.league %}
+                                <div class="bg-gray-50 rounded-lg p-3">
+                                    <p class="text-xs text-gray-500 mb-1">League</p>
+                                    <p class="text-sm font-semibold text-gray-900">
+                                        {{ club.league }}
+                                    </p>
+                                </div>
+                                {% endif %}
+
+                                <!-- Location -->
+                                <div class="bg-gray-50 rounded-lg p-3">
+                                    <p class="text-xs text-gray-500 mb-1">Location</p>
+                                    <p class="text-sm font-semibold text-gray-900">
+                                        {% if club.location %}
+                                            {{ club.location }}
+                                        {% elif club.location_postcode %}
+                                            {{ club.location_postcode }}
+                                        {% else %}
+                                            N/A
+                                        {% endif %}
+                                    </p>
+                                </div>
+
+                                <!-- Founded -->
+                                {% if club.founded_year %}
+                                <div class="bg-gray-50 rounded-lg p-3">
+                                    <p class="text-xs text-gray-500 mb-1">Founded</p>
+                                    <p class="text-sm font-semibold text-gray-900">
+                                        {{ club.founded_year }}
+                                    </p>
+                                </div>
+                                {% endif %}
+
+                                <!-- Status -->
+                                <div class="bg-gray-50 rounded-lg p-3">
+                                    <p class="text-xs text-gray-500 mb-1">Status</p>
+                                    <p class="text-sm font-semibold">
+                                        {% if club.is_registered %}
+                                            <span class="text-green-600">✓ Verified</span>
+                                        {% else %}
+                                            <span class="text-gray-500">Listed</span>
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="pt-4 border-t space-y-2">
+                                {% if club.is_registered %}
+                                    <button onclick="alert('Contact feature coming soon! This club has a registered account.')" 
+                                            class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 flex items-center justify-center">
+                                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                        </svg>
+                                        Contact Club
+                                    </button>
+                                {% else %}
+                                    <div class="text-center p-3 bg-gray-50 rounded-lg">
+                                        <p class="text-sm text-gray-600">
+                                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            This club doesn't have an account yet
+                                        </p>
+                                    </div>
+                                {% endif %}
+                                
+                                {% if club.rss_feed_url %}
+                                    <a href="{{ club.rss_feed_url }}" target="_blank" 
+                                       class="block w-full text-center border border-green-600 text-green-600 hover:bg-green-50 font-semibold py-2 px-4 rounded-lg transition duration-300">
+                                        <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                        </svg>
+                                        View News Feed
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination placeholder -->
+            {% if clubs.count > 20 %}
+                <div class="mt-8 flex justify-center">
+                    <p class="text-gray-500 text-sm">Showing all {{ total_results }} results</p>
+                </div>
+            {% endif %}
+        {% else %}
+            <!-- No Results -->
+            <div class="bg-white rounded-lg shadow-md p-12 text-center">
+                <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <h3 class="text-xl font-semibold text-gray-700 mb-2">No Clubs Found</h3>
+                <p class="text-gray-500 mb-4">Try adjusting your search criteria</p>
+                <a href="{% url 'search_clubs' %}" 
+                   class="inline-block bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded-lg transition duration-300">
+                    Clear All Filters
+                </a>
+            </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}
