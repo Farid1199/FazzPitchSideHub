@@ -11,7 +11,7 @@ from .forms import (
     OpportunityForm
 )
 from .models import (
-    User, NewsItem, Opportunity, PlayerProfile, ClubProfile, 
+    User, NewsItem, Opportunity, PlayerProfile, ClubProfile, ClubSource,
     ScoutProfile, ManagerProfile, QualificationVerification
 )
 from .utils import get_recommendations
@@ -266,6 +266,72 @@ def home_view(request):
     }
     
     return render(request, 'index.html', context)
+
+
+def feeds_view(request):
+    """
+    Feeds page - Shows all clubs organized by league level,
+    with their latest news and opportunities from RSS feeds and user posts.
+    Displays both ClubSource (RSS aggregation) and ClubProfile (registered users) content.
+    """
+    # Fetch all club sources (RSS aggregation)
+    all_sources = ClubSource.objects.all().order_by('league_level', 'name')
+    
+    # Fetch all registered club profiles
+    all_clubs = ClubProfile.objects.all().order_by('league_level', 'club_name')
+    
+    # Organize club sources by league level for pyramid display
+    league_pyramid = {}
+    for source in all_sources:
+        level = source.get_league_level_display()
+        if level not in league_pyramid:
+            league_pyramid[level] = []
+        league_pyramid[level].append({
+            'name': source.name,
+            'logo_url': source.logo_url,
+            'website_url': source.website_url,
+            'type': 'source'
+        })
+    
+    # Add registered clubs to the league pyramid
+    for club in all_clubs:
+        level = club.get_league_level_display()
+        if level not in league_pyramid:
+            league_pyramid[level] = []
+        league_pyramid[level].append({
+            'name': club.club_name,
+            'logo_url': club.logo_url,
+            'website_url': club.website_url,
+            'type': 'club'
+        })
+    
+    # Fetch latest news from all sources (both RSS and user posts)
+    latest_news = NewsItem.objects.select_related('source', 'club').all().order_by('-published_date')[:20]
+    
+    # Fetch open opportunities
+    open_opportunities = Opportunity.objects.select_related('source', 'club').filter(is_open=True).order_by('-published_date')[:15]
+    
+    # Get sources with RSS feeds configured
+    sources_with_rss = ClubSource.objects.exclude(rss_url='').count()
+    total_sources = ClubSource.objects.count()
+    
+    # Get clubs with RSS feeds configured
+    clubs_with_rss = ClubProfile.objects.exclude(rss_feed_url='').count()
+    total_clubs = ClubProfile.objects.count()
+    
+    context = {
+        'league_pyramid': league_pyramid,
+        'latest_news': latest_news,
+        'open_opportunities': open_opportunities,
+        'sources_with_rss': sources_with_rss,
+        'total_sources': total_sources,
+        'clubs_with_rss': clubs_with_rss,
+        'total_clubs': total_clubs,
+        'all_sources': all_sources,
+        'all_clubs': all_clubs,
+    }
+    
+    return render(request, 'users/feeds.html', context)
 
 
 def search_clubs(request):

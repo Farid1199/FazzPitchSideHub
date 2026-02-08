@@ -4,7 +4,7 @@ from .views import (
     signup_view, login_view, select_role,
     player_setup, club_setup, scout_setup, manager_setup,
     role_selection_view, profile_creation_view, 
-    dashboard_view, home_view, search_players, search_clubs,
+    dashboard_view, home_view, feeds_view, search_players, search_clubs,
     edit_profile, submit_qualification_verification, post_opportunity,
     opportunity_detail, news_detail, player_profile
 )
@@ -34,5 +34,6 @@ urlpatterns = [
     path('player/<str:username>/', player_profile, name='player_profile'),
     path('search-players/', search_players, name='search_players'),
     path('search-clubs/', search_clubs, name='search_clubs'),
+    path('feeds/', feeds_view, name='feeds'),
     path('', home_view, name='home'),
 ]

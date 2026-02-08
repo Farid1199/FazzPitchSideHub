@@ -1,0 +1,292 @@
+{% extends 'base.html' %}
+
+{% block title %}Feeds - FazzPitchSideHub{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-gray-100 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Header Section -->
+        <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+            <div class="flex items-center justify-between flex-wrap gap-4">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-blue-600 rounded-full p-4">
+                        <i class="fas fa-rss text-white text-3xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-4xl font-bold text-gray-900 mb-2">Feeds</h1>
+                        <p class="text-gray-600 text-lg">Your central hub for grassroots football news, opportunities, and trials</p>
+                    </div>
+                </div>
+                <div class="bg-blue-50 border-2 border-blue-200 rounded-lg px-6 py-4 text-center">
+                    <div class="text-3xl font-bold text-blue-600">{{ total_sources|add:total_clubs }}</div>
+                    <div class="text-sm text-gray-600">Clubs Tracked</div>
+                </div>
+            </div>
+            
+            <!-- Regional Focus Notice -->
+            <div class="mt-6 bg-gradient-to-r from-blue-100 to-indigo-100 border-l-4 border-blue-600 rounded-lg p-6">
+                <div class="flex items-start">
+                    <i class="fas fa-info-circle text-blue-600 text-2xl mr-4 mt-1"></i>
+                    <div>
+                        <h3 class="font-bold text-gray-900 text-lg mb-2">Currently Focused on Birmingham</h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            We're launching with comprehensive coverage of Birmingham's grassroots football scene. 
+                            Our platform aggregates news, trial opportunities, and club information from across the city's football pyramid. 
+                            <span class="font-semibold text-blue-700">We're growing fast and will be expanding to other regions soon!</span>
+                        </p>
+                        <div class="mt-3 flex items-center space-x-4 text-sm">
+                            <span class="inline-flex items-center text-green-700">
+                                <i class="fas fa-check-circle mr-2"></i> {{ sources_with_rss|add:clubs_with_rss }} clubs with live RSS feeds
+                            </span>
+                            <span class="inline-flex items-center text-blue-700">
+                                <i class="fas fa-newspaper mr-2"></i> Real-time news updates
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Two Column Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Main Content - News & Opportunities -->
+            <div class="lg:col-span-2 space-y-8">
+                
+                <!-- Latest Opportunities Section -->
+                <div class="bg-white rounded-2xl shadow-xl p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-2xl font-bold text-gray-900 flex items-center">
+                            <i class="fas fa-bullhorn text-orange-500 mr-3"></i>
+                            Open Trial Opportunities
+                        </h2>
+                        <span class="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-sm font-semibold">
+                            {{ open_opportunities.count }} Active
+                        </span>
+                    </div>
+                    
+                    {% if open_opportunities %}
+                        <div class="space-y-4">
+                            {% for opportunity in open_opportunities %}
+                                <div class="border border-gray-200 rounded-lg p-5 hover:shadow-lg transition-shadow duration-200 hover:border-orange-300">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex items-start space-x-4 flex-1">
+                                            {% if opportunity.source.logo_url or opportunity.club.logo_url %}
+                                                <img src="{{ opportunity.source.logo_url|default:opportunity.club.logo_url }}" alt="{{ opportunity.get_club_name }} logo" class="w-12 h-12 rounded-lg object-cover flex-shrink-0">
+                                            {% else %}
+                                                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                                    <i class="fas fa-shield-alt text-blue-600 text-xl"></i>
+                                                </div>
+                                            {% endif %}
+                                            <div class="flex-1">
+                                            <div class="flex items-center space-x-2 mb-2">
+                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                                    <i class="fas fa-calendar-alt mr-1"></i>
+                                                    {{ opportunity.published_date|date:"M d, Y" }}
+                                                </span>
+                                                {% if opportunity.target_position %}
+                                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                        <i class="fas fa-running mr-1"></i>
+                                                        {{ opportunity.target_position }}
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                            <h3 class="text-lg font-bold text-gray-900 mb-2 hover:text-orange-600">
+                                                <a href="{% url 'opportunity_detail' opportunity.pk %}">{{ opportunity.title }}</a>
+                                            </h3>
+                                            <p class="text-gray-600 text-sm mb-3">{{ opportunity.description|truncatewords:30 }}</p>
+                                            <div class="flex items-center text-sm text-gray-500">
+                                                <i class="fas fa-shield-alt text-blue-500 mr-2"></i>
+                                                <span class="font-semibold">{{ opportunity.get_club_name }}</span>
+                                                <span class="mx-2">•</span>
+                                                <span>{{ opportunity.get_league_display }}</span>
+                                            </div>
+                                            </div>
+                                        </div>
+                                        <a href="{% url 'opportunity_detail' opportunity.pk %}" 
+                                           class="ml-4 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors duration-200">
+                                            View Details
+                                        </a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-12">
+                            <i class="fas fa-clipboard-list text-gray-300 text-6xl mb-4"></i>
+                            <p class="text-gray-500 text-lg">No open opportunities at the moment. Check back soon!</p>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Latest News Section -->
+                <div class="bg-white rounded-2xl shadow-xl p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-2xl font-bold text-gray-900 flex items-center">
+                            <i class="fas fa-newspaper text-green-500 mr-3"></i>
+                            Latest News from Clubs
+                        </h2>
+                    </div>
+                    
+                    {% if latest_news %}
+                        <div class="space-y-4">
+                            {% for news in latest_news %}
+                                <div class="border border-gray-200 rounded-lg p-5 hover:shadow-lg transition-shadow duration-200 hover:border-green-300">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex items-start space-x-4 flex-1">
+                                            {% if news.source.logo_url or news.club.logo_url %}
+                                                <img src="{{ news.source.logo_url|default:news.club.logo_url }}" alt="{{ news.get_club_name }} logo" class="w-12 h-12 rounded-lg object-cover flex-shrink-0">
+                                            {% else %}
+                                                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                                    <i class="fas fa-shield-alt text-green-600 text-xl"></i>
+                                                </div>
+                                            {% endif %}
+                                            <div class="flex-1">
+                                            <div class="flex items-center space-x-2 mb-2">
+                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                    <i class="fas fa-clock mr-1"></i>
+                                                    {{ news.published_date|timesince }} ago
+                                                </span>
+                                            </div>
+                                            <h3 class="text-lg font-bold text-gray-900 mb-2 hover:text-green-600">
+                                                <a href="{% url 'news_detail' news.pk %}" target="_blank">{{ news.title }}</a>
+                                            </h3>
+                                            <p class="text-gray-600 text-sm mb-3">{{ news.description|truncatewords:25 }}</p>
+                                            <div class="flex items-center text-sm text-gray-500">
+                                                <i class="fas fa-shield-alt text-blue-500 mr-2"></i>
+                                                <span class="font-semibold">{{ news.get_club_name }}</span>
+                                                <span class="mx-2">•</span>
+                                                <span>{{ news.get_league_display }}</span>
+                                            </div>
+                                            </div>
+                                        </div>
+                                        <a href="{{ news.link }}" target="_blank" 
+                                           class="ml-4 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors duration-200">
+                                            Read More
+                                        </a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-12">
+                            <i class="fas fa-newspaper text-gray-300 text-6xl mb-4"></i>
+                            <p class="text-gray-500 text-lg">No news available yet. News will appear as clubs' RSS feeds are added!</p>
+                        </div>
+                    {% endif %}
+                </div>
+
+            </div>
+
+            <!-- Sidebar - League Pyramid -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-2xl shadow-xl p-6 sticky top-24">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                        <i class="fas fa-layer-group text-purple-500 mr-3"></i>
+                        League Pyramid
+                    </h2>
+                    
+                    {% if league_pyramid %}
+                        <div class="space-y-4">
+                            {% for level, clubs in league_pyramid.items %}
+                                <div class="border-l-4 border-purple-500 pl-4">
+                                    <h3 class="text-sm font-bold text-purple-700 mb-2 uppercase tracking-wide">{{ level }}</h3>
+                                    <div class="space-y-2">
+                                        {% for club_data in clubs %}
+                                            <div class="bg-gray-50 rounded-lg p-3 hover:bg-purple-50 transition-colors duration-150">
+                                                <div class="flex items-start space-x-3">
+                                                    {% if club_data.logo_url %}
+                                                        <img src="{{ club_data.logo_url }}" alt="{{ club_data.name }} logo" class="w-10 h-10 rounded object-cover flex-shrink-0">
+                                                    {% else %}
+                                                        <div class="w-10 h-10 bg-purple-100 rounded flex items-center justify-center flex-shrink-0">
+                                                            <i class="fas fa-shield-alt text-purple-600"></i>
+                                                        </div>
+                                                    {% endif %}
+                                                    <div class="flex-1">
+                                                        <div class="font-semibold text-gray-900 text-sm">{{ club_data.name }}</div>
+                                                        <div class="inline-flex items-center mt-2">
+                                                            {% if club_data.type == 'source' %}
+                                                                <span class="inline-flex items-center px-2 py-1 rounded text-xs bg-blue-100 text-blue-700">
+                                                                    <i class="fas fa-rss mr-1"></i> RSS Feed
+                                                                </span>
+                                                            {% else %}
+                                                                <span class="inline-flex items-center px-2 py-1 rounded text-xs bg-green-100 text-green-700">
+                                                                    <i class="fas fa-user mr-1"></i> Registered
+                                                                </span>
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-8">
+                            <i class="fas fa-layer-group text-gray-300 text-5xl mb-4"></i>
+                            <p class="text-gray-500">No clubs added yet</p>
+                        </div>
+                    {% endif %}
+
+                    <!-- Admin Notice -->
+                    {% if user.is_staff %}
+                        <div class="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                            <div class="flex items-start">
+                                <i class="fas fa-crown text-yellow-600 mr-3 mt-1"></i>
+                                <div>
+                                    <h4 class="font-bold text-yellow-900 text-sm mb-1">Admin Access</h4>
+                                    <p class="text-xs text-yellow-800 mb-3">Add Birmingham clubs and their RSS feeds from the admin panel to populate this hub.</p>
+                                    <a href="/admin/users/clubsource/" 
+                                       class="inline-flex items-center text-xs font-semibold text-yellow-700 hover:text-yellow-900 mb-2 block">
+                                        Manage RSS Sources <i class="fas fa-arrow-right ml-1"></i>
+                                    </a>
+                                    <a href="/admin/users/clubprofile/" 
+                                       class="inline-flex items-center text-xs font-semibold text-yellow-700 hover:text-yellow-900">
+                                        Manage Registered Clubs <i class="fas fa-arrow-right ml-1"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+
+        <!-- RSS Info Section for Regular Users -->
+        {% if not user.is_staff %}
+        <div class="mt-8 bg-white rounded-2xl shadow-xl p-8">
+            <div class="text-center max-w-3xl mx-auto">
+                <i class="fas fa-rss text-blue-500 text-5xl mb-4"></i>
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">Powered by Real-Time RSS Feeds</h2>
+                <p class="text-gray-600 leading-relaxed mb-6">
+                    Our platform automatically gathers news and opportunities from club websites. 
+                    Information is updated regularly to ensure you never miss an opportunity to showcase your talent or follow your favorite local clubs.
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                    <div class="bg-blue-50 rounded-lg p-6">
+                        <i class="fas fa-sync-alt text-blue-600 text-3xl mb-3"></i>
+                        <h3 class="font-bold text-gray-900 mb-2">Auto-Updated</h3>
+                        <p class="text-sm text-gray-600">News and trials are fetched automatically from club websites</p>
+                    </div>
+                    <div class="bg-green-50 rounded-lg p-6">
+                        <i class="fas fa-bullseye text-green-600 text-3xl mb-3"></i>
+                        <h3 class="font-bold text-gray-900 mb-2">Birmingham First</h3>
+                        <p class="text-sm text-gray-600">Starting with comprehensive coverage of Birmingham grassroots football</p>
+                    </div>
+                    <div class="bg-purple-50 rounded-lg p-6">
+                        <i class="fas fa-expand-arrows-alt text-purple-600 text-3xl mb-3"></i>
+                        <h3 class="font-bold text-gray-900 mb-2">Growing Coverage</h3>
+                        <p class="text-sm text-gray-600">More regions and features coming soon!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

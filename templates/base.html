@@ -46,6 +46,9 @@
                     <a href="{% url 'home' %}" class="text-gray-700 hover:text-primary transition duration-200 font-medium">
                         <i class="fas fa-home mr-1"></i> Home
                     </a>
+                    <a href="{% url 'feeds' %}" class="text-gray-700 hover:text-primary transition duration-200 font-medium">
+                        <i class="fas fa-rss mr-1"></i> Feeds
+                    </a>
                     <a href="{% url 'search_players' %}" class="text-gray-700 hover:text-primary transition duration-200 font-medium">
                         <i class="fas fa-users mr-1"></i> Find Players
                     </a>
@@ -103,10 +106,13 @@
                 <a href="{% url 'home' %}" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100 hover:text-primary font-medium">
                     <i class="fas fa-home mr-2"></i> Home
                 </a>
+                <a href="{% url 'feeds' %}" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100 hover:text-primary font-medium">
+                    <i class="fas fa-rss mr-2"></i> Feeds
+                </a>
                 <a href="{% url 'search_players' %}" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100 hover:text-primary font-medium">
                     <i class="fas fa-users mr-2"></i> Find Players
                 </a>
-                <a href="#" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100 hover:text-primary font-medium">
+                <a href="{% url 'search_clubs' %}" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100 hover:text-primary font-medium">
                     <i class="fas fa-shield-alt mr-2"></i> Find Clubs
                 </a>
                 

@@ -128,6 +128,66 @@ class PlayerProfile(models.Model):
         return f"Player: {self.user.username}"
 
 
+class ClubSource(models.Model):
+    """
+    Independent model for RSS feed sources (Admin-managed only).
+    This is NOT linked to user accounts - used purely for aggregating news.
+    Admin can add any club here to scrape their RSS feeds.
+    """
+    LEAGUE_LEVEL_CHOICES = [
+        ('STEP_1', 'Step 1 (National League)'),
+        ('STEP_2', 'Step 2 (National League North/South)'),
+        ('STEP_3', 'Step 3 (Isthmian/Northern/Southern Premier)'),
+        ('STEP_4', 'Step 4 (Isthmian/Northern/Southern Division One)'),
+        ('STEP_5', 'Step 5 (Regional Leagues)'),
+        ('STEP_6', 'Step 6 (County Leagues)'),
+        ('STEP_7', 'Step 7 (Local Leagues)'),
+        ('SUNDAY', 'Sunday League'),
+        ('OTHER', 'Other'),
+    ]
+    
+    name = models.CharField(
+        max_length=100,
+        help_text="Official name of the club (e.g., 'Halesowen Town FC').",
+        unique=True
+    )
+    league_level = models.CharField(
+        max_length=10,
+        choices=LEAGUE_LEVEL_CHOICES,
+        help_text="League level the club plays in.",
+        default='SUNDAY'
+    )
+    website_url = models.URLField(
+        max_length=500,
+        help_text="Official club website URL.",
+        blank=True
+    )
+    rss_url = models.URLField(
+        max_length=500,
+        help_text="RSS feed URL for automatic news scraping.",
+        blank=True
+    )
+    logo_url = models.URLField(
+        max_length=500,
+        help_text="URL to the club's logo image.",
+        blank=True
+    )
+    region = models.CharField(
+        max_length=100,
+        help_text="Region/city (e.g., 'Birmingham', 'West Midlands').",
+        default='Birmingham'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['league_level', 'name']
+        verbose_name = 'Club Source (RSS)'
+        verbose_name_plural = 'Club Sources (RSS)'
+    
+    def __str__(self):
+        return f"{self.name} ({self.get_league_level_display()})"
+
+
 class ClubProfile(models.Model):
     """
     Profile model for Clubs.
@@ -168,9 +228,19 @@ class ClubProfile(models.Model):
         help_text="Postcode for club's location.",
         blank=True
     )
+    website_url = models.URLField(
+        max_length=500,
+        help_text="Official club website URL.",
+        blank=True
+    )
     rss_feed_url = models.URLField(
         max_length=500, 
         help_text="RSS feed URL for club news (for news scraper).", 
+        blank=True
+    )
+    logo_url = models.URLField(
+        max_length=500,
+        help_text="URL to the club's logo image.",
         blank=True
     )
     league = models.CharField(
@@ -423,21 +493,39 @@ def save_user_profile(sender, instance, **kwargs):
 
 class NewsItem(models.Model):
     """
-    Model for storing news items fetched from club RSS feeds.
+    Model for storing news items.
+    Can be sourced from:
+    1. RSS feeds (links to ClubSource) - Admin-managed
+    2. Manual posts (links to ClubProfile) - User-managed (future)
     """
+    # RSS Source (Admin-managed aggregation)
+    source = models.ForeignKey(
+        ClubSource,
+        on_delete=models.CASCADE,
+        related_name='news_items',
+        null=True,
+        blank=True,
+        help_text="The RSS club source (for aggregated content)."
+    )
+    
+    # User Source (Manual posts by registered clubs)
     club = models.ForeignKey(
         ClubProfile, 
         on_delete=models.CASCADE, 
         related_name='news_items',
-        help_text="The club this news item belongs to."
+        null=True,
+        blank=True,
+        help_text="The registered club (for user-posted content)."
     )
+    
     title = models.CharField(
         max_length=500, 
         help_text="Title of the news item."
     )
     link = models.URLField(
         max_length=1000, 
-        help_text="Link to the full news article."
+        help_text="Link to the full news article.",
+        unique=True  # Prevent duplicates across all sources
     )
     description = models.TextField(
         blank=True, 
@@ -453,16 +541,32 @@ class NewsItem(models.Model):
 
     class Meta:
         ordering = ['-published_date']
-        unique_together = ['club', 'link']  # Prevent duplicate entries
 
     def __str__(self):
-        return f"{self.club.club_name}: {self.title}"
+        if self.source:
+            return f"{self.source.name}: {self.title}"
+        elif self.club:
+            return f"{self.club.club_name}: {self.title}"
+        return self.title
+    
+    def get_club_name(self):
+        """Helper to get club name from either source"""
+        return self.source.name if self.source else (self.club.club_name if self.club else "Unknown")
+    
+    def get_league_display(self):
+        """Helper to get league level display"""
+        if self.source:
+            return self.source.get_league_level_display()
+        elif self.club:
+            return self.club.get_league_level_display()
+        return "Unknown"
 
 
 class Opportunity(NewsItem):
     """
     Model for trials and recruitment opportunities.
     Inherits from NewsItem and adds trial-specific fields.
+    Can be sourced from RSS feeds (ClubSource) or manual posts (ClubProfile).
     """
     target_position = models.CharField(
         max_length=100, 
@@ -479,4 +583,5 @@ class Opportunity(NewsItem):
         verbose_name_plural = "Opportunities"
 
     def __str__(self):
-        return f"Opportunity: {self.title} ({self.club.club_name})"
+        club_name = self.get_club_name()
+        return f"Opportunity: {self.title} ({club_name})"

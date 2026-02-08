@@ -1,50 +1,75 @@
 """
-Django management command to fetch RSS feeds from clubs.
+Django management command to fetch RSS feeds from club sources.
+Intelligent Scraper - Automatically categorizes content as News or Opportunities.
+
+Features:
+- Fetches RSS feeds from all ClubSource entries with configured RSS URLs
+- Uses intelligent keyword detection to classify content:
+  * Detects recruitment keywords (trial, recruiting, squad, etc.)
+  * Detects position keywords (goalkeeper, defender, striker, midfielder, etc.)
+  * Categorizes as Opportunity (trial) or NewsItem (regular news)
+- Extracts target positions from content
+- Prevents duplicate entries
 
 Usage:
-    python manage.py fetch_rss
+    python manage.py fetch_rss                    # Fetch from all club sources
+    python manage.py fetch_rss --source-id 1     # Fetch from specific source
 """
 import feedparser
 from datetime import datetime
 from django.core.management.base import BaseCommand
 from django.utils import timezone
-from users.models import ClubProfile, NewsItem, Opportunity
+from users.models import ClubSource, NewsItem, Opportunity
 
 
 class Command(BaseCommand):
-    help = 'Fetches RSS feeds from all clubs with RSS URLs and saves news items and opportunities'
+    help = '''
+    Intelligent RSS Feed Scraper - Fetches and categorizes club content from ClubSource entries
+    - Automatically detects recruitment/trial opportunities vs regular news
+    - Extracts position information (Goalkeeper, Defender, Striker, etc.)
+    - Prevents duplicate entries
+    '''
 
     def add_arguments(self, parser):
         parser.add_argument(
-            '--club-id',
+            '--source-id',
             type=int,
-            help='Fetch RSS for a specific club ID only',
+            help='Fetch RSS for a specific ClubSource ID only',
         )
 
     def handle(self, *args, **options):
         """Main command handler"""
-        club_id = options.get('club_id')
+        source_id = options.get('source_id')
         
-        # Get clubs with RSS feeds
-        if club_id:
-            clubs = ClubProfile.objects.filter(id=club_id, rss_feed_url__isnull=False).exclude(rss_feed_url='')
+        # Display header
+        self.stdout.write('=' * 70)
+        self.stdout.write(self.style.SUCCESS('  🤖 INTELLIGENT RSS FEED SCRAPER'))
+        self.stdout.write('=' * 70)
+        self.stdout.write('  📡 Fetching feeds from club sources...')
+        self.stdout.write('  🧠 Applying intelligence logic to categorize content')
+        self.stdout.write('  🎯 Detecting: Trials, Recruitment, Positions')
+        self.stdout.write('=' * 70 + '\n')
+        
+        # Get club sources with RSS feeds
+        if source_id:
+            sources = ClubSource.objects.filter(id=source_id, rss_url__isnull=False).exclude(rss_url='')
         else:
-            clubs = ClubProfile.objects.filter(rss_feed_url__isnull=False).exclude(rss_feed_url='')
+            sources = ClubSource.objects.filter(rss_url__isnull=False).exclude(rss_url='')
         
-        if not clubs.exists():
-            self.stdout.write(self.style.WARNING('No clubs with RSS feeds found.'))
+        if not sources.exists():
+            self.stdout.write(self.style.WARNING('No club sources with RSS feeds found.'))
             return
         
         total_items = 0
         total_opportunities = 0
         
-        for club in clubs:
-            self.stdout.write(f'\nProcessing RSS feed for: {club.club_name}')
-            self.stdout.write(f'RSS URL: {club.rss_feed_url}')
+        for source in sources:
+            self.stdout.write(f'\nProcessing RSS feed for: {source.name}')
+            self.stdout.write(f'RSS URL: {source.rss_url}')
             
             try:
                 # Parse the RSS feed
-                feed = feedparser.parse(club.rss_feed_url)
+                feed = feedparser.parse(source.rss_url)
                 
                 if feed.bozo:
                     # Feed has errors
@@ -80,9 +105,9 @@ class Command(BaseCommand):
                     if is_opportunity:
                         # Save as Opportunity
                         opportunity, created = Opportunity.objects.get_or_create(
-                            club=club,
                             link=link,
                             defaults={
+                                'source': source,
                                 'title': title,
                                 'description': description,
                                 'published_date': published_date,
@@ -99,9 +124,9 @@ class Command(BaseCommand):
                     else:
                         # Save as NewsItem
                         news_item, created = NewsItem.objects.get_or_create(
-                            club=club,
                             link=link,
                             defaults={
+                                'source': source,
                                 'title': title,
                                 'description': description,
                                 'published_date': published_date,
@@ -127,12 +152,24 @@ class Command(BaseCommand):
                 )
         
         # Final summary
-        self.stdout.write('\n' + '='*60)
+        self.stdout.write('\n' + '='*70)
         self.stdout.write(
             self.style.SUCCESS(
-                f'✅ Total: {total_items} news items and {total_opportunities} opportunities added'
+                f'✅ RSS Feed Fetch Complete!\n'
+                f'   Total News Items: {total_items}\n'
+                f'   Total Opportunities (Trials/Recruitment): {total_opportunities}\n'
+                f'   Club Sources Processed: {sources.count()}'
             )
         )
+        self.stdout.write(
+            self.style.WARNING(
+                '\n💡 Intelligence Logic Applied:\n'
+                '   - Opportunities detected using recruitment keywords\n'
+                '   - Position extraction from content\n'
+                '   - Duplicate prevention active'
+            )
+        )
+        self.stdout.write('='*70)
 
     def _parse_date(self, entry):
         """Parse the published date from an RSS entry"""
@@ -153,24 +190,68 @@ class Command(BaseCommand):
         return timezone.now()
 
     def _is_opportunity(self, title, description):
-        """Check if a news item is a trial/recruitment opportunity"""
-        keywords = ['trial', 'trials', 'recruit', 'recruitment', 'recruiting', 
-                    'tryout', 'tryouts', 'vacancy', 'vacancies', 'wanted',
-                    'looking for', 'seeking players']
+        """
+        Check if a news item is a trial/recruitment opportunity.
+        Intelligence Logic: Detects keywords related to trials, recruitment, and positions.
+        """
+        # Core recruitment keywords
+        recruitment_keywords = [
+            'trial', 'trials', 'recruit', 'recruitment', 'recruiting', 
+            'tryout', 'tryouts', 'vacancy', 'vacancies', 'wanted',
+            'looking for', 'seeking players', 'squad', 'join us',
+            'apply now', 'applications', 'signing', 'register for'
+        ]
         
-        combined_text = (title + ' ' + description).lower()
-        
-        return any(keyword in combined_text for keyword in keywords)
-
-    def _extract_position(self, title, description):
-        """Attempt to extract target position from title or description"""
-        positions = [
+        # Position keywords (when combined with recruitment context)
+        position_keywords = [
             'goalkeeper', 'defender', 'midfielder', 'striker', 'forward',
-            'winger', 'centre back', 'full back', 'attacking', 'defensive'
+            'player', 'players', 'talent', 'opportunity'
         ]
         
         combined_text = (title + ' ' + description).lower()
         
-        found_positions = [pos for pos in positions if pos in combined_text]
+        # Check for direct recruitment keywords
+        has_recruitment = any(keyword in combined_text for keyword in recruitment_keywords)
         
-        return ', '.join(found_positions).title() if found_positions else ''
+        # Check for position keywords (can indicate recruitment)
+        has_position = any(keyword in combined_text for keyword in position_keywords)
+        
+        # If clear recruitment keywords found, it's an opportunity
+        if has_recruitment:
+            return True
+        
+        # If position keywords found with action words, likely an opportunity
+        action_words = ['need', 'seeking', 'want', 'require', 'join', 'sign', 'register']
+        if has_position and any(word in combined_text for word in action_words):
+            return True
+        
+        return False
+
+    def _extract_position(self, title, description):
+        """
+        Extract target position from title or description.
+        Enhanced to detect all major football positions.
+        """
+        # Define position keywords with variations
+        positions = {
+            'goalkeeper': ['goalkeeper', 'keeper', 'gk', 'goalie'],
+            'defender': ['defender', 'defence', 'center back', 'centre back', 'cb', 'full back', 'fb'],
+            'left back': ['left back', 'lb', 'left-back'],
+            'right back': ['right back', 'rb', 'right-back'],
+            'midfielder': ['midfielder', 'midfield', 'cm', 'central midfielder'],
+            'defensive midfielder': ['defensive midfielder', 'cdm', 'holding midfielder'],
+            'attacking midfielder': ['attacking midfielder', 'cam', 'playmaker'],
+            'winger': ['winger', 'wing', 'wide player', 'lw', 'rw'],
+            'striker': ['striker', 'forward', 'st', 'cf', 'center forward', 'centre forward'],
+        }
+        
+        combined_text = (title + ' ' + description).lower()
+        found_positions = []
+        
+        for position_name, variations in positions.items():
+            if any(variation in combined_text for variation in variations):
+                if position_name not in found_positions:
+                    found_positions.append(position_name)
+        
+        # Return formatted positions
+        return ', '.join([pos.title() for pos in found_positions]) if found_positions else ''

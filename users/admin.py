@@ -3,7 +3,7 @@ from django.utils.html import format_html
 from django.utils import timezone
 from .models import (
     User, PlayerProfile, ClubProfile, ScoutProfile, 
-    ManagerProfile, QualificationVerification, NewsItem, Opportunity
+    ManagerProfile, QualificationVerification, ClubSource, NewsItem, Opportunity
 )
 
 # Register your models here.
@@ -21,18 +21,28 @@ class PlayerProfileAdmin(admin.ModelAdmin):
 
 @admin.register(ClubProfile)
 class ClubProfileAdmin(admin.ModelAdmin):
-    list_display = ['club_name', 'league_level', 'is_registered', 'rss_feed_url', 'location']
+    list_display = ['club_name', 'league_level', 'location', 'rss_status', 'is_registered', 'news_count']
     list_filter = ['league_level', 'is_registered', 'location']
     search_fields = ['club_name', 'league', 'location']
     readonly_fields = ['is_registered']
     
     fieldsets = (
         ('Basic Information', {
-            'fields': ('club_name', 'league_level', 'league', 'location', 'location_postcode', 'founded_year')
+            'fields': ('club_name', 'league_level', 'league', 'location', 'location_postcode', 'founded_year'),
+            'description': 'Enter the basic details for the club.'
         }),
-        ('RSS Feed', {
+        ('Website & Media', {
+            'fields': ('website_url', 'logo_url'),
+            'description': 'Add the club\'s official website and logo image URL.'
+        }),
+        ('RSS Feed Configuration', {
             'fields': ('rss_feed_url',),
-            'description': 'Add RSS feed URL to automatically fetch news and opportunities from this club.'
+            'description': '<strong>Important:</strong> Add the club\'s RSS feed URL here to automatically fetch news and trial opportunities. '
+                          'This will populate the Feeds page with live updates from the club\'s website. '
+                          '<br><br><em>Example URLs:</em><br>'
+                          '• https://clubwebsite.com/feed/<br>'
+                          '• https://clubwebsite.com/rss/<br>'
+                          '• https://clubwebsite.com/news/feed/'
         }),
         ('User Account', {
             'fields': ('user', 'is_registered'),
@@ -40,6 +50,90 @@ class ClubProfileAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
+    
+    def rss_status(self, obj):
+        if obj.rss_feed_url:
+            return format_html(
+                '<span style="color: green; font-weight: bold;">✓ RSS Enabled</span>'
+            )
+        return format_html(
+            '<span style="color: orange;">⚠ No RSS Feed</span>'
+        )
+    rss_status.short_description = 'RSS Feed Status'
+    
+    def news_count(self, obj):
+        count = obj.news_items.count()
+        if count > 0:
+            return format_html(
+                '<a href="/admin/users/newsitem/?club__id__exact={}">{} news items</a>',
+                obj.id, count
+            )
+        return "0 news items"
+    news_count.short_description = 'News Articles'
+    
+    class Media:
+        css = {
+            'all': ('admin/css/custom_admin.css',)
+        }
+
+@admin.register(ClubSource)
+class ClubSourceAdmin(admin.ModelAdmin):
+    """
+    Admin interface for managing RSS feed sources.
+    These are clubs added by admins for RSS aggregation, separate from registered users.
+    """
+    list_display = ['name', 'league_level', 'rss_status', 'region', 'news_count', 'created_at']
+    list_filter = ['league_level', 'region']
+    search_fields = ['name', 'website_url']
+    readonly_fields = ['created_at']
+    
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('name', 'league_level', 'region'),
+            'description': 'Enter the basic details for the club RSS source.'
+        }),
+        ('Website & Media', {
+            'fields': ('website_url', 'logo_url'),
+            'description': 'Add the club\'s official website and logo image URL.'
+        }),
+        ('RSS Feed Configuration', {
+            'fields': ('rss_url',),
+            'description': '<strong>Important:</strong> Add the club\'s RSS feed URL here to automatically fetch news and trial opportunities. '
+                          '<br><br><em>Example URLs:</em><br>'
+                          '• https://clubwebsite.com/feed/<br>'
+                          '• https://clubwebsite.com/rss/<br>'
+                          '• https://clubwebsite.com/news/feed/'
+        }),
+        ('Metadata', {
+            'fields': ('created_at',),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def rss_status(self, obj):
+        if obj.rss_url:
+            return format_html(
+                '<span style="color: green; font-weight: bold;">✓ RSS Enabled</span>'
+            )
+        return format_html(
+            '<span style="color: orange;">⚠ No RSS Feed</span>'
+        )
+    rss_status.short_description = 'RSS Feed Status'
+    
+    def news_count(self, obj):
+        count = obj.news_items.count()
+        if count > 0:
+            return format_html(
+                '<a href="/admin/users/newsitem/?source__id__exact={}">{} news items</a>',
+                obj.id, count
+            )
+        return "0 news items"
+    news_count.short_description = 'News Articles'
+    
+    class Media:
+        css = {
+            'all': ('admin/css/custom_admin.css',)
+        }
 
 @admin.register(ScoutProfile)
 class ScoutProfileAdmin(admin.ModelAdmin):
@@ -144,16 +238,106 @@ class QualificationVerificationAdmin(admin.ModelAdmin):
 
 @admin.register(NewsItem)
 class NewsItemAdmin(admin.ModelAdmin):
-    list_display = ['title', 'club', 'published_date', 'created_at']
-    list_filter = ['published_date', 'club']
-    search_fields = ['title', 'description', 'club__club_name']
+    list_display = ['title', 'club_link', 'league_display', 'published_date', 'created_at']
+    list_filter = ['published_date', 'source__league_level', 'club__league_level', 'source', 'club']
+    search_fields = ['title', 'description', 'source__name', 'club__club_name']
     readonly_fields = ['created_at']
     date_hierarchy = 'published_date'
+    ordering = ['-published_date']
+    
+    def club_link(self, obj):
+        club_name = obj.get_club_name()
+        if obj.source:
+            return format_html(
+                '<a href="/admin/users/clubsource/{}/change/">{}</a> <span style="color: #3b82f6;">(RSS)</span>',
+                obj.source.id, club_name
+            )
+        elif obj.club:
+            return format_html(
+                '<a href="/admin/users/clubprofile/{}/change/">{}</a> <span style="color: #10b981;">(User)</span>',
+                obj.club.id, club_name
+            )
+        return club_name
+    club_link.short_description = 'Club'
+    
+    def league_display(self, obj):
+        return obj.get_league_display()
+    league_display.short_description = 'League Level'
+    
+    fieldsets = (
+        ('News Information', {
+            'fields': ('title', 'link', 'description')
+        }),
+        ('Source Selection', {
+            'fields': ('source', 'club'),
+            'description': '<strong>Choose ONE source:</strong><br>'
+                          '• <strong>Source (RSS):</strong> For news automatically fetched from RSS feeds<br>'
+                          '• <strong>Club (User):</strong> For news manually posted by registered clubs'
+        }),
+        ('Dates', {
+            'fields': ('published_date', 'created_at')
+        }),
+    )
 
 @admin.register(Opportunity)
 class OpportunityAdmin(admin.ModelAdmin):
-    list_display = ['title', 'club', 'target_position', 'is_open', 'published_date']
-    list_filter = ['is_open', 'published_date', 'club']
-    search_fields = ['title', 'description', 'target_position', 'club__club_name']
+    list_display = ['title', 'club_link', 'target_position', 'status_badge', 'published_date']
+    list_filter = ['is_open', 'published_date', 'source__league_level', 'club__league_level', 'source', 'club']
+    search_fields = ['title', 'description', 'target_position', 'source__name', 'club__club_name']
     readonly_fields = ['created_at']
     date_hierarchy = 'published_date'
+    ordering = ['-published_date']
+    actions = ['mark_as_open', 'mark_as_closed']
+    
+    def club_link(self, obj):
+        club_name = obj.get_club_name()
+        if obj.source:
+            return format_html(
+                '<a href="/admin/users/clubsource/{}/change/">{}</a> <span style="color: #3b82f6;">(RSS)</span>',
+                obj.source.id, club_name
+            )
+        elif obj.club:
+            return format_html(
+                '<a href="/admin/users/clubprofile/{}/change/">{}</a> <span style="color: #10b981;">(User)</span>',
+                obj.club.id, club_name
+            )
+        return club_name
+    club_link.short_description = 'Club'
+    
+    def status_badge(self, obj):
+        if obj.is_open:
+            return format_html(
+                '<span style="background-color: #10b981; color: white; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: bold;">OPEN</span>'
+            )
+        return format_html(
+            '<span style="background-color: #ef4444; color: white; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: bold;">CLOSED</span>'
+        )
+    status_badge.short_description = 'Status'
+    
+    def mark_as_open(self, request, queryset):
+        updated = queryset.update(is_open=True)
+        self.message_user(request, f"{updated} opportunity/opportunities marked as open.")
+    mark_as_open.short_description = "Mark selected as OPEN"
+    
+    def mark_as_closed(self, request, queryset):
+        updated = queryset.update(is_open=False)
+        self.message_user(request, f"{updated} opportunity/opportunities marked as closed.")
+    mark_as_closed.short_description = "Mark selected as CLOSED"
+    
+    fieldsets = (
+        ('Opportunity Information', {
+            'fields': ('title', 'link', 'description')
+        }),
+        ('Source Selection', {
+            'fields': ('source', 'club'),
+            'description': '<strong>Choose ONE source:</strong><br>'
+                          '• <strong>Source (RSS):</strong> For opportunities automatically fetched from RSS feeds<br>'
+                          '• <strong>Club (User):</strong> For opportunities manually posted by registered clubs'
+        }),
+        ('Trial Details', {
+            'fields': ('target_position', 'is_open')
+        }),
+        ('Dates', {
+            'fields': ('published_date', 'created_at')
+        }),
+    )
