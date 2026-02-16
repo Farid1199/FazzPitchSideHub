@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ item.title }} - FazzPitchSideHub{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Back Button -->
+        <div class="mb-6">
+            <a href="{% url 'community_hub' %}" class="inline-flex items-center text-green-600 hover:text-green-700 font-medium transition">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Back to Community Hub
+            </a>
+        </div>
+
+        <!-- Article Card -->
+        <div class="bg-white rounded-lg shadow-xl overflow-hidden">
+            
+            <!-- Header with Club Info -->
+            <div class="{% if is_opportunity %}bg-gradient-to-r from-green-600 to-green-700{% else %}bg-gradient-to-r from-blue-600 to-blue-700{% endif %} px-6 py-8 md:px-10 md:py-10">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-shield-alt text-white text-2xl"></i>
+                        <div>
+                            <h2 class="text-white font-bold text-lg">{{ item.get_club_name }}</h2>
+                            {% if item.source %}
+                            <p class="text-white text-opacity-80 text-sm">{{ item.get_league_display }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if is_opportunity %}
+                    <span class="bg-yellow-400 text-gray-900 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">
+                        TRIAL OPPORTUNITY
+                    </span>
+                    {% else %}
+                    <span class="bg-white bg-opacity-20 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">
+                        CLUB NEWS
+                    </span>
+                    {% endif %}
+                </div>
+                
+                <h1 class="text-3xl md:text-4xl font-bold text-white leading-tight mb-3">
+                    {{ item.title }}
+                </h1>
+                
+                <div class="flex items-center text-white text-opacity-90 text-sm space-x-4">
+                    <span class="flex items-center">
+                        <i class="far fa-clock mr-2"></i>
+                        Published {{ item.published_date|timesince }} ago
+                    </span>
+                    <span class="flex items-center">
+                        <i class="far fa-calendar mr-2"></i>
+                        {{ item.published_date|date:"d M Y" }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="px-6 py-8 md:px-10 md:py-10">
+                
+                <!-- Position Badge (for opportunities) -->
+                {% if is_opportunity and positions %}
+                <div class="mb-6 pb-6 border-b border-gray-200">
+                    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Target Position(s)</h3>
+                    <div class="flex flex-wrap gap-2">
+                        {% for position in positions %}
+                        <span class="inline-flex items-center px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full">
+                            <i class="fas fa-user-circle mr-2"></i>{{ position }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Article Summary/Description -->
+                <div class="prose prose-lg max-w-none mb-8">
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">Summary</h3>
+                    <div class="text-gray-700 leading-relaxed whitespace-pre-line">
+                        {{ item.description|striptags }}
+                    </div>
+                </div>
+
+                {% if is_opportunity %}
+                <!-- Opportunity Status -->
+                <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-8">
+                    <div class="flex items-start">
+                        <i class="fas fa-info-circle text-green-600 text-xl mr-3 mt-1"></i>
+                        <div>
+                            <h4 class="font-bold text-green-900 mb-1">Application Status</h4>
+                            <p class="text-sm text-green-800">
+                                {% if item.is_open %}
+                                This opportunity is currently <strong>OPEN</strong> for applications. Visit the club website for full details and application instructions.
+                                {% else %}
+                                This opportunity has been closed.
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a href="{{ item.link }}" target="_blank" 
+                       class="flex-1 inline-flex items-center justify-center px-6 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white font-bold rounded-lg hover:from-green-700 hover:to-green-800 transition shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                        <i class="fas fa-external-link-alt mr-3"></i>
+                        Visit Official Club Website for Full Story
+                        <i class="fas fa-arrow-right ml-3"></i>
+                    </a>
+                </div>
+
+                <!-- Additional Info -->
+                <div class="mt-8 pt-6 border-t border-gray-200">
+                    <div class="bg-blue-50 rounded-lg p-4">
+                        <div class="flex items-start">
+                            <i class="fas fa-lightbulb text-yellow-500 text-xl mr-3 mt-1"></i>
+                            <div class="text-sm text-gray-700">
+                                <p class="font-semibold text-gray-900 mb-1">About FazzPitchSideHub</p>
+                                <p>We aggregate news and opportunities from clubs across the West Midlands Non-League Football Pyramid. 
+                                {% if is_opportunity %}
+                                This opportunity was automatically detected by our AI system.
+                                {% else %}
+                                Stay updated with the latest club news and developments.
+                                {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Actions -->
+        <div class="mt-6 flex flex-col sm:flex-row gap-4">
+            <a href="{% url 'community_hub' %}" 
+               class="flex-1 inline-flex items-center justify-center px-6 py-3 bg-white text-gray-700 font-medium rounded-lg border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50 transition">
+                <i class="fas fa-newspaper mr-2"></i>
+                Browse More News
+            </a>
+            {% if is_opportunity %}
+            <a href="{% url 'community_hub' %}?level={{ item.source.league_level }}" 
+               class="flex-1 inline-flex items-center justify-center px-6 py-3 bg-white text-gray-700 font-medium rounded-lg border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50 transition">
+                <i class="fas fa-filter mr-2"></i>
+                More from {{ item.get_league_display }}
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

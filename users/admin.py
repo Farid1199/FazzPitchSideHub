@@ -3,7 +3,7 @@ from django.utils.html import format_html
 from django.utils import timezone
 from .models import (
     User, PlayerProfile, ClubProfile, ScoutProfile, 
-    ManagerProfile, QualificationVerification, ClubSource, NewsItem, Opportunity
+    ManagerProfile, QualificationVerification, ClubSource, NewsItem, Opportunity, Post
 )
 
 # Register your models here.
@@ -341,3 +341,50 @@ class OpportunityAdmin(admin.ModelAdmin):
             'fields': ('published_date', 'created_at')
         }),
     )
+
+
+@admin.register(Post)
+class PostAdmin(admin.ModelAdmin):
+    list_display = ['user', 'post_type', 'caption_preview', 'total_likes', 'created_at']
+    list_filter = ['post_type', 'created_at', 'user__role']
+    search_fields = ['user__username', 'caption', 'award_title']
+    readonly_fields = ['created_at', 'updated_at', 'total_likes']
+    filter_horizontal = ['likes']
+    
+    fieldsets = (
+        ('User & Type', {
+            'fields': ('user', 'post_type')
+        }),
+        ('Content', {
+            'fields': ('caption',)
+        }),
+        ('Media', {
+            'fields': ('image', 'video', 'youtube_url'),
+            'classes': ('collapse',)
+        }),
+        ('Achievement Stats', {
+            'fields': ('goals', 'assists', 'clean_sheets', 'minutes_played', 'match_rating'),
+            'classes': ('collapse',),
+            'description': 'Fill in relevant stats for player achievements'
+        }),
+        ('Match Details', {
+            'fields': ('match_opponent', 'match_result', 'match_date', 'competition'),
+            'classes': ('collapse',)
+        }),
+        ('Award/Milestone', {
+            'fields': ('award_title', 'award_description'),
+            'classes': ('collapse',)
+        }),
+        ('Engagement', {
+            'fields': ('likes', 'total_likes'),
+            'classes': ('collapse',)
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def caption_preview(self, obj):
+        return obj.caption[:50] + '...' if len(obj.caption) > 50 else obj.caption
+    caption_preview.short_description = 'Caption'

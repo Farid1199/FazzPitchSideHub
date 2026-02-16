@@ -28,7 +28,18 @@ class Command(BaseCommand):
     - Automatically detects recruitment/trial opportunities vs regular news
     - Extracts position information (Goalkeeper, Defender, Striker, etc.)
     - Prevents duplicate entries
+    - Filters out women's football, youth teams, and academy content
     '''
+    
+    # Exclusion keywords for data noise reduction (Hard Exclusion)
+    EXCLUSION_KEYWORDS = [
+        'women', 'ladies', 'girls', 'womens', "women's", 'lady', 'female',
+        'u18', 'u17', 'u16', 'u15', 'u14', 'u13', 'u12', 'u11', 'u10', 'u9', 'u8',
+        'u18s', 'u17s', 'u16s', 'u15s', 'u14s', 'u13s', 'u12s',  # Common variations
+        'under 18', 'under 17', 'under 16', 'under-18', 'under-17', 'under-16',
+        'youth', 'juniors', 'junior', 'academy', 'development', 'schoolboy',
+        'boys', 'youth team', 'junior team', 'youth side'
+    ]
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -97,6 +108,11 @@ class Command(BaseCommand):
                     
                     if not link:
                         self.stdout.write(self.style.WARNING(f'  Skipping entry without link: {title}'))
+                        continue
+                    
+                    # Apply exclusion filter (Data Noise Reduction)
+                    if self._should_exclude(title, description):
+                        self.stdout.write(f'  ⊗ Filtered (Youth/Women): {title[:50]}...')
                         continue
                     
                     # Check if this is a trial/recruitment opportunity
@@ -188,50 +204,72 @@ class Command(BaseCommand):
         
         # If no date found, use current time
         return timezone.now()
+    
+    def _should_exclude(self, title, description):
+        """
+        Check if content should be excluded based on exclusion keywords.
+        Data Noise Reduction: Filters out women's football, youth teams, academy content.
+        Returns True if content should be excluded.
+        """
+        combined_text = (title + ' ' + description).lower()
+        
+        # Check if any exclusion keyword appears in the text
+        return any(keyword in combined_text for keyword in self.EXCLUSION_KEYWORDS)
 
     def _is_opportunity(self, title, description):
         """
         Check if a news item is a trial/recruitment opportunity.
-        Intelligence Logic: Detects keywords related to trials, recruitment, and positions.
+        Strict Intelligence Logic: 
+        - MUST contain trial/recruiting/vacancy/wanted/looking for keywords
+        - MUST NOT contain signing/signed/joins/welcome/captured (these are announcements, not opportunities)
         """
-        # Core recruitment keywords
-        recruitment_keywords = [
-            'trial', 'trials', 'recruit', 'recruitment', 'recruiting', 
-            'tryout', 'tryouts', 'vacancy', 'vacancies', 'wanted',
-            'looking for', 'seeking players', 'squad', 'join us',
-            'apply now', 'applications', 'signing', 'register for'
-        ]
-        
-        # Position keywords (when combined with recruitment context)
-        position_keywords = [
-            'goalkeeper', 'defender', 'midfielder', 'striker', 'forward',
-            'player', 'players', 'talent', 'opportunity'
-        ]
-        
         combined_text = (title + ' ' + description).lower()
         
-        # Check for direct recruitment keywords
-        has_recruitment = any(keyword in combined_text for keyword in recruitment_keywords)
+        # Strict recruitment keywords (MUST have at least one)
+        strict_recruitment_keywords = [
+            'trial', 'trials', 'recruit', 'recruitment', 'recruiting', 
+            'tryout', 'tryouts', 'vacancy', 'vacancies', 'wanted',
+            'looking for', 'seeking players', 'seeking player',
+            'apply now', 'applications open', 'register for trial'
+        ]
         
-        # Check for position keywords (can indicate recruitment)
-        has_position = any(keyword in combined_text for keyword in position_keywords)
+        # Announcement keywords (if present, it's NOT an opportunity)
+        announcement_keywords = [
+            'signing', 'signed', 'signs', 'joins', 'joined', 'welcome',
+            'captured', 'announces', 'announced', 'confirms', 'confirmed',
+            'new signing', 'completes move', 'agrees deal'
+        ]
         
-        # If clear recruitment keywords found, it's an opportunity
-        if has_recruitment:
-            return True
+        # Check for announcement keywords first (immediate disqualification)
+        has_announcement = any(keyword in combined_text for keyword in announcement_keywords)
+        if has_announcement:
+            return False
         
-        # If position keywords found with action words, likely an opportunity
-        action_words = ['need', 'seeking', 'want', 'require', 'join', 'sign', 'register']
-        if has_position and any(word in combined_text for word in action_words):
-            return True
+        # Check for strict recruitment keywords
+        has_recruitment = any(keyword in combined_text for keyword in strict_recruitment_keywords)
         
-        return False
+        return has_recruitment
 
     def _extract_position(self, title, description):
         """
         Extract target position from title or description.
         Enhanced to detect all major football positions.
+        Only extracts player positions - ignores managerial/coaching roles.
         """
+        combined_text = (title + ' ' + description).lower()
+        
+        # Check if this is a staff/managerial role (not a player opportunity)
+        staff_keywords = [
+            'manager', 'coach', 'assistant manager', 'head coach',
+            'physiotherapist', 'physio', 'kit man', 'groundsman',
+            'volunteer', 'administrator', 'secretary', 'treasurer',
+            'committee', 'director', 'chairman', 'staff'
+        ]
+        
+        if any(keyword in combined_text for keyword in staff_keywords):
+            # This is a staff role, not a player position
+            return ''
+        
         # Define position keywords with variations
         positions = {
             'goalkeeper': ['goalkeeper', 'keeper', 'gk', 'goalie'],
@@ -245,7 +283,6 @@ class Command(BaseCommand):
             'striker': ['striker', 'forward', 'st', 'cf', 'center forward', 'centre forward'],
         }
         
-        combined_text = (title + ' ' + description).lower()
         found_positions = []
         
         for position_name, variations in positions.items():

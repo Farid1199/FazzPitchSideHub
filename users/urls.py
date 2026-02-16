@@ -6,7 +6,8 @@ from .views import (
     role_selection_view, profile_creation_view, 
     dashboard_view, home_view, feeds_view, search_players, search_clubs,
     edit_profile, submit_qualification_verification, post_opportunity,
-    opportunity_detail, news_detail, player_profile
+    opportunity_detail, news_detail, player_profile, community_hub,
+    create_post, social_feed, like_post, delete_post, my_posts
 )
 
 urlpatterns = [
@@ -35,5 +36,14 @@ urlpatterns = [
     path('search-players/', search_players, name='search_players'),
     path('search-clubs/', search_clubs, name='search_clubs'),
     path('feeds/', feeds_view, name='feeds'),
+    path('community-hub/', community_hub, name='community_hub'),
+    
+    # Social Media Posts
+    path('posts/create/', create_post, name='create_post'),
+    path('posts/feed/', social_feed, name='social_feed'),
+    path('posts/my-posts/', my_posts, name='my_posts'),
+    path('posts/<int:post_id>/like/', like_post, name='like_post'),
+    path('posts/<int:post_id>/delete/', delete_post, name='delete_post'),
+    
     path('', home_view, name='home'),
 ]

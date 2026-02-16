@@ -585,3 +585,163 @@ class Opportunity(NewsItem):
     def __str__(self):
         club_name = self.get_club_name()
         return f"Opportunity: {self.title} ({club_name})"
+
+
+class Post(models.Model):
+    """
+    Social media-style post model for Players, Managers, and Scouts.
+    Allows users to share achievements, highlights, match reports, and general updates.
+    """
+    POST_TYPE_CHOICES = [
+        ('GENERAL', 'General Update'),
+        ('ACHIEVEMENT', 'Achievement'),
+        ('MATCH_REPORT', 'Match Report'),
+        ('TRAINING', 'Training Session'),
+        ('HIGHLIGHT', 'Highlight Video'),
+        ('MILESTONE', 'Career Milestone'),
+        ('TRANSFER', 'Transfer News'),
+        ('AWARD', 'Award/Recognition'),
+    ]
+    
+    # Core Fields
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
+    post_type = models.CharField(
+        max_length=20,
+        choices=POST_TYPE_CHOICES,
+        default='GENERAL',
+        help_text="Type of post (achievement, match report, etc.)"
+    )
+    caption = models.TextField(
+        help_text="Post caption/description",
+        max_length=1000
+    )
+    
+    # Media Fields
+    image = models.ImageField(
+        upload_to='post_images/',
+        blank=True,
+        null=True,
+        help_text="Upload an image for the post"
+    )
+    video = models.FileField(
+        upload_to='post_videos/',
+        blank=True,
+        null=True,
+        help_text="Upload a video (MP4, AVI, MOV). Max size: 100MB"
+    )
+    youtube_url = models.URLField(
+        max_length=500,
+        blank=True,
+        help_text="YouTube video link"
+    )
+    
+    # Achievement Fields (for players)
+    goals = models.IntegerField(
+        null=True,
+        blank=True,
+        help_text="Goals scored"
+    )
+    assists = models.IntegerField(
+        null=True,
+        blank=True,
+        help_text="Assists provided"
+    )
+    clean_sheets = models.IntegerField(
+        null=True,
+        blank=True,
+        help_text="Clean sheets (for goalkeepers)"
+    )
+    minutes_played = models.IntegerField(
+        null=True,
+        blank=True,
+        help_text="Minutes played in the match"
+    )
+    match_rating = models.DecimalField(
+        max_digits=3,
+        decimal_places=1,
+        null=True,
+        blank=True,
+        help_text="Match rating (e.g., 8.5)"
+    )
+    
+    # Match Details
+    match_opponent = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text="Opponent team name"
+    )
+    match_result = models.CharField(
+        max_length=20,
+        blank=True,
+        help_text="Match result (e.g., 'Won 3-1', 'Drew 2-2')"
+    )
+    match_date = models.DateField(
+        null=True,
+        blank=True,
+        help_text="Date of the match"
+    )
+    competition = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text="Competition name (e.g., 'FA Cup', 'League Cup')"
+    )
+    
+    # Award/Milestone Fields
+    award_title = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text="Award or milestone title"
+    )
+    award_description = models.TextField(
+        max_length=500,
+        blank=True,
+        help_text="Award or milestone description"
+    )
+    
+    # Engagement
+    likes = models.ManyToManyField(
+        User,
+        related_name='liked_posts',
+        blank=True,
+        help_text="Users who liked this post"
+    )
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = "Post"
+        verbose_name_plural = "Posts"
+    
+    def __str__(self):
+        return f"{self.user.username}'s {self.get_post_type_display()} - {self.created_at.strftime('%Y-%m-%d')}"
+    
+    def total_likes(self):
+        return self.likes.count()
+    
+    def get_user_role(self):
+        """Get the role of the user who created the post"""
+        return self.user.get_role_display() if self.user.role else "User"
+    
+    def get_profile_info(self):
+        """Get profile information based on user role"""
+        if self.user.role == 'PLAYER' and hasattr(self.user, 'player_profile'):
+            return {
+                'position': self.user.player_profile.get_position_display(),
+                'team': self.user.player_profile.current_team or 'Free Agent',
+                'level': self.user.player_profile.get_playing_level_display()
+            }
+        elif self.user.role == 'MANAGER' and hasattr(self.user, 'manager_profile'):
+            return {
+                'role': self.user.manager_profile.current_role or 'Manager',
+                'club': self.user.manager_profile.club_name or 'Unattached',
+                'qualification': self.user.manager_profile.get_highest_qualification_display() if hasattr(self.user.manager_profile, 'highest_qualification') else 'N/A'
+            }
+        elif self.user.role == 'SCOUT' and hasattr(self.user, 'scout_profile'):
+            return {
+                'organization': self.user.scout_profile.organization or 'Independent Scout',
+                'region': self.user.scout_profile.region or 'N/A'
+            }
+        return {}

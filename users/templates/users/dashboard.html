@@ -124,6 +124,61 @@
                 </div>
             </div>
             
+            <!-- Social Posts Section -->
+            <div class="bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl shadow-xl p-8 mb-8 border-2 border-green-200">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center">
+                            <i class="fas fa-share-alt text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-900">Share Your Journey</h2>
+                            <p class="text-gray-600">Post achievements, highlights, and updates</p>
+                        </div>
+                    </div>
+                    <div class="flex space-x-3">
+                        <a href="{% url 'my_posts' %}" 
+                           class="px-4 py-2 bg-white border-2 border-green-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-all font-semibold shadow-md">
+                            <i class="fas fa-list mr-2"></i>My Posts
+                        </a>
+                        <a href="{% url 'create_post' %}" 
+                           class="px-6 py-2 bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white rounded-lg font-bold shadow-lg transform hover:scale-105 transition-all">
+                            <i class="fas fa-plus-circle mr-2"></i>Create Post
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-white rounded-lg p-4 shadow-md text-center border-2 border-transparent hover:border-green-300 transition-all cursor-pointer"
+                         onclick="window.location.href='{% url 'create_post' %}'">
+                        <i class="fas fa-trophy text-yellow-500 text-3xl mb-2"></i>
+                        <p class="text-sm font-semibold text-gray-700">Share Achievement</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 shadow-md text-center border-2 border-transparent hover:border-blue-300 transition-all cursor-pointer"
+                         onclick="window.location.href='{% url 'create_post' %}'">
+                        <i class="fas fa-video text-red-500 text-3xl mb-2"></i>
+                        <p class="text-sm font-semibold text-gray-700">Post Highlight</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 shadow-md text-center border-2 border-transparent hover:border-purple-300 transition-all cursor-pointer"
+                         onclick="window.location.href='{% url 'create_post' %}'">
+                        <i class="fas fa-futbol text-green-500 text-3xl mb-2"></i>
+                        <p class="text-sm font-semibold text-gray-700">Match Report</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 shadow-md text-center border-2 border-transparent hover:border-orange-300 transition-all cursor-pointer"
+                         onclick="window.location.href='{% url 'social_feed' %}'">
+                        <i class="fas fa-stream text-blue-500 text-3xl mb-2"></i>
+                        <p class="text-sm font-semibold text-gray-700">View Feed</p>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg p-4 border-2 border-dashed border-green-300">
+                    <p class="text-center text-gray-600">
+                        <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                        <strong>Tip:</strong> Share your goals, assists, clean sheets, and match ratings to showcase your performance to scouts and clubs!
+                    </p>
+                </div>
+            </div>
+            
             <!-- Video Highlights Section -->
             {% if user.player_profile.youtube_highlight_url or user.player_profile.video_file %}
                 <div class="bg-white rounded-lg shadow-md p-6 mb-8">

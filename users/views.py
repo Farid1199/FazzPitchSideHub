@@ -5,14 +5,16 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
 from django.db.models import Q
 from django.utils import timezone
+from django.core.paginator import Paginator
+from itertools import chain
 from .forms import (
     CustomUserCreationForm, PlayerProfileForm, ClubProfileForm, 
     ScoutProfileForm, ManagerProfileForm, QualificationVerificationForm,
-    OpportunityForm
+    OpportunityForm, PostForm
 )
 from .models import (
     User, NewsItem, Opportunity, PlayerProfile, ClubProfile, ClubSource,
-    ScoutProfile, ManagerProfile, QualificationVerification
+    ScoutProfile, ManagerProfile, QualificationVerification, Post
 )
 from .utils import get_recommendations
 
@@ -270,68 +272,98 @@ def home_view(request):
 
 def feeds_view(request):
     """
-    Feeds page - Shows all clubs organized by league level,
-    with their latest news and opportunities from RSS feeds and user posts.
-    Displays both ClubSource (RSS aggregation) and ClubProfile (registered users) content.
+    User Feeds page - Shows ALL content posted BY REGISTERED USERS on the platform.
+    This includes:
+    - Club news and opportunities (NewsItems/Opportunities)
+    - Player/Manager/Scout posts (Posts with achievements, highlights, etc.)
+    
+    IMPORTANT: Only shows user-generated content, NOT RSS aggregated content.
     """
-    # Fetch all club sources (RSS aggregation)
-    all_sources = ClubSource.objects.all().order_by('league_level', 'name')
+    from .models import Post
+    from itertools import chain
+    from operator import attrgetter
+    
+    # Get filter parameters
+    post_type_filter = request.GET.get('type', '')
+    role_filter = request.GET.get('role', '')
+    page_number = request.GET.get('page', 1)
     
     # Fetch all registered club profiles
     all_clubs = ClubProfile.objects.all().order_by('league_level', 'club_name')
     
-    # Organize club sources by league level for pyramid display
+    # Organize registered clubs by league level for pyramid display
     league_pyramid = {}
-    for source in all_sources:
-        level = source.get_league_level_display()
-        if level not in league_pyramid:
-            league_pyramid[level] = []
-        league_pyramid[level].append({
-            'name': source.name,
-            'logo_url': source.logo_url,
-            'website_url': source.website_url,
-            'type': 'source'
-        })
-    
-    # Add registered clubs to the league pyramid
     for club in all_clubs:
         level = club.get_league_level_display()
         if level not in league_pyramid:
             league_pyramid[level] = []
         league_pyramid[level].append({
             'name': club.club_name,
-            'logo_url': club.logo_url,
-            'website_url': club.website_url,
-            'type': 'club'
+            'logo_url': club.logo_url if hasattr(club, 'logo_url') else None,
+            'website_url': club.website_url if hasattr(club, 'website_url') else None,
+            'type': 'club',
+            'is_registered': club.is_registered if hasattr(club, 'is_registered') else True
         })
     
-    # Fetch latest news from all sources (both RSS and user posts)
-    latest_news = NewsItem.objects.select_related('source', 'club').all().order_by('-published_date')[:20]
+    # Fetch USER-GENERATED opportunities (only from registered clubs, NOT RSS)
+    open_opportunities = Opportunity.objects.filter(
+        club__isnull=False,  # Only user posts
+        is_open=True
+    ).select_related('club').order_by('-published_date')[:15]
     
-    # Fetch open opportunities
-    open_opportunities = Opportunity.objects.select_related('source', 'club').filter(is_open=True).order_by('-published_date')[:15]
+    # Fetch social posts from players/managers/scouts
+    posts = Post.objects.select_related('user').prefetch_related('likes').all()
     
-    # Get sources with RSS feeds configured
-    sources_with_rss = ClubSource.objects.exclude(rss_url='').count()
-    total_sources = ClubSource.objects.count()
+    # Apply filters to posts
+    if post_type_filter:
+        posts = posts.filter(post_type=post_type_filter)
+    if role_filter:
+        posts = posts.filter(user__role=role_filter)
     
-    # Get clubs with RSS feeds configured
-    clubs_with_rss = ClubProfile.objects.exclude(rss_feed_url='').count()
+    # Fetch club news items
+    club_news = NewsItem.objects.filter(
+        club__isnull=False  # Only user posts
+    ).select_related('club')
+    
+    # Combine and sort all content by date (most recent first)
+    # We'll paginate the combined feed
+    combined_feed = sorted(
+        chain(posts, club_news),
+        key=lambda obj: obj.created_at if hasattr(obj, 'created_at') else obj.published_date,
+        reverse=True
+    )
+    
+    # Paginate combined feed (15 items per page)
+    paginator = Paginator(combined_feed, 15)
+    feed_page = paginator.get_page(page_number)
+    
+    # Get filter choices
+    post_types = Post.POST_TYPE_CHOICES
+    user_roles = [
+        ('PLAYER', 'Players'),
+        ('MANAGER', 'Managers'),
+        ('SCOUT', 'Scouts'),
+        ('CLUB', 'Clubs'),
+    ]
+    
+    # Get registered clubs count
     total_clubs = ClubProfile.objects.count()
+    registered_clubs = ClubProfile.objects.filter(user__isnull=False).count()
     
     context = {
         'league_pyramid': league_pyramid,
-        'latest_news': latest_news,
+        'feed_items': feed_page,
         'open_opportunities': open_opportunities,
-        'sources_with_rss': sources_with_rss,
-        'total_sources': total_sources,
-        'clubs_with_rss': clubs_with_rss,
         'total_clubs': total_clubs,
-        'all_sources': all_sources,
+        'registered_clubs': registered_clubs,
         'all_clubs': all_clubs,
+        'post_types': post_types,
+        'user_roles': user_roles,
+        'selected_type': post_type_filter,
+        'selected_role': role_filter,
     }
     
-    return render(request, 'users/feeds.html', context)
+    return render(request, 'users/feeds_unified.html', context)
 
 
 def search_clubs(request):
@@ -625,15 +657,27 @@ def opportunity_detail(request, pk):
 
 def news_detail(request, pk):
     """
-    Display full details of a news item.
+    Display full details of a news item or opportunity.
+    Unified detail page that keeps users on the platform.
     """
-    news = get_object_or_404(NewsItem, pk=pk)
+    # Try to get as Opportunity first, then as NewsItem
+    try:
+        item = Opportunity.objects.get(pk=pk)
+        is_opportunity = True
+        # Parse target positions into a list
+        positions = [pos.strip() for pos in item.target_position.split(',')] if item.target_position else []
+    except Opportunity.DoesNotExist:
+        item = get_object_or_404(NewsItem, pk=pk)
+        is_opportunity = False
+        positions = []
     
     context = {
-        'news': news,
+        'item': item,
+        'is_opportunity': is_opportunity,
+        'positions': positions,
     }
     
-    return render(request, 'users/news_detail.html', context)
+    return render(request, 'news_summary.html', context)
 
 
 def player_profile(request, username):
@@ -659,3 +703,165 @@ def player_profile(request, username):
     }
     
     return render(request, 'users/player_profile.html', context)
+
+
+def community_hub(request):
+    """
+    Community Hub - Shows RSS AGGREGATED content from external club websites.
+    This is for news scraped automatically from ClubSource RSS feeds.
+    
+    IMPORTANT: Only shows content where source is NOT NULL (RSS feeds),
+    NOT user-generated content (which appears in Feeds page).
+    
+    Includes filtering by league level and pagination.
+    """
+    from django.core.paginator import Paginator
+    
+    # Get selected league level filter from query parameter
+    selected_level = request.GET.get('level', None)
+    page_number = request.GET.get('page', 1)
+    
+    # Fetch RSS Trials/Opportunities (Only from ClubSource, NOT user posts)
+    opportunities = Opportunity.objects.filter(
+        source__isnull=False  # Only RSS content
+    )
+    if selected_level:
+        opportunities = opportunities.filter(source__league_level=selected_level)
+    opportunities = opportunities.order_by('-published_date')[:10]
+    
+    # Fetch RSS General News (Only from ClubSource, NOT user posts)
+    # Since Opportunity inherits from NewsItem, we need to exclude opportunities from news
+    opportunity_ids = Opportunity.objects.values_list('newsitem_ptr_id', flat=True)
+    news = NewsItem.objects.filter(
+        source__isnull=False  # Only RSS content
+    ).exclude(id__in=opportunity_ids)
+    if selected_level:
+        news = news.filter(source__league_level=selected_level)
+    news = news.order_by('-published_date')
+    
+    # Paginate news (10 items per page)
+    paginator = Paginator(news, 10)
+    news_page = paginator.get_page(page_number)
+    
+    # Get league level choices for the filter sidebar
+    from .models import ClubSource
+    league_levels = ClubSource.LEAGUE_LEVEL_CHOICES
+    
+    return render(request, 'community_hub.html', {
+        'opportunities': opportunities,
+        'news': news_page,
+        'league_levels': league_levels,
+        'selected_level': selected_level,
+    })
+
+
+@login_required
+def create_post(request):
+    """
+    View for creating a new post.
+    Available to Players, Managers, and Scouts.
+    """
+    from .forms import PostForm
+    from .models import Post
+    
+    if request.method == 'POST':
+        form = PostForm(request.POST, request.FILES)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.user = request.user
+            post.save()
+            messages.success(request, 'Post created successfully!')
+            return redirect('social_feed')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = PostForm()
+    
+    return render(request, 'users/create_post.html', {'form': form})
+
+
+@login_required
+def social_feed(request):
+    """
+    Redirect to unified user feeds.
+    This view is kept for backwards compatibility.
+    """
+    return redirect('feeds')
+
+
+@login_required
+def like_post(request, post_id):
+    """
+    AJAX view for liking/unliking a post.
+    """
+    from .models import Post
+    from django.http import JsonResponse
+    
+    if request.method == 'POST':
+        try:
+            post = Post.objects.get(pk=post_id)
+            
+            # Toggle like
+            if request.user in post.likes.all():
+                post.likes.remove(request.user)
+                liked = False
+            else:
+                post.likes.add(request.user)
+                liked = True
+            
+            return JsonResponse({
+                'success': True,
+                'liked': liked,
+                'total_likes': post.total_likes()
+            })
+        except Post.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Post not found'}, status=404)
+    
+    return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=400)
+
+
+@login_required
+def delete_post(request, post_id):
+    """
+    View for deleting a post.
+    Only the post owner can delete their post.
+    """
+    from .models import Post
+    
+    try:
+        post = Post.objects.get(pk=post_id)
+        
+        # Check if user is the post owner
+        if post.user != request.user:
+            messages.error(request, 'You can only delete your own posts.')
+            return redirect('social_feed')
+        
+        post.delete()
+        messages.success(request, 'Post deleted successfully!')
+        return redirect('social_feed')
+        
+    except Post.DoesNotExist:
+        messages.error(request, 'Post not found.')
+        return redirect('social_feed')
+
+
+@login_required
+def my_posts(request):
+    """
+    View for displaying user's own posts.
+    """
+    from .models import Post
+    
+    posts = Post.objects.filter(user=request.user).prefetch_related('likes')
+    
+    # Paginate
+    paginator = Paginator(posts, 10)
+    page_number = request.GET.get('page', 1)
+    posts_page = paginator.get_page(page_number)
+    
+    context = {
+        'posts': posts_page,
+        'is_my_posts': True,
+    }
+    
+    return render(request, 'users/my_posts.html', context)

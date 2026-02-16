@@ -46,8 +46,11 @@
                     <a href="{% url 'home' %}" class="text-gray-700 hover:text-primary transition duration-200 font-medium">
                         <i class="fas fa-home mr-1"></i> Home
                     </a>
-                    <a href="{% url 'feeds' %}" class="text-gray-700 hover:text-primary transition duration-200 font-medium">
-                        <i class="fas fa-rss mr-1"></i> Feeds
+                    <a href="{% url 'community_hub' %}" class="text-gray-700 hover:text-primary transition duration-200 font-medium" title="RSS aggregated news from club websites">
+                        <i class="fas fa-rss mr-1"></i> Community Hub
+                    </a>
+                    <a href="{% url 'feeds' %}" class="text-gray-700 hover:text-primary transition duration-200 font-medium" title="Posts from clubs, players, managers, and scouts">
+                        <i class="fas fa-comments mr-1"></i> User Feeds
                     </a>
                     <a href="{% url 'search_players' %}" class="text-gray-700 hover:text-primary transition duration-200 font-medium">
                         <i class="fas fa-users mr-1"></i> Find Players
@@ -106,8 +109,13 @@
                 <a href="{% url 'home' %}" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100 hover:text-primary font-medium">
                     <i class="fas fa-home mr-2"></i> Home
                 </a>
+                <a href="{% url 'community_hub' %}" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100 hover:text-primary font-medium">
+                    <i class="fas fa-rss mr-2"></i> Community Hub
+                    <span class="text-xs text-gray-500 block ml-8">RSS Feeds</span>
+                </a>
                 <a href="{% url 'feeds' %}" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100 hover:text-primary font-medium">
-                    <i class="fas fa-rss mr-2"></i> Feeds
+                    <i class="fas fa-comments mr-2"></i> User Feeds
+                    <span class="text-xs text-gray-500 block ml-8">Posts from All Users</span>
                 </a>
                 <a href="{% url 'search_players' %}" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100 hover:text-primary font-medium">
                     <i class="fas fa-users mr-2"></i> Find Players

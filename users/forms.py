@@ -3,7 +3,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
 from .models import (
     User, PlayerProfile, ClubProfile, ScoutProfile, 
-    ManagerProfile, QualificationVerification, Opportunity
+    ManagerProfile, QualificationVerification, Opportunity, Post
 )
 
 def validate_video_file_size(file):
@@ -215,3 +215,126 @@ class OpportunityForm(forms.ModelForm):
         }
 
 
+class PostForm(forms.ModelForm):
+    """
+    Form for creating social media-style posts.
+    Used by Players, Managers, and Scouts to share achievements, highlights, and updates.
+    """
+    video = forms.FileField(
+        required=False,
+        validators=[validate_video_file_size, validate_video_file_extension],
+        help_text='Upload a video (MP4, AVI, MOV, etc.). Maximum file size: 50MB.',
+        widget=forms.FileInput(attrs={'accept': 'video/*', 'class': 'hidden'})
+    )
+    
+    class Meta:
+        model = Post
+        fields = [
+            'post_type',
+            'caption',
+            'image',
+            'video',
+            'youtube_url',
+            # Achievement fields
+            'goals',
+            'assists',
+            'clean_sheets',
+            'minutes_played',
+            'match_rating',
+            # Match details
+            'match_opponent',
+            'match_result',
+            'match_date',
+            'competition',
+            # Award/Milestone
+            'award_title',
+            'award_description',
+        ]
+        widgets = {
+            'caption': forms.Textarea(attrs={
+                'rows': 4,
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent',
+                'placeholder': 'Share your football story... achievements, highlights, match reports, or updates!'
+            }),
+            'post_type': forms.Select(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent'
+            }),
+            'image': forms.FileInput(attrs={
+                'accept': 'image/*',
+                'class': 'hidden'
+            }),
+            'youtube_url': forms.URLInput(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent',
+                'placeholder': 'YouTube video URL (optional)'
+            }),
+            'goals': forms.NumberInput(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent',
+                'min': '0',
+                'placeholder': '0'
+            }),
+            'assists': forms.NumberInput(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent',
+                'min': '0',
+                'placeholder': '0'
+            }),
+            'clean_sheets': forms.NumberInput(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent',
+                'min': '0',
+                'placeholder': '0'
+            }),
+            'minutes_played': forms.NumberInput(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent',
+                'min': '0',
+                'placeholder': 'e.g., 90'
+            }),
+            'match_rating': forms.NumberInput(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent',
+                'step': '0.1',
+                'min': '0',
+                'max': '10',
+                'placeholder': 'e.g., 8.5'
+            }),
+            'match_opponent': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent',
+                'placeholder': 'e.g., Manchester United'
+            }),
+            'match_result': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent',
+                'placeholder': 'e.g., Won 3-1'
+            }),
+            'match_date': forms.DateInput(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent',
+                'type': 'date'
+            }),
+            'competition': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent',
+                'placeholder': 'e.g., FA Cup, Premier League'
+            }),
+            'award_title': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent',
+                'placeholder': 'e.g., Player of the Month'
+            }),
+            'award_description': forms.Textarea(attrs={
+                'rows': 3,
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent',
+                'placeholder': 'Describe your achievement...'
+            }),
+        }
+        labels = {
+            'post_type': 'Post Type',
+            'caption': 'Caption',
+            'image': 'Upload Image',
+            'video': 'Upload Video',
+            'youtube_url': 'YouTube Video URL',
+            'goals': 'Goals',
+            'assists': 'Assists',
+            'clean_sheets': 'Clean Sheets',
+            'minutes_played': 'Minutes Played',
+            'match_rating': 'Match Rating (out of 10)',
+            'match_opponent': 'Opponent',
+            'match_result': 'Match Result',
+            'match_date': 'Match Date',
+            'competition': 'Competition',
+            'award_title': 'Award/Milestone Title',
+            'award_description': 'Description',
+        }
