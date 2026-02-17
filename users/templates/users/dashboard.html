@@ -357,6 +357,61 @@
                 {% endif %}
             </div>
 
+            <!-- Social Posts Section for Scouts -->
+            <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl shadow-xl p-8 mb-8 mt-8 border-2 border-purple-200">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                            <i class="fas fa-binoculars text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-900">Share Your Scouting Reports</h2>
+                            <p class="text-gray-600">Post player assessments, talent discoveries, and insights</p>
+                        </div>
+                    </div>
+                    <div class="flex space-x-3">
+                        <a href="{% url 'my_posts' %}" 
+                           class="px-4 py-2 bg-white border-2 border-purple-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-all font-semibold shadow-md">
+                            <i class="fas fa-list mr-2"></i>My Posts
+                        </a>
+                        <a href="{% url 'create_post' %}" 
+                           class="px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg font-bold shadow-lg transform hover:scale-105 transition-all">
+                            <i class="fas fa-plus-circle mr-2"></i>Create Post
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-white rounded-lg p-4 shadow-md text-center border-2 border-transparent hover:border-purple-300 transition-all cursor-pointer"
+                         onclick="window.location.href='{% url 'create_post' %}'">
+                        <i class="fas fa-star text-purple-500 text-3xl mb-2"></i>
+                        <p class="text-sm font-semibold text-gray-700">Talent Spotting</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 shadow-md text-center border-2 border-transparent hover:border-pink-300 transition-all cursor-pointer"
+                         onclick="window.location.href='{% url 'create_post' %}'">
+                        <i class="fas fa-file-alt text-pink-500 text-3xl mb-2"></i>
+                        <p class="text-sm font-semibold text-gray-700">Scouting Report</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 shadow-md text-center border-2 border-transparent hover:border-purple-300 transition-all cursor-pointer"
+                         onclick="window.location.href='{% url 'create_post' %}'">
+                        <i class="fas fa-user-circle text-indigo-500 text-3xl mb-2"></i>
+                        <p class="text-sm font-semibold text-gray-700">Player Analysis</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 shadow-md text-center border-2 border-transparent hover:border-pink-300 transition-all cursor-pointer"
+                         onclick="window.location.href='{% url 'feeds' %}'">
+                        <i class="fas fa-stream text-blue-500 text-3xl mb-2"></i>
+                        <p class="text-sm font-semibold text-gray-700">View Feed</p>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg p-4 border-2 border-dashed border-purple-300">
+                    <p class="text-center text-gray-600">
+                        <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                        <strong>Tip:</strong> Share your player assessments, strengths, development areas, and potential ratings to help clubs discover new talent!
+                    </p>
+                </div>
+            </div>
+
         {% elif user.role == 'MANAGER' %}
             <!-- Manager Dashboard -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
@@ -560,6 +615,61 @@
                 {% else %}
                     <p class="text-gray-500 italic">No career history added yet. Update your profile to add your previous roles.</p>
                 {% endif %}
+            </div>
+            
+            <!-- Social Posts Section for Managers -->
+            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl shadow-xl p-8 mb-8 border-2 border-blue-200">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full flex items-center justify-center">
+                            <i class="fas fa-chalkboard-teacher text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-900">Share Your Coaching Insights</h2>
+                            <p class="text-gray-600">Post tactical analysis, team updates, and coaching philosophy</p>
+                        </div>
+                    </div>
+                    <div class="flex space-x-3">
+                        <a href="{% url 'my_posts' %}" 
+                           class="px-4 py-2 bg-white border-2 border-blue-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-all font-semibold shadow-md">
+                            <i class="fas fa-list mr-2"></i>My Posts
+                        </a>
+                        <a href="{% url 'create_post' %}" 
+                           class="px-6 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white rounded-lg font-bold shadow-lg transform hover:scale-105 transition-all">
+                            <i class="fas fa-plus-circle mr-2"></i>Create Post
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-white rounded-lg p-4 shadow-md text-center border-2 border-transparent hover:border-blue-300 transition-all cursor-pointer"
+                         onclick="window.location.href='{% url 'create_post' %}'">
+                        <i class="fas fa-chess text-blue-500 text-3xl mb-2"></i>
+                        <p class="text-sm font-semibold text-gray-700">Tactical Analysis</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 shadow-md text-center border-2 border-transparent hover:border-indigo-300 transition-all cursor-pointer"
+                         onclick="window.location.href='{% url 'create_post' %}'">
+                        <i class="fas fa-clipboard-list text-indigo-500 text-3xl mb-2"></i>
+                        <p class="text-sm font-semibold text-gray-700">Coaching Insights</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 shadow-md text-center border-2 border-transparent hover:border-blue-300 transition-all cursor-pointer"
+                         onclick="window.location.href='{% url 'create_post' %}'">
+                        <i class="fas fa-users text-cyan-500 text-3xl mb-2"></i>
+                        <p class="text-sm font-semibold text-gray-700">Team News</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 shadow-md text-center border-2 border-transparent hover:border-indigo-300 transition-all cursor-pointer"
+                         onclick="window.location.href='{% url 'feeds' %}'">
+                        <i class="fas fa-stream text-blue-500 text-3xl mb-2"></i>
+                        <p class="text-sm font-semibold text-gray-700">View Feed</p>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg p-4 border-2 border-dashed border-blue-300">
+                    <p class="text-center text-gray-600">
+                        <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                        <strong>Tip:</strong> Share your tactical insights, formations, team performance updates, and coaching methodology to showcase your expertise!
+                    </p>
+                </div>
             </div>
             
         {% endif %}

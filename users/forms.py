@@ -235,7 +235,7 @@ class PostForm(forms.ModelForm):
             'image',
             'video',
             'youtube_url',
-            # Achievement fields
+            # Achievement fields (for players)
             'goals',
             'assists',
             'clean_sheets',
@@ -249,6 +249,20 @@ class PostForm(forms.ModelForm):
             # Award/Milestone
             'award_title',
             'award_description',
+            # Manager-specific fields
+            'tactical_analysis',
+            'team_formation',
+            'team_performance',
+            'coaching_methodology',
+            # Scout-specific fields
+            'player_scouted',
+            'player_position',
+            'player_age',
+            'player_club',
+            'scouting_report',
+            'strengths',
+            'areas_for_improvement',
+            'potential_rating',
         ]
         widgets = {
             'caption': forms.Textarea(attrs={
@@ -319,6 +333,67 @@ class PostForm(forms.ModelForm):
                 'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent',
                 'placeholder': 'Describe your achievement...'
             }),
+            # Manager-specific widgets
+            'tactical_analysis': forms.Textarea(attrs={
+                'rows': 4,
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'placeholder': 'Share your tactical insights, game analysis, or coaching observations...'
+            }),
+            'team_formation': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'placeholder': 'e.g., 4-3-3, 3-5-2, 4-2-3-1'
+            }),
+            'team_performance': forms.Textarea(attrs={
+                'rows': 3,
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'placeholder': 'Describe team performance, key moments, or player contributions...'
+            }),
+            'coaching_methodology': forms.Textarea(attrs={
+                'rows': 3,
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'placeholder': 'Share your coaching methods, training philosophy, or development approach...'
+            }),
+            # Scout-specific widgets
+            'player_scouted': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent',
+                'placeholder': 'Player name'
+            }),
+            'player_position': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent',
+                'placeholder': 'e.g., ST, CM, CB'
+            }),
+            'player_age': forms.NumberInput(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent',
+                'min': '10',
+                'max': '50',
+                'placeholder': 'e.g., 18'
+            }),
+            'player_club': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent',
+                'placeholder': 'Current club'
+            }),
+            'scouting_report': forms.Textarea(attrs={
+                'rows': 4,
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent',
+                'placeholder': 'Detailed scouting report and overall assessment...'
+            }),
+            'strengths': forms.Textarea(attrs={
+                'rows': 2,
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent',
+                'placeholder': "Player's key strengths and standout qualities..."
+            }),
+            'areas_for_improvement': forms.Textarea(attrs={
+                'rows': 2,
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent',
+                'placeholder': 'Areas where the player can develop further...'
+            }),
+            'potential_rating': forms.NumberInput(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent',
+                'step': '0.1',
+                'min': '0',
+                'max': '10',
+                'placeholder': 'e.g., 7.5'
+            }),
         }
         labels = {
             'post_type': 'Post Type',
@@ -337,4 +412,18 @@ class PostForm(forms.ModelForm):
             'competition': 'Competition',
             'award_title': 'Award/Milestone Title',
             'award_description': 'Description',
+            # Manager labels
+            'tactical_analysis': 'Tactical Analysis',
+            'team_formation': 'Formation Used',
+            'team_performance': 'Team Performance',
+            'coaching_methodology': 'Coaching Methodology',
+            # Scout labels
+            'player_scouted': 'Player Name',
+            'player_position': 'Position',
+            'player_age': 'Age',
+            'player_club': 'Current Club',
+            'scouting_report': 'Scouting Report',
+            'strengths': 'Key Strengths',
+            'areas_for_improvement': 'Areas for Improvement',
+            'potential_rating': 'Potential Rating (out of 10)',
         }

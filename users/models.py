@@ -601,6 +601,13 @@ class Post(models.Model):
         ('MILESTONE', 'Career Milestone'),
         ('TRANSFER', 'Transfer News'),
         ('AWARD', 'Award/Recognition'),
+        # Manager-specific
+        ('TACTICAL', 'Tactical Analysis'),
+        ('COACHING', 'Coaching Insights'),
+        ('TEAM_NEWS', 'Team News'),
+        # Scout-specific
+        ('PLAYER_REPORT', 'Player Scouting Report'),
+        ('TALENT_SPOT', 'Talent Spotting'),
     ]
     
     # Core Fields
@@ -696,6 +703,72 @@ class Post(models.Model):
         max_length=500,
         blank=True,
         help_text="Award or milestone description"
+    )
+    
+    # Manager-Specific Fields
+    tactical_analysis = models.TextField(
+        max_length=1000,
+        blank=True,
+        help_text="Tactical analysis or coaching insights (for managers)"
+    )
+    team_formation = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="Formation used (e.g., 4-3-3, 3-5-2)"
+    )
+    team_performance = models.TextField(
+        max_length=500,
+        blank=True,
+        help_text="Team performance summary"
+    )
+    coaching_methodology = models.TextField(
+        max_length=500,
+        blank=True,
+        help_text="Coaching methodology or training approach"
+    )
+    
+    # Scout-Specific Fields
+    player_scouted = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text="Name of player scouted"
+    )
+    player_position = models.CharField(
+        max_length=20,
+        blank=True,
+        help_text="Position of scouted player"
+    )
+    player_age = models.IntegerField(
+        null=True,
+        blank=True,
+        help_text="Age of scouted player"
+    )
+    player_club = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text="Current club of scouted player"
+    )
+    scouting_report = models.TextField(
+        max_length=1000,
+        blank=True,
+        help_text="Detailed scouting report or assessment"
+    )
+    strengths = models.TextField(
+        max_length=500,
+        blank=True,
+        help_text="Player's key strengths"
+    )
+    areas_for_improvement = models.TextField(
+        max_length=500,
+        blank=True,
+        help_text="Areas where player can improve"
+    )
+    potential_rating = models.DecimalField(
+        max_digits=3,
+        decimal_places=1,
+        null=True,
+        blank=True,
+        help_text="Potential rating (out of 10)"
     )
     
     # Engagement

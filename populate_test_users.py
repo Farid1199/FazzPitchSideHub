@@ -12,7 +12,7 @@ django.setup()
 
 from django.contrib.auth import get_user_model
 from django.db import transaction
-from users.models import PlayerProfile, ManagerProfile
+from users.models import PlayerProfile, ManagerProfile, ScoutProfile
 
 User = get_user_model()
 
@@ -594,8 +594,52 @@ TEST_MANAGERS = [
     },
 ]
 
+# Test scouts data
+TEST_SCOUTS = [
+    {
+        'username': 'scout_david',
+        'email': 'david.scout@test.com',
+        'password': 'TestPass123!',
+        'role': 'SCOUT',
+        'profile': {
+            'organization': 'Premier League Scouting Network',
+            'region': 'London & South East',
+        }
+    },
+    {
+        'username': 'scout_maria',
+        'email': 'maria.spotter@test.com',
+        'password': 'TestPass123!',
+        'role': 'SCOUT',
+        'profile': {
+            'organization': 'Independent Scout',
+            'region': 'North West England',
+        }
+    },
+    {
+        'username': 'scout_john',
+        'email': 'john.talent@test.com',
+        'password': 'TestPass123!',
+        'role': 'SCOUT',
+        'profile': {
+            'organization': 'Championship Talent Agency',
+            'region': 'Midlands',
+        }
+    },
+    {
+        'username': 'scout_sarah',
+        'email': 'sarah.observer@test.com',
+        'password': 'TestPass123!',
+        'role': 'SCOUT',
+        'profile': {
+            'organization': 'United FC',
+            'region': 'National Coverage',
+        }
+    },
+]
+
 def create_test_users():
-    """Create all test players and managers"""
+    """Create all test players, managers, and scouts"""
     
     created_users = []
     
@@ -686,6 +730,46 @@ def create_test_users():
     
     print()
     print("=" * 80)
+    print("📋 CREATING SCOUTS")
+    print("-" * 80)
+    for scout_data in TEST_SCOUTS:
+        try:
+            # Check if user already exists
+            if User.objects.filter(username=scout_data['username']).exists():
+                print(f"⚠️  User '{scout_data['username']}' already exists. Skipping...")
+                continue
+            
+            # Use transaction to ensure both user and profile are created together
+            with transaction.atomic():
+                # Create user (this triggers signal that creates empty profile)
+                user = User.objects.create_user(
+                    username=scout_data['username'],
+                    email=scout_data['email'],
+                    password=scout_data['password'],
+                    role=scout_data['role']
+                )
+                
+                # Update the scout profile created by signal with our data
+                profile = user.scout_profile
+                for key, value in scout_data['profile'].items():
+                    setattr(profile, key, value)
+                profile.save()
+            
+            created_users.append({
+                'type': 'SCOUT',
+                'username': scout_data['username'],
+                'email': scout_data['email'],
+                'password': scout_data['password'],
+                'organization': scout_data['profile']['organization']
+            })
+            
+            print(f"✅ Created scout: {scout_data['username']} ({scout_data['profile']['organization']})")
+            
+        except Exception as e:
+            print(f"❌ Error creating {scout_data['username']}: {str(e)}")
+    
+    print()
+    print("=" * 80)
     print("✨ CREATION COMPLETE!")
     print("=" * 80)
     print()
@@ -709,6 +793,7 @@ def print_login_credentials(created_users):
     # Group by position
     players_by_position = {}
     managers = []
+    scouts = []
     
     for user in created_users:
         if user['type'] == 'PLAYER':
@@ -716,8 +801,10 @@ def print_login_credentials(created_users):
             if position not in players_by_position:
                 players_by_position[position] = []
             players_by_position[position].append(user)
-        else:
+        elif user['type'] == 'MANAGER':
             managers.append(user)
+        elif user['type'] == 'SCOUT':
+            scouts.append(user)
     
     # Print players by position
     print("👥 PLAYERS BY POSITION")
@@ -762,12 +849,25 @@ def print_login_credentials(created_users):
         print(f"  Qualification: {manager['qualification']}")
         print()
     
+    # Print scouts
+    print("=" * 80)
+    print("🔍 SCOUTS")
+    print("-" * 80)
+    
+    for scout in scouts:
+        print(f"\n• Username: {scout['username']}")
+        print(f"  Email: {scout['email']}")
+        print(f"  Password: {scout['password']}")
+        print(f"  Organization: {scout['organization']}")
+        print()
+    
     print("=" * 80)
     print()
     print("📝 QUICK REFERENCE - ALL PASSWORDS: TestPass123!")
     print()
     print("Player usernames follow pattern: <position>_<name>")
     print("Manager usernames follow pattern: manager_<name>")
+    print("Scout usernames follow pattern: scout_<name>")
     print()
     print("=" * 80)
 

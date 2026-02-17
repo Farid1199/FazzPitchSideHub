@@ -756,6 +756,7 @@ def community_hub(request):
 
 
 @login_required
+@login_required
 def create_post(request):
     """
     View for creating a new post.
