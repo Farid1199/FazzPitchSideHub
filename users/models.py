@@ -272,6 +272,9 @@ class ClubProfile(models.Model):
         super().save(*args, **kwargs)
 
 
+
+
+
 class ScoutProfile(models.Model):
     """
     Profile model for Scouts.
@@ -577,7 +580,18 @@ class Opportunity(NewsItem):
         default=True,
         help_text="Whether the opportunity is still open for applications."
     )
-    
+    is_verified = models.BooleanField(
+        default=False, 
+        help_text="Verified by an official club manager"
+    )
+    verified_by = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='verified_opportunities',
+        help_text="User who verified this opportunity."
+    )
     class Meta:
         ordering = ['-published_date']
         verbose_name_plural = "Opportunities"
@@ -818,3 +832,66 @@ class Post(models.Model):
                 'region': self.user.scout_profile.region or 'N/A'
             }
         return {}
+
+
+class TrialView(models.Model):
+    """
+    Tracks when a player views a trial opportunity detail page.
+    Used for behavioral boosting in the recommendation engine:
+    - Viewing a trial signals interest (+2 score boost)
+    - Data collected here supports future deep learning models
+    """
+    player = models.ForeignKey(
+        PlayerProfile,
+        on_delete=models.CASCADE,
+        related_name='trial_views'
+    )
+    opportunity = models.ForeignKey(
+        'Opportunity',
+        on_delete=models.CASCADE,
+        related_name='player_views'
+    )
+    viewed_at = models.DateTimeField(auto_now=True)
+    view_count = models.PositiveIntegerField(
+        default=1,
+        help_text="Number of times this player viewed this trial."
+    )
+
+    class Meta:
+        unique_together = ('player', 'opportunity')
+        ordering = ['-viewed_at']
+        verbose_name = "Trial View"
+        verbose_name_plural = "Trial Views"
+
+    def __str__(self):
+        return f"{self.player.user.username} viewed {self.opportunity.title}"
+
+
+class TrialApplication(models.Model):
+    """
+    Tracks when a player expresses interest in a trial opportunity.
+    Used in the recommendation engine for:
+    - Collaborative filtering: find trials that similar players applied to (+6 boost)
+    - Suppression: don't re-recommend trials the player already applied to (-100)
+    - Data collected here supports future deep learning models
+    """
+    player = models.ForeignKey(
+        PlayerProfile,
+        on_delete=models.CASCADE,
+        related_name='trial_applications'
+    )
+    opportunity = models.ForeignKey(
+        'Opportunity',
+        on_delete=models.CASCADE,
+        related_name='player_applications'
+    )
+    applied_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('player', 'opportunity')
+        ordering = ['-applied_at']
+        verbose_name = "Trial Application"
+        verbose_name_plural = "Trial Applications"
+
+    def __str__(self):
+        return f"{self.player.user.username} interested in {self.opportunity.title}"

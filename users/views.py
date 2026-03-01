@@ -249,6 +249,16 @@ def dashboard_view(request):
         context['pending_verifications'] = pending_verifications
         # Get all verification requests
         context['verification_requests'] = manager_profile.verification_requests.all()[:5]
+        
+        # Claim & Verify Feature: Fetch unverified opportunities belonging to this club
+        if manager_profile.club:
+            from .models import Opportunity
+            unverified_opportunities = Opportunity.objects.filter(
+                club=manager_profile.club, 
+                is_verified=False,
+                is_open=True
+            ).order_by('-published_date')
+            context['unverified_opportunities'] = unverified_opportunities
     
     return render(request, 'users/dashboard.html', context)
 
@@ -645,15 +655,127 @@ def post_opportunity(request):
 def opportunity_detail(request, pk):
     """
     Display full details of a trial opportunity.
+    For logged-in players, also:
+    - Records a TrialView (behavioral tracking for recommendations)
+    - Passes has_applied flag (for Express Interest button state)
     """
     opportunity = get_object_or_404(Opportunity, pk=pk)
     
+    has_applied = False
+    
+    # Track view and check application status for logged-in players
+    if request.user.is_authenticated and request.user.role == 'PLAYER' and hasattr(request.user, 'player_profile'):
+        from .models import TrialView, TrialApplication
+        player_profile = request.user.player_profile
+        
+        # Record or update the view (behavioral tracking)
+        trial_view, created = TrialView.objects.get_or_create(
+            player=player_profile,
+            opportunity=opportunity,
+        )
+        if not created:
+            # Increment view count on repeat visits
+            trial_view.view_count += 1
+            trial_view.save()
+        
+        # Check if player has already expressed interest
+        has_applied = TrialApplication.objects.filter(
+            player=player_profile,
+            opportunity=opportunity
+        ).exists()
+    
     context = {
         'opportunity': opportunity,
+        'has_applied': has_applied,
     }
     
     return render(request, 'users/opportunity_detail.html', context)
 
+
+@login_required
+def express_interest(request, pk):
+    """
+    Allow a player to express interest in a trial opportunity.
+    POST-only view. Creates a TrialApplication record.
+    
+    This data feeds two layers of the recommendation engine:
+    - Collaborative filtering: other similar players' interests boost trials
+    - Suppression: applied trials are removed from recommendations (-100 score)
+    """
+    if request.method != 'POST':
+        return redirect('opportunity_detail', pk=pk)
+    
+    if request.user.role != 'PLAYER' or not hasattr(request.user, 'player_profile'):
+        messages.error(request, "Only players can express interest in trials.")
+        return redirect('opportunity_detail', pk=pk)
+    
+    from .models import TrialApplication
+    opportunity = get_object_or_404(Opportunity, pk=pk)
+    
+    # Create application (ignore if already exists)
+    _, created = TrialApplication.objects.get_or_create(
+        player=request.user.player_profile,
+        opportunity=opportunity
+    )
+    
+    if created:
+        messages.success(request, "Interest registered! The club has been notified.")
+    else:
+        messages.info(request, "You've already expressed interest in this trial.")
+    
+    return redirect('opportunity_detail', pk=pk)
+
+
+@login_required
+def withdraw_interest(request, pk):
+    """
+    Allow a player to withdraw their interest in a trial opportunity.
+    POST-only view. Deletes the TrialApplication record.
+    """
+    if request.method != 'POST':
+        return redirect('opportunity_detail', pk=pk)
+    
+    if request.user.role != 'PLAYER' or not hasattr(request.user, 'player_profile'):
+        messages.error(request, "Access denied.")
+        return redirect('opportunity_detail', pk=pk)
+    
+    from .models import TrialApplication
+    opportunity = get_object_or_404(Opportunity, pk=pk)
+    
+    TrialApplication.objects.filter(
+        player=request.user.player_profile,
+        opportunity=opportunity
+    ).delete()
+    
+    messages.success(request, "Interest withdrawn.")
+    return redirect('opportunity_detail', pk=pk)
+
+@login_required
+def verify_opportunity(request, pk):
+    """
+    Allow a Club Manager to formally verify an automatically scraped trial.
+    This boosts trust and adds a Verified badge to the trial.
+    """
+    if request.method != 'POST':
+        return redirect('opportunity_detail', pk=pk)
+        
+    if request.user.role != 'MANAGER' or not hasattr(request.user, 'manager_profile'):
+        messages.error(request, "Only verified Club Managers can verify trials.")
+        return redirect('opportunity_detail', pk=pk)
+        
+    opportunity = get_object_or_404(Opportunity, pk=pk)
+    
+    # Security: Manager can only verify trials belonging to their own club
+    if opportunity.club != request.user.manager_profile.club:
+        messages.error(request, "You can only verify opportunities belonging to your club.")
+        return redirect('opportunity_detail', pk=pk)
+        
+    opportunity.is_verified = True
+    opportunity.verified_by = request.user
+    opportunity.save()
+    
+    messages.success(request, "Trial successfully verified! The Verified badge is now visible to all players.")
+    return redirect('opportunity_detail', pk=pk)
 
 def news_detail(request, pk):
     """

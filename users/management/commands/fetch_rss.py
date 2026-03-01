@@ -54,11 +54,11 @@ class Command(BaseCommand):
         
         # Display header
         self.stdout.write('=' * 70)
-        self.stdout.write(self.style.SUCCESS('  🤖 INTELLIGENT RSS FEED SCRAPER'))
+        self.stdout.write(self.style.SUCCESS('    INTELLIGENT RSS FEED SCRAPER'))
         self.stdout.write('=' * 70)
-        self.stdout.write('  📡 Fetching feeds from club sources...')
-        self.stdout.write('  🧠 Applying intelligence logic to categorize content')
-        self.stdout.write('  🎯 Detecting: Trials, Recruitment, Positions')
+        self.stdout.write('    Fetching feeds from club sources...')
+        self.stdout.write('    Applying intelligence logic to categorize content')
+        self.stdout.write('    Detecting: Trials, Recruitment, Positions')
         self.stdout.write('=' * 70 + '\n')
         
         # Get club sources with RSS feeds
@@ -98,10 +98,17 @@ class Command(BaseCommand):
                 opportunities_added = 0
                 
                 for entry in feed.entries:
-                    # Extract entry data
-                    title = entry.get('title', 'No Title')
+                    import html
+                    from django.utils.html import strip_tags
+
+                    # Extract entry data, strip tags and unescape HTML entities out of the text
+                    raw_title = entry.get('title', 'No Title')
+                    title = html.unescape(strip_tags(raw_title))
+                    
                     link = entry.get('link', '')
-                    description = entry.get('description', '') or entry.get('summary', '')
+                    
+                    raw_description = entry.get('description', '') or entry.get('summary', '')
+                    description = html.unescape(strip_tags(raw_description))
                     
                     # Parse published date
                     published_date = self._parse_date(entry)
@@ -112,13 +119,34 @@ class Command(BaseCommand):
                     
                     # Apply exclusion filter (Data Noise Reduction)
                     if self._should_exclude(title, description):
-                        self.stdout.write(f'  ⊗ Filtered (Youth/Women): {title[:50]}...')
+                        self.stdout.write(f'  [FILTERED] (Youth/Women): {title[:50]}...')
                         continue
                     
                     # Check if this is a trial/recruitment opportunity
                     is_opportunity = self._is_opportunity(title, description)
                     
+                    from thefuzz import fuzz
+                    
                     if is_opportunity:
+                        # Fuzzy Deduplication (Levenshtein Distance)
+                        # Check if a very similar opportunity already exists for this source
+                        is_duplicate = False
+                        recent_opps = Opportunity.objects.filter(
+                            source=source, 
+                            is_open=True
+                        ).order_by('-published_date')[:50]
+                        
+                        for existing_opp in recent_opps:
+                            # token_set_ratio is great for varied wording but same keywords
+                            similarity = fuzz.token_set_ratio(title.lower(), existing_opp.title.lower())
+                            if similarity > 90:
+                                self.stdout.write(self.style.WARNING(f'  [DUPLICATE] trial ({similarity}% match): {title[:40]}...'))
+                                is_duplicate = True
+                                break
+                                
+                        if is_duplicate:
+                            continue
+                            
                         # Save as Opportunity
                         opportunity, created = Opportunity.objects.get_or_create(
                             link=link,
@@ -135,9 +163,30 @@ class Command(BaseCommand):
                         if created:
                             opportunities_added += 1
                             self.stdout.write(
-                                self.style.SUCCESS(f'  ✓ Added Opportunity: {title[:60]}...')
+                                self.style.SUCCESS(f'  [ADDED] Opportunity: {title[:60]}...')
                             )
                     else:
+                        # Fuzzy Deduplication for General News
+                        is_duplicate = False
+                        
+                        # Only check against generic NewsItems, not Opportunities
+                        opportunity_ids = Opportunity.objects.filter(source=source).values_list('newsitem_ptr_id', flat=True)
+                        recent_news = NewsItem.objects.filter(
+                            source=source
+                        ).exclude(
+                            id__in=opportunity_ids
+                        ).order_by('-published_date')[:50]
+                        
+                        for existing_news in recent_news:
+                            similarity = fuzz.token_set_ratio(title.lower(), existing_news.title.lower())
+                            if similarity > 90:
+                                self.stdout.write(self.style.WARNING(f'  [DUPLICATE] news ({similarity}% match): {title[:40]}...'))
+                                is_duplicate = True
+                                break
+                                
+                        if is_duplicate:
+                            continue
+                            
                         # Save as NewsItem
                         news_item, created = NewsItem.objects.get_or_create(
                             link=link,
@@ -151,7 +200,7 @@ class Command(BaseCommand):
                         
                         if created:
                             items_added += 1
-                            self.stdout.write(f'  ✓ Added NewsItem: {title[:60]}...')
+                            self.stdout.write(f'  [ADDED] NewsItem: {title[:60]}...')
                 
                 total_items += items_added
                 total_opportunities += opportunities_added
@@ -171,7 +220,7 @@ class Command(BaseCommand):
         self.stdout.write('\n' + '='*70)
         self.stdout.write(
             self.style.SUCCESS(
-                f'✅ RSS Feed Fetch Complete!\n'
+                f'   RSS Feed Fetch Complete!\n'
                 f'   Total News Items: {total_items}\n'
                 f'   Total Opportunities (Trials/Recruitment): {total_opportunities}\n'
                 f'   Club Sources Processed: {sources.count()}'
@@ -179,7 +228,7 @@ class Command(BaseCommand):
         )
         self.stdout.write(
             self.style.WARNING(
-                '\n💡 Intelligence Logic Applied:\n'
+                '\n   Intelligence Logic Applied:\n'
                 '   - Opportunities detected using recruitment keywords\n'
                 '   - Position extraction from content\n'
                 '   - Duplicate prevention active'
@@ -253,42 +302,108 @@ class Command(BaseCommand):
     def _extract_position(self, title, description):
         """
         Extract target position from title or description.
-        Enhanced to detect all major football positions.
-        Only extracts player positions - ignores managerial/coaching roles.
+        First attempts to use Google Generative AI (Gemini) for highly accurate extraction.
+        If the API fails or is not configured, falls back to Regex matching.
         """
-        combined_text = (title + ' ' + description).lower()
+        import re
+        import json
+        from django.utils.html import strip_tags
+        from django.conf import settings
+        
+        clean_title = strip_tags(title)
+        clean_desc = strip_tags(description)
+        combined_text = (clean_title + ' ' + clean_desc).strip()
+        
+        # AI-Powered LLM Parsing (Gemini)
+        if hasattr(settings, 'GEMINI_API_KEY') and settings.GEMINI_API_KEY:
+            try:
+                import google.generativeai as genai
+                genai.configure(api_key=settings.GEMINI_API_KEY)
+                # Using gemini-1.5-flash which is extremely fast and cheap
+                model = genai.GenerativeModel('gemini-1.5-flash')
+                
+                prompt = f"""
+                You are a smart football/soccer data extractor. Read the following text from a club's recruitment post.
+                Determine the specific player position(s) they are recruiting for.
+                If this is a staff, managerial, medical, volunteer, or coaching role (NOT a playing role), return "is_staff_role": true.
+                If it is a player role, return standard position names (e.g., "Goalkeeper", "Striker", "Center Back").
+                Return ONLY a strict JSON object with no markdown formatting.
+                
+                Text to analyze:
+                {combined_text[:500]}
+                
+                Required JSON format:
+                {{
+                    "is_staff_role": <boolean>,
+                    "positions": ["<Position 1>", "<Position 2>"]
+                }}
+                """
+                
+                response = model.generate_content(prompt)
+                
+                # Strip potential markdown backticks from response
+                raw_json = response.text.strip().removeprefix('```json').removesuffix('```').strip()
+                result = json.loads(raw_json)
+                
+                if result.get("is_staff_role", False):
+                    self.stdout.write(self.style.WARNING("    [GEMINI] Detected non-player staff role. Discarding position."))
+                    return ''
+                
+                extracted_positions = result.get("positions", [])
+                if extracted_positions:
+                    valid_positions = [pos.title() for pos in extracted_positions if pos]
+                    if valid_positions:
+                        self.stdout.write(self.style.SUCCESS(f"    [GEMINI] Accurately extracted: {', '.join(valid_positions)}"))
+                        return ', '.join(valid_positions)
+                
+            except Exception as e:
+                self.stdout.write(self.style.ERROR(f"    [GEMINI ERROR] {str(e)}. Falling back to Regex..."))
+                
+        # Regex Fallback (If Gemini is disabled or fails)
+        combined_text_lower = combined_text.lower()
+        import re
+        from django.utils.html import strip_tags
+        
+        # Strip HTML tags before searching to avoid matching inside URLs/attributes
+        clean_title = strip_tags(title)
+        clean_desc = strip_tags(description)
+        combined_text = (clean_title + ' ' + clean_desc).lower()
         
         # Check if this is a staff/managerial role (not a player opportunity)
         staff_keywords = [
             'manager', 'coach', 'assistant manager', 'head coach',
             'physiotherapist', 'physio', 'kit man', 'groundsman',
             'volunteer', 'administrator', 'secretary', 'treasurer',
-            'committee', 'director', 'chairman', 'staff'
+            'committee', 'director', 'chairman', 'staff',
+            'therapist', 'therapy', 'medical', 'student vacancy'
         ]
         
-        if any(keyword in combined_text for keyword in staff_keywords):
-            # This is a staff role, not a player position
-            return ''
+        # Use regex word boundaries for staff keywords too
+        for keyword in staff_keywords:
+            if re.search(r'\b' + re.escape(keyword) + r'\b', combined_text_lower):
+                return ''
         
-        # Define position keywords with variations
+        # Define positions and their regex patterns (using \b for word boundaries)
         positions = {
-            'goalkeeper': ['goalkeeper', 'keeper', 'gk', 'goalie'],
-            'defender': ['defender', 'defence', 'center back', 'centre back', 'cb', 'full back', 'fb'],
-            'left back': ['left back', 'lb', 'left-back'],
-            'right back': ['right back', 'rb', 'right-back'],
-            'midfielder': ['midfielder', 'midfield', 'cm', 'central midfielder'],
-            'defensive midfielder': ['defensive midfielder', 'cdm', 'holding midfielder'],
-            'attacking midfielder': ['attacking midfielder', 'cam', 'playmaker'],
-            'winger': ['winger', 'wing', 'wide player', 'lw', 'rw'],
-            'striker': ['striker', 'forward', 'st', 'cf', 'center forward', 'centre forward'],
+            'goalkeeper': [r'\bgoalkeeper\b', r'\bkeeper\b', r'\bgk\b', r'\bgoalie\b'],
+            'defender': [r'\bdefender\b', r'\bdefence\b', r'\bcenter back\b', r'\bcentre back\b', r'\bcb\b', r'\bfull back\b', r'\bfb\b'],
+            'left back': [r'\bleft back\b', r'\blb\b', r'\bleft-back\b'],
+            'right back': [r'\bright back\b', r'\brb\b', r'\bright-back\b'],
+            'midfielder': [r'\bmidfielder\b', r'\bmidfield\b', r'\bcm\b', r'\bcentral midfielder\b'],
+            'defensive midfielder': [r'\bdefensive midfielder\b', r'\bcdm\b', r'\bholding midfielder\b'],
+            'attacking midfielder': [r'\battacking midfielder\b', r'\bcam\b', r'\bplaymaker\b'],
+            'winger': [r'\bwinger\b', r'\bwing\b', r'\bwide player\b', r'\blw\b', r'\brw\b'],
+            'striker': [r'\bstriker\b', r'\bforward\b', r'\bst\b', r'\bcf\b', r'\bcenter forward\b', r'\bcentre forward\b'],
         }
         
         found_positions = []
         
-        for position_name, variations in positions.items():
-            if any(variation in combined_text for variation in variations):
-                if position_name not in found_positions:
-                    found_positions.append(position_name)
+        for position_name, patterns in positions.items():
+            for pattern in patterns:
+                if re.search(pattern, combined_text_lower):
+                    if position_name not in found_positions:
+                        found_positions.append(position_name)
+                    break # Stop checking patterns for this position if we found a match
         
         # Return formatted positions
         return ', '.join([pos.title() for pos in found_positions]) if found_positions else ''

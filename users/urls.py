@@ -6,7 +6,8 @@ from .views import (
     role_selection_view, profile_creation_view, 
     dashboard_view, home_view, feeds_view, search_players, search_clubs,
     edit_profile, submit_qualification_verification, post_opportunity,
-    opportunity_detail, news_detail, player_profile, community_hub,
+    opportunity_detail, express_interest, withdraw_interest, verify_opportunity,
+    news_detail, player_profile, community_hub,
     create_post, social_feed, like_post, delete_post, my_posts
 )
 
@@ -31,6 +32,9 @@ urlpatterns = [
     path('submit-verification/', submit_qualification_verification, name='submit_verification'),
     path('post-opportunity/', post_opportunity, name='post_opportunity'),
     path('opportunity/<int:pk>/', opportunity_detail, name='opportunity_detail'),
+    path('opportunity/<int:pk>/express-interest/', express_interest, name='express_interest'),
+    path('opportunity/<int:pk>/withdraw-interest/', withdraw_interest, name='withdraw_interest'),
+    path('opportunity/<int:pk>/verify/', verify_opportunity, name='verify_opportunity'),
     path('news/<int:pk>/', news_detail, name='news_detail'),
     path('player/<str:username>/', player_profile, name='player_profile'),
     path('search-players/', search_players, name='search_players'),
