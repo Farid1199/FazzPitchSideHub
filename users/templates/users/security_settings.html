@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}Security Settings - FazzPitchSideHub{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-3xl mx-auto">
+        <div class="bg-white rounded-lg shadow-xl p-8">
+            <h1 class="text-2xl font-bold text-gray-900 mb-8">
+                <i class="fas fa-shield-alt mr-2 text-green-600"></i> Security & Privacy Settings
+            </h1>
+
+            <!-- Privacy Toggle -->
+            <form method="post" class="mb-8">
+                {% csrf_token %}
+                <div class="bg-gray-50 rounded-lg p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="font-semibold text-gray-900">Private Account</h3>
+                            <p class="text-sm text-gray-500 mt-1">
+                                When enabled, only approved followers can see your full profile. New followers must request approval.
+                            </p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" name="is_private" class="sr-only peer"
+                                {% if request.user.is_private %}checked{% endif %}>
+                            <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                        </label>
+                    </div>
+                    <button type="submit"
+                        class="mt-4 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm">
+                        Save Privacy Settings
+                    </button>
+                </div>
+            </form>
+
+            <!-- Change Password -->
+            <div class="bg-gray-50 rounded-lg p-6 mb-8">
+                <h3 class="font-semibold text-gray-900 mb-2">Change Password</h3>
+                <p class="text-sm text-gray-500 mb-4">Use the password reset flow to change your password securely.</p>
+                <a href="{% url 'password_reset' %}"
+                    class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm">
+                    <i class="fas fa-key mr-1"></i> Reset Password
+                </a>
+            </div>
+
+            <!-- Delete Account -->
+            <div class="bg-red-50 border border-red-200 rounded-lg p-6">
+                <h3 class="font-semibold text-red-800 mb-2">Danger Zone</h3>
+                <p class="text-sm text-red-600 mb-4">Permanently delete your account and all associated data. This cannot be undone.</p>
+                <a href="{% url 'delete_account' %}"
+                    class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm">
+                    <i class="fas fa-trash mr-1"></i> Delete Account
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

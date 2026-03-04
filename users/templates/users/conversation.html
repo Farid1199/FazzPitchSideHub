@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block title %}Chat with {{ other_user.username }} - FazzPitchSideHub{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-3xl mx-auto">
+        <div class="bg-white rounded-lg shadow-xl flex flex-col" style="height: 80vh;">
+            <!-- Header -->
+            <div class="px-6 py-4 border-b border-gray-200 flex items-center space-x-4">
+                <a href="{% url 'inbox' %}" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <div class="w-10 h-10 bg-green-200 rounded-full flex items-center justify-center">
+                    <span class="text-green-700 font-bold">{% if other_user %}{{ other_user.username|first|upper }}{% else %}?{% endif %}</span>
+                </div>
+                <div>
+                    <h2 class="font-bold text-gray-900">{% if other_user %}{{ other_user.username }}{% else %}Deleted User{% endif %}</h2>
+                    {% if other_user %}<p class="text-xs text-gray-500">{{ other_user.get_role_display|default:"User" }}</p>{% endif %}
+                </div>
+            </div>
+
+            <!-- Messages -->
+            <div id="messages-container" class="flex-1 overflow-y-auto px-6 py-4 space-y-3">
+                {% for msg in messages %}
+                <div class="flex {% if msg.sender == request.user %}justify-end{% else %}justify-start{% endif %}">
+                    <div class="max-w-xs lg:max-w-md px-4 py-2 rounded-2xl text-sm
+                        {% if msg.sender == request.user %}bg-green-600 text-white{% else %}bg-gray-200 text-gray-900{% endif %}">
+                        <p>{{ msg.body }}</p>
+                        <p class="text-xs mt-1 {% if msg.sender == request.user %}text-green-200{% else %}text-gray-500{% endif %}">
+                            {{ msg.sent_at|time:"H:i" }}
+                        </p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Input -->
+            <div class="px-6 py-4 border-t border-gray-200">
+                <form method="post" id="message-form" class="flex space-x-3">
+                    {% csrf_token %}
+                    <input type="text" name="body" id="message-input" autocomplete="off"
+                        class="flex-1 px-4 py-3 border border-gray-300 rounded-full focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        placeholder="Type a message..." required>
+                    <button type="submit"
+                        class="px-6 py-3 bg-green-600 text-white rounded-full hover:bg-green-700 transition">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const container = document.getElementById('messages-container');
+container.scrollTop = container.scrollHeight;
+
+let lastId = 0;
+document.querySelectorAll('#messages-container > div').forEach(el => {
+    // Track the last message by counting
+});
+// Find max message id from rendered messages
+{% if messages %}
+lastId = {{ messages.last.id|default:"0" }};
+{% endif %}
+
+// Poll for new messages every 5 seconds
+setInterval(function() {
+    fetch('{% url "get_new_messages" conversation.id %}?after=' + lastId)
+        .then(r => r.json())
+        .then(data => {
+            if (data.messages && data.messages.length > 0) {
+                data.messages.forEach(msg => {
+                    if (msg.id > lastId) lastId = msg.id;
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'flex ' + (msg.is_mine ? 'justify-end' : 'justify-start');
+                    wrapper.innerHTML = `
+                        <div class="max-w-xs lg:max-w-md px-4 py-2 rounded-2xl text-sm ${msg.is_mine ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-900'}">
+                            <p>${msg.body}</p>
+                            <p class="text-xs mt-1 ${msg.is_mine ? 'text-green-200' : 'text-gray-500'}">${msg.sent_at}</p>
+                        </div>
+                    `;
+                    container.appendChild(wrapper);
+                });
+                container.scrollTop = container.scrollHeight;
+            }
+        });
+}, 5000);
+
+// AJAX send
+document.getElementById('message-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const input = document.getElementById('message-input');
+    const body = input.value.trim();
+    if (!body) return;
+
+    fetch('{% url "conversation" conversation.id %}', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+        body: new URLSearchParams({body: body})
+    }).then(r => r.json()).then(data => {
+        if (data.status === 'sent') {
+            const msg = data.message;
+            if (msg.id > lastId) lastId = msg.id;
+            const wrapper = document.createElement('div');
+            wrapper.className = 'flex justify-end';
+            wrapper.innerHTML = `
+                <div class="max-w-xs lg:max-w-md px-4 py-2 rounded-2xl text-sm bg-green-600 text-white">
+                    <p>${msg.body}</p>
+                    <p class="text-xs mt-1 text-green-200">${msg.sent_at}</p>
+                </div>
+            `;
+            container.appendChild(wrapper);
+            container.scrollTop = container.scrollHeight;
+            input.value = '';
+        }
+    });
+});
+</script>
+{% endblock %}

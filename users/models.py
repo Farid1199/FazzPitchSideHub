@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.conf import settings
 
 class User(AbstractUser):
     """
@@ -20,6 +21,10 @@ class User(AbstractUser):
         blank=True,
         null=True,
         help_text="The role of the user in the system."
+    )
+    is_private = models.BooleanField(
+        default=False,
+        help_text="If True, only approved followers can see full profile."
     )
 
     def __str__(self):
@@ -122,6 +127,25 @@ class PlayerProfile(models.Model):
     available_for_club = models.BooleanField(
         default=False,
         help_text="Whether the player is looking for a club."
+    )
+
+    AVAILABILITY_CHOICES = [
+        ('AVAILABLE', 'Available — Actively Looking'),
+        ('OPEN', 'Open to Offers'),
+        ('CONTRACTED', 'Contracted — Not Available'),
+        ('TRIALLING', 'Currently on Trial'),
+        ('INJURED', 'Unavailable — Injured'),
+    ]
+    availability_status = models.CharField(
+        max_length=15,
+        choices=AVAILABILITY_CHOICES,
+        default='AVAILABLE',
+        help_text="Current availability status."
+    )
+    bio = models.TextField(
+        blank=True,
+        max_length=500,
+        help_text='A short professional bio shown on your profile'
     )
 
     def __str__(self):
@@ -280,16 +304,33 @@ class ScoutProfile(models.Model):
     Profile model for Scouts.
     Linked to User via OneToOneField.
     """
+    TIER_CHOICES = [
+        ('TIER1', 'FAZZ Verified Scout'),
+        ('TIER2', 'FAZZ Advanced Verified'),
+        ('TIER3', 'FAZZ Professional Verified'),
+    ]
+
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='scout_profile')
     organization = models.CharField(
-        max_length=100, 
-        blank=True, 
+        max_length=100,
+        blank=True,
         help_text="Organization or Club the scout works for."
     )
     region = models.CharField(
-        max_length=100, 
+        max_length=100,
         help_text="Primary region covered by the scout.",
         default=''
+    )
+    scout_verified = models.BooleanField(
+        default=False,
+        help_text="Whether this scout has been verified by the platform."
+    )
+    verification_tier = models.CharField(
+        max_length=10,
+        choices=TIER_CHOICES,
+        blank=True,
+        null=True,
+        help_text="Verified tier awarded by admin."
     )
 
     def __str__(self):
@@ -410,12 +451,18 @@ class ManagerProfile(models.Model):
 
 class QualificationVerification(models.Model):
     """
-    Model to store uploaded coaching certificates for verification.
+    Model to store uploaded coaching certificates for Fazz Pitchside verification.
+    Managers must provide: certificate, FA dashboard screenshot, and FAN number.
+    Verification is performed manually by platform administrators.
+    
+    IMPORTANT: This is a Fazz Pitchside platform-level verification.
+    It is NOT an official endorsement by The Football Association.
     """
     STATUS_CHOICES = [
         ('PENDING', 'Pending Review'),
-        ('APPROVED', 'Approved'),
+        ('APPROVED', 'Fazz Pitchside Verified'),
         ('REJECTED', 'Rejected'),
+        ('FLAGGED', 'Flagged for Further Review'),
     ]
     
     manager = models.ForeignKey(
@@ -428,14 +475,24 @@ class QualificationVerification(models.Model):
         choices=ManagerProfile.QUALIFICATION_CHOICES,
         help_text="Type of qualification being verified."
     )
-    certificate_image = models.ImageField(
+    certificate_image = models.FileField(
         upload_to='coaching_certificates/',
-        help_text="Upload a photo/scan of your coaching certificate."
+        help_text="Upload a clear photo, scan, or PDF of your coaching certificate. "
+                  "Your full name and qualification level must be visible."
+    )
+    dashboard_screenshot = models.ImageField(
+        upload_to='coaching_dashboard_screenshots/',
+        help_text="Upload a screenshot from your England Football Learning dashboard showing "
+                  "your name, FAN number, and licence level. This is required for cross-verification.",
+        blank=True,
+        null=False,
+        default=''
     )
     fa_fan_number = models.CharField(
         max_length=50,
-        blank=True,
-        help_text="Optional: FA FAN (Football Affiliate Number)."
+        help_text="Your FA FAN (Football Affiliate Number). This is required for cross-reference "
+                  "against your dashboard screenshot.",
+        default=''
     )
     status = models.CharField(
         max_length=20,
@@ -444,19 +501,222 @@ class QualificationVerification(models.Model):
     )
     submitted_at = models.DateTimeField(auto_now_add=True)
     reviewed_at = models.DateTimeField(null=True, blank=True)
+    verified_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='verified_licences',
+        help_text="The admin who reviewed this verification request."
+    )
     admin_notes = models.TextField(
         blank=True,
-        help_text="Admin notes on the verification decision."
+        help_text="Internal admin notes on the verification decision. NOT visible to the user."
+    )
+    rejection_reason = models.TextField(
+        blank=True,
+        help_text="Reason for rejection. This IS visible to the manager so they can resubmit."
     )
     
     class Meta:
         ordering = ['-submitted_at']
+        verbose_name = 'Coaching Licence Verification'
+        verbose_name_plural = 'Coaching Licence Verifications'
     
     def __str__(self):
-        return f"{self.manager.user.username} - {self.get_qualification_type_display()} ({self.status})"
+        return f"{self.manager.user.username} - {self.get_qualification_type_display()} ({self.get_status_display()})"
 
 
-# Django Signals for automatic profile creation
+class ScoutVerification(models.Model):
+    """
+    Tiered Scout Verification System.
+    Scouts submit evidence documents; admins manually review and award a tier badge.
+
+    TIER 1 — FAZZ Verified Scout       (Basic / Grassroots)
+    TIER 2 — FAZZ Advanced Verified    (Semi-Pro)
+    TIER 3 — FAZZ Professional Verified (Professional / Club-Attached)
+
+    IMPORTANT: This is a Fazz Pitchside platform-level verification.
+    It is NOT an official endorsement by The Football Association or any governing body.
+    """
+    STATUS_CHOICES = [
+        ('PENDING', 'Pending Review'),
+        ('APPROVED', 'Approved'),
+        ('REJECTED', 'Rejected'),
+        ('FLAGGED', 'Flagged for Further Review'),
+    ]
+
+    TIER_CHOICES = [
+        ('TIER1', 'FAZZ Verified Scout'),
+        ('TIER2', 'FAZZ Advanced Verified'),
+        ('TIER3', 'FAZZ Professional Verified'),
+    ]
+
+    QUALIFICATION_BODY_CHOICES = [
+        ('FA', 'The Football Association (FA)'),
+        ('PFSA', 'Professional Football Scouts Association (PFSA)'),
+        ('OTHER', 'Other Recognised Course'),
+        ('NONE', 'No Formal Qualification'),
+    ]
+
+    QUALIFICATION_LEVEL_CHOICES = [
+        ('FA_L1', 'FA Level 1 – Introduction to Talent ID'),
+        ('FA_L2', 'FA Level 2 – National Talent ID & Scouting'),
+        ('FA_L3', 'FA Level 3 – Advanced Principles of Talent ID'),
+        ('FA_L4', 'FA Level 4 – Leadership of Talent ID'),
+        ('FA_L5', 'FA Level 5 – Technical Directors Course'),
+        ('PFSA_L1', 'PFSA Level 1 – Talent ID'),
+        ('PFSA_L2', 'PFSA Level 2 – Talent ID'),
+        ('PFSA_L3', 'PFSA Level 3 – Talent ID'),
+        ('PFSA_OPP', 'PFSA Opposition Analysis'),
+        ('PFSA_TECH', 'PFSA Technical Scouting'),
+        ('OTHER', 'Other Recognised Course'),
+        ('NONE', 'No Formal Qualification'),
+    ]
+
+    scout = models.OneToOneField(
+        ScoutProfile,
+        on_delete=models.CASCADE,
+        related_name='verification'
+    )
+
+    qualification_body = models.CharField(
+        max_length=10,
+        choices=QUALIFICATION_BODY_CHOICES,
+        help_text="Awarding body for the qualification."
+    )
+    qualification_level = models.CharField(
+        max_length=20,
+        choices=QUALIFICATION_LEVEL_CHOICES,
+        help_text="Level of qualification being verified."
+    )
+
+    fa_fan_number = models.CharField(
+        max_length=20,
+        blank=True,
+        null=True,
+        help_text="FA FAN number (required for FA qualifications)."
+    )
+
+    certificate_file = models.FileField(
+        upload_to='scout_certificates/',
+        help_text="Upload your qualification certificate (PDF or image)."
+    )
+    dashboard_screenshot = models.ImageField(
+        upload_to='scout_dashboards/',
+        blank=True,
+        null=True,
+        help_text="England Football dashboard screenshot (FA route only)."
+    )
+    safeguarding_certificate = models.FileField(
+        upload_to='scout_safeguarding/',
+        blank=True,
+        null=True,
+        help_text="Safeguarding certificate (required for Tier 2+)."
+    )
+    dbs_expiry_date = models.DateField(
+        blank=True,
+        null=True,
+        help_text="DBS certificate expiry date (required for Tier 2+)."
+    )
+    club_affiliation_proof = models.FileField(
+        upload_to='scout_club_proof/',
+        blank=True,
+        null=True,
+        help_text="Signed club letter or official club email (Tier 3)."
+    )
+    sample_scout_report = models.FileField(
+        upload_to='scout_reports/',
+        blank=True,
+        null=True,
+        help_text="Sample anonymised scout report (Tier 3)."
+    )
+
+    requested_tier = models.CharField(
+        max_length=10,
+        choices=TIER_CHOICES,
+        default='TIER1',
+        help_text="Tier the scout is applying for."
+    )
+    awarded_tier = models.CharField(
+        max_length=10,
+        choices=TIER_CHOICES,
+        blank=True,
+        null=True,
+        help_text="Tier actually awarded by admin (may differ from requested)."
+    )
+
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        default='PENDING'
+    )
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    reviewed_at = models.DateTimeField(blank=True, null=True)
+    verified_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='scout_verifications_reviewed',
+        help_text="The admin who reviewed this verification request."
+    )
+    admin_notes = models.TextField(
+        blank=True,
+        help_text="Internal admin notes (not visible to scout)."
+    )
+    rejection_reason = models.TextField(
+        blank=True,
+        help_text="Reason shown to scout on rejection."
+    )
+
+    class Meta:
+        verbose_name = 'Scout Verification'
+        verbose_name_plural = 'Scout Verifications'
+        ordering = ['-submitted_at']
+
+    def __str__(self):
+        return f"{self.scout} – {self.get_status_display()} ({self.get_requested_tier_display()})"
+
+
+class Notification(models.Model):
+    """
+    In-app notification for users.
+    Created for verification, follows, likes, messages, opportunities, etc.
+    """
+    TYPE_CHOICES = [
+        ('verification', 'Verification Update'),
+        ('follow', 'New Follower'),
+        ('follow_request', 'Follow Request'),
+        ('follow_accepted', 'Follow Request Accepted'),
+        ('like', 'Post Liked'),
+        ('message', 'New Message'),
+        ('opportunity', 'New Opportunity'),
+        ('system', 'System Notification'),
+    ]
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='notifications'
+    )
+    message = models.TextField()
+    notification_type = models.CharField(
+        max_length=20,
+        choices=TYPE_CHOICES,
+        default='system'
+    )
+    action_url = models.CharField(max_length=255, blank=True)
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Notification'
+        verbose_name_plural = 'Notifications'
+
+    def __str__(self):
+        return f"Notification for {self.user.username}: {self.message[:50]}"
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
@@ -476,6 +736,8 @@ def create_user_profile(sender, instance, created, **kwargs):
             ScoutProfile.objects.get_or_create(user=instance)
         elif instance.role == 'MANAGER':
             ManagerProfile.objects.get_or_create(user=instance)
+        elif instance.role == 'FAN':
+            FanProfile.objects.get_or_create(user=instance)
 
 
 @receiver(post_save, sender=User)
@@ -492,6 +754,8 @@ def save_user_profile(sender, instance, **kwargs):
             instance.scout_profile.save()
         elif instance.role == 'MANAGER' and hasattr(instance, 'manager_profile'):
             instance.manager_profile.save()
+        elif instance.role == 'FAN' and hasattr(instance, 'fan_profile'):
+            instance.fan_profile.save()
 
 
 class NewsItem(models.Model):
@@ -501,6 +765,13 @@ class NewsItem(models.Model):
     1. RSS feeds (links to ClubSource) - Admin-managed
     2. Manual posts (links to ClubProfile) - User-managed (future)
     """
+    CATEGORY_CHOICES = [
+        ('trial', 'Trial News'),
+        ('general', 'General News'),
+        ('transfer', 'Transfer News'),
+        ('match', 'Match Reports'),
+    ]
+
     # RSS Source (Admin-managed aggregation)
     source = models.ForeignKey(
         ClubSource,
@@ -540,6 +811,12 @@ class NewsItem(models.Model):
     created_at = models.DateTimeField(
         auto_now_add=True,
         help_text="When this item was added to our database."
+    )
+    category = models.CharField(
+        max_length=20,
+        choices=CATEGORY_CHOICES,
+        default='general',
+        help_text="Category of the news item."
     )
 
     class Meta:
@@ -591,6 +868,32 @@ class Opportunity(NewsItem):
         blank=True, 
         related_name='verified_opportunities',
         help_text="User who verified this opportunity."
+    )
+    CONTRACT_TYPE_CHOICES = [
+        ('AMATEUR', 'Amateur'),
+        ('SEMI_PRO', 'Semi-Professional'),
+        ('EXPENSES', 'Expenses Only'),
+        ('PAID', 'Paid'),
+        ('UNSPECIFIED', 'Not Specified'),
+    ]
+    contract_type = models.CharField(
+        max_length=15,
+        choices=CONTRACT_TYPE_CHOICES,
+        default='UNSPECIFIED'
+    )
+    age_min = models.PositiveIntegerField(null=True, blank=True)
+    age_max = models.PositiveIntegerField(null=True, blank=True)
+    trial_date = models.DateField(null=True, blank=True)
+    application_deadline = models.DateField(null=True, blank=True)
+    positions_needed = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text='Comma-separated list of positions needed'
+    )
+    level_required = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text='e.g. Step 3-4, Sunday League, County League'
     )
     class Meta:
         ordering = ['-published_date']
@@ -833,6 +1136,35 @@ class Post(models.Model):
             }
         return {}
 
+    def total_comments(self):
+        return self.comments.count()
+
+
+# ===================================================================
+# Post Comments
+# ===================================================================
+
+class Comment(models.Model):
+    """Comment on a social post."""
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,
+        related_name='comments'
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='comments'
+    )
+    body = models.TextField(max_length=500)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f"{self.user.username} on {self.post.pk}: {self.body[:40]}"
+
 
 class TrialView(models.Model):
     """
@@ -895,3 +1227,187 @@ class TrialApplication(models.Model):
 
     def __str__(self):
         return f"{self.player.user.username} interested in {self.opportunity.title}"
+
+
+# ===================================================================
+# Follow System
+# ===================================================================
+
+class Follow(models.Model):
+    follower = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='following'
+    )
+    following = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='followers'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['follower', 'following']
+
+    def __str__(self):
+        return f"{self.follower.username} → {self.following.username}"
+
+
+class FollowRequest(models.Model):
+    STATUS_CHOICES = [
+        ('PENDING', 'Pending'),
+        ('ACCEPTED', 'Accepted'),
+        ('REJECTED', 'Rejected'),
+    ]
+    from_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='sent_follow_requests'
+    )
+    to_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='received_follow_requests'
+    )
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        default='PENDING'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ['from_user', 'to_user']
+
+    def __str__(self):
+        return f"{self.from_user.username} → {self.to_user.username} ({self.status})"
+
+
+# ===================================================================
+# Private Messaging
+# ===================================================================
+
+class Conversation(models.Model):
+    participants = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name='conversations'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-updated_at']
+
+    def get_other_participant(self, user):
+        return self.participants.exclude(id=user.id).first()
+
+    def get_last_message(self):
+        return self.messages.order_by('-sent_at').first()
+
+    def unread_count(self, user):
+        return self.messages.filter(is_read=False).exclude(sender=user).count()
+
+    def __str__(self):
+        names = ', '.join(self.participants.values_list('username', flat=True))
+        return f"Conversation: {names}"
+
+
+class Message(models.Model):
+    conversation = models.ForeignKey(
+        Conversation,
+        on_delete=models.CASCADE,
+        related_name='messages'
+    )
+    sender = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='sent_messages'
+    )
+    body = models.TextField(max_length=2000)
+    sent_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['sent_at']
+
+    def __str__(self):
+        return f"{self.sender.username}: {self.body[:50]}"
+
+
+# ===================================================================
+# Fan Profile
+# ===================================================================
+
+class FanProfile(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='fan_profile'
+    )
+    favourite_club = models.CharField(max_length=100, blank=True)
+    location = models.CharField(max_length=100, blank=True)
+    bio = models.TextField(max_length=300, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Fan: {self.user.username}"
+
+
+# ===================================================================
+# Scout Watchlist / Club Shortlist
+# ===================================================================
+
+class Watchlist(models.Model):
+    """Used by scouts to privately track players of interest."""
+    scout = models.ForeignKey(
+        ScoutProfile,
+        on_delete=models.CASCADE,
+        related_name='watchlist'
+    )
+    player = models.ForeignKey(
+        PlayerProfile,
+        on_delete=models.CASCADE,
+        related_name='watchlisted_by'
+    )
+    private_notes = models.TextField(
+        blank=True,
+        help_text='Private scout notes — never shown to player'
+    )
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['scout', 'player']
+        ordering = ['-added_at']
+
+    def __str__(self):
+        return f"{self.scout.user.username} watching {self.player.user.username}"
+
+
+class ClubShortlist(models.Model):
+    """Used by clubs to shortlist players for opportunities."""
+    club = models.ForeignKey(
+        ClubProfile,
+        on_delete=models.CASCADE,
+        related_name='shortlist'
+    )
+    player = models.ForeignKey(
+        PlayerProfile,
+        on_delete=models.CASCADE,
+        related_name='shortlisted_by'
+    )
+    opportunity = models.ForeignKey(
+        'Opportunity',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        help_text='Optional — link shortlist to a specific trial'
+    )
+    notes = models.TextField(blank=True)
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['club', 'player']
+
+    def __str__(self):
+        return f"{self.club.club_name} shortlisted {self.player.user.username}"

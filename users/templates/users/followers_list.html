@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ profile_user.username }}'s Followers - FazzPitchSideHub{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-3xl mx-auto">
+        <div class="bg-white rounded-lg shadow-xl p-8">
+            <h1 class="text-2xl font-bold text-gray-900 mb-6">
+                <i class="fas fa-users mr-2 text-green-600"></i>
+                {{ profile_user.username }}'s Followers
+            </h1>
+
+            {% if pending_requests %}
+            <div class="mb-8">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">Pending Follow Requests</h2>
+                <div class="space-y-3">
+                    {% for req in pending_requests %}
+                    <div class="flex items-center justify-between bg-yellow-50 border border-yellow-200 rounded-lg p-4" id="req-{{ req.id }}">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-yellow-200 rounded-full flex items-center justify-center">
+                                <span class="text-yellow-700 font-bold">{{ req.from_user.username|first|upper }}</span>
+                            </div>
+                            <span class="font-medium text-gray-900">{{ req.from_user.username }}</span>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="handleFollowRequest({{ req.id }}, 'accept')"
+                                class="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition">
+                                Accept
+                            </button>
+                            <button onclick="handleFollowRequest({{ req.id }}, 'reject')"
+                                class="px-4 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition">
+                                Reject
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <h2 class="text-lg font-semibold text-gray-800 mb-4">Followers ({{ followers|length }})</h2>
+            {% if followers %}
+            <div class="space-y-3">
+                {% for f in followers %}
+                <div class="flex items-center justify-between bg-gray-50 rounded-lg p-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-green-200 rounded-full flex items-center justify-center">
+                            <span class="text-green-700 font-bold">{{ f.follower.username|first|upper }}</span>
+                        </div>
+                        <div>
+                            <a href="{% url 'player_profile' f.follower.username %}" class="font-medium text-gray-900 hover:text-green-600">
+                                {{ f.follower.username }}
+                            </a>
+                            <p class="text-xs text-gray-500">{{ f.follower.get_role_display|default:"User" }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-gray-500 text-center py-8">No followers yet.</p>
+            {% endif %}
+
+            <div class="mt-6 text-center">
+                <a href="{% url 'following_list' profile_user.id %}" class="text-green-600 hover:text-green-700 font-medium">
+                    View Following &rarr;
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function handleFollowRequest(requestId, action) {
+    const url = action === 'accept'
+        ? `/follow-request/${requestId}/accept/`
+        : `/follow-request/${requestId}/reject/`;
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'X-Requested-With': 'XMLHttpRequest',
+        }
+    }).then(r => r.json()).then(data => {
+        document.getElementById('req-' + requestId).remove();
+    });
+}
+</script>
+{% endblock %}

@@ -231,3 +231,218 @@ footer p {
     margin-bottom: 0;
     opacity: 0.8;
 }
+
+/* ===================================================================
+   Accessibility Features
+   =================================================================== */
+
+/* Focus-visible: visible focus ring for keyboard navigation */
+*:focus-visible {
+    outline: 3px solid #1E5631 !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 4px rgba(30, 86, 49, 0.3) !important;
+}
+
+/* Skip-to-content link (hidden until focused) */
+.skip-link {
+    position: absolute;
+    top: -100%;
+    left: 1rem;
+    z-index: 9999;
+    background: #1E5631;
+    color: #FFFFFF;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0 0 4px 4px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.skip-link:focus {
+    top: 0;
+}
+
+/* --- High Contrast Mode --- */
+body.high-contrast {
+    background-color: #000000 !important;
+    color: #FFFFFF !important;
+}
+
+body.high-contrast a {
+    color: #FFD700 !important;
+}
+
+body.high-contrast a:hover {
+    color: #FFA500 !important;
+}
+
+body.high-contrast h1,
+body.high-contrast h2,
+body.high-contrast h3,
+body.high-contrast h4,
+body.high-contrast h5,
+body.high-contrast h6 {
+    color: #FFFFFF !important;
+}
+
+body.high-contrast .bg-white,
+body.high-contrast .bg-gray-50,
+body.high-contrast .bg-gray-100 {
+    background-color: #1a1a1a !important;
+    color: #FFFFFF !important;
+}
+
+body.high-contrast .text-gray-600,
+body.high-contrast .text-gray-500,
+body.high-contrast .text-gray-700,
+body.high-contrast .text-gray-900 {
+    color: #e0e0e0 !important;
+}
+
+body.high-contrast .border-gray-200,
+body.high-contrast .border-gray-300 {
+    border-color: #555555 !important;
+}
+
+body.high-contrast .shadow-md,
+body.high-contrast .shadow-lg,
+body.high-contrast .shadow-xl {
+    box-shadow: 0 0 0 1px #555555 !important;
+}
+
+body.high-contrast input,
+body.high-contrast select,
+body.high-contrast textarea {
+    background-color: #1a1a1a !important;
+    color: #FFFFFF !important;
+    border-color: #FFD700 !important;
+}
+
+/* --- Dyslexia-Friendly Font Mode --- */
+@import url('https://fonts.cdnfonts.com/css/opendyslexic');
+
+body.dyslexia-font {
+    font-family: 'OpenDyslexic', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+    letter-spacing: 0.05em;
+    word-spacing: 0.15em;
+    line-height: 1.8;
+}
+
+body.dyslexia-font * {
+    font-family: inherit !important;
+}
+
+/* --- Large Text Mode --- */
+body.large-text {
+    font-size: 1.2rem !important;
+}
+
+body.large-text h1 { font-size: 2.5rem !important; }
+body.large-text h2 { font-size: 2rem !important; }
+body.large-text h3 { font-size: 1.75rem !important; }
+body.large-text p, body.large-text li, body.large-text span {
+    font-size: 1.2rem !important;
+}
+
+/* --- Reduced Motion --- */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* --- Accessibility Toggle Panel --- */
+.a11y-panel {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    z-index: 9998;
+}
+
+.a11y-toggle-btn {
+    background-color: #1E5631;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.25rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    transition: background-color 0.2s;
+}
+
+.a11y-toggle-btn:hover {
+    background-color: #143d22;
+}
+
+.a11y-options {
+    display: none;
+    position: absolute;
+    bottom: 56px;
+    right: 0;
+    background: #FFFFFF;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1rem;
+    min-width: 200px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.a11y-options.show {
+    display: block;
+}
+
+body.high-contrast .a11y-options {
+    background: #1a1a1a !important;
+    border-color: #555 !important;
+}
+
+.a11y-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    color: #333;
+}
+
+.a11y-option:hover {
+    background-color: #f3f4f6;
+}
+
+body.high-contrast .a11y-option {
+    color: #e0e0e0 !important;
+}
+
+body.high-contrast .a11y-option:hover {
+    background-color: #333 !important;
+}
+
+/* TTS button styling */
+.tts-btn {
+    background: none;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    padding: 2px 8px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    color: #6b7280;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s;
+}
+
+.tts-btn:hover {
+    background-color: #f3f4f6;
+    border-color: #1E5631;
+    color: #1E5631;
+}

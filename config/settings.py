@@ -12,6 +12,10 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -125,6 +129,9 @@ STATICFILES_DIRS = [
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# Max in-memory upload size: 10 MB (for scout/manager verification docs)
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
@@ -139,4 +146,18 @@ LOGOUT_REDIRECT_URL = 'login'
 
 # Third-Party APIs
 GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
+
+# Email (console backend for development — prints emails to terminal)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# --- Production Security (uncomment when deploying) ---
+# SECURE_SSL_REDIRECT = True
+# SESSION_COOKIE_SECURE = True
+# CSRF_COOKIE_SECURE = True
+# SECURE_HSTS_SECONDS = 31536000
+# SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+# SECURE_HSTS_PRELOAD = True
+# SECURE_BROWSER_XSS_FILTER = True
+# SECURE_CONTENT_TYPE_NOSNIFF = True
+# X_FRAME_OPTIONS = 'DENY'
 

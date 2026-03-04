@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}About - FazzPitchSideHub{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="bg-white rounded-lg shadow-xl p-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-8">About Fazz Pitchside Hub</h1>
+
+            <div class="prose max-w-none text-gray-700 space-y-6">
+                <p class="text-lg">
+                    Fazz Pitchside Hub is the UK's dedicated platform connecting non-league football players,
+                    clubs, scouts, and managers. We bridge the gap between grassroots talent and opportunity.
+                </p>
+
+                <div class="grid md:grid-cols-2 gap-6 mt-8">
+                    <div class="bg-green-50 rounded-lg p-6">
+                        <h3 class="text-lg font-semibold text-green-800 mb-2">
+                            <i class="fas fa-running mr-2"></i> For Players
+                        </h3>
+                        <p class="text-green-700 text-sm">Create a professional profile, showcase your highlights, and discover trial opportunities at clubs across the pyramid.</p>
+                    </div>
+                    <div class="bg-blue-50 rounded-lg p-6">
+                        <h3 class="text-lg font-semibold text-blue-800 mb-2">
+                            <i class="fas fa-shield-alt mr-2"></i> For Clubs
+                        </h3>
+                        <p class="text-blue-700 text-sm">Post trial opportunities, search for players by position and level, and build shortlists of promising talent.</p>
+                    </div>
+                    <div class="bg-purple-50 rounded-lg p-6">
+                        <h3 class="text-lg font-semibold text-purple-800 mb-2">
+                            <i class="fas fa-search mr-2"></i> For Scouts
+                        </h3>
+                        <p class="text-purple-700 text-sm">Discover and track players with watchlists, verified credentials, and professional scouting tools.</p>
+                    </div>
+                    <div class="bg-yellow-50 rounded-lg p-6">
+                        <h3 class="text-lg font-semibold text-yellow-800 mb-2">
+                            <i class="fas fa-clipboard mr-2"></i> For Managers
+                        </h3>
+                        <p class="text-yellow-700 text-sm">Showcase your coaching qualifications, share tactical insights, and connect with clubs and players.</p>
+                    </div>
+                </div>
+
+                <h2 class="text-xl font-semibold text-gray-900 mt-8">Our Mission</h2>
+                <p>To democratise access to football opportunities at the non-league level, ensuring that
+                talent is discovered regardless of connections or geography.</p>
+
+                <h2 class="text-xl font-semibold text-gray-900">Key Features</h2>
+                <ul class="list-disc pl-6 space-y-1">
+                    <li>AI-powered player-to-trial matching recommendations</li>
+                    <li>Verified coaching and scouting qualifications</li>
+                    <li>Real-time RSS news aggregation from non-league clubs</li>
+                    <li>Social features: posts, follows, messaging</li>
+                    <li>Scout watchlists and club shortlists</li>
+                    <li>AI-generated player bios</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

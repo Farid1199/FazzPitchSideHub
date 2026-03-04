@@ -62,6 +62,18 @@
                     <p class="mt-1 text-xs text-gray-500">{{ form.available_for_club.help_text }}</p>
                 </div>
 
+                <!-- Availability Status Dropdown -->
+                <div>
+                    <label for="{{ form.availability_status.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        Availability Status
+                    </label>
+                    {{ form.availability_status }}
+                    {% if form.availability_status.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.availability_status.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-xs text-gray-500">{{ form.availability_status.help_text }}</p>
+                </div>
+
                 <!-- Location Postcode -->
                 <div>
                     <label for="{{ form.location_postcode.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
@@ -151,6 +163,25 @@
                     <p class="mt-1 text-xs text-gray-500">List your previous clubs and playing history</p>
                 </div>
 
+                <!-- Bio with AI Generate Button -->
+                <div>
+                    <label for="{{ form.bio.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        Player Bio
+                    </label>
+                    {{ form.bio }}
+                    {% if form.bio.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.bio.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-xs text-gray-500">{{ form.bio.help_text }}</p>
+                    {% if edit_mode %}
+                    <button type="button" id="generate-bio-btn"
+                            class="mt-2 inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold rounded-lg transition duration-300">
+                        <i class="fas fa-magic mr-2"></i> Generate Bio with AI
+                    </button>
+                    <p id="bio-status" class="mt-1 text-xs text-gray-500 hidden"></p>
+                    {% endif %}
+                </div>
+
                 <!-- Submit Button -->
                 <div class="pt-4">
                     <button type="submit" 
@@ -219,4 +250,47 @@
         resize: vertical;
     }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const btn = document.getElementById('generate-bio-btn');
+    if (!btn) return;
+
+    btn.addEventListener('click', function() {
+        const statusEl = document.getElementById('bio-status');
+        statusEl.classList.remove('hidden');
+        statusEl.textContent = 'Generating bio with AI...';
+        statusEl.className = 'mt-1 text-xs text-blue-600';
+        btn.disabled = true;
+        btn.classList.add('opacity-50');
+
+        fetch('{% url "generate_bio" %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.bio) {
+                document.getElementById('{{ form.bio.id_for_label }}').value = data.bio;
+                statusEl.textContent = 'Bio generated! Review and edit as needed.';
+                statusEl.className = 'mt-1 text-xs text-green-600';
+            } else {
+                statusEl.textContent = data.error || 'Failed to generate bio. Try again.';
+                statusEl.className = 'mt-1 text-xs text-red-600';
+            }
+        })
+        .catch(() => {
+            statusEl.textContent = 'Network error. Please try again.';
+            statusEl.className = 'mt-1 text-xs text-red-600';
+        })
+        .finally(() => {
+            btn.disabled = false;
+            btn.classList.remove('opacity-50');
+        });
+    });
+});
+</script>
 {% endblock %}

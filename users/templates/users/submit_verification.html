@@ -1,39 +1,86 @@
 {% extends 'base.html' %}
 
-{% block title %}Submit Qualification Verification - FazzPitchSideHub{% endblock %}
+{% block title %}Fazz Pitchside Verification - FazzPitchSideHub{% endblock %}
 
 {% block content %}
 <div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-3xl mx-auto">
-        <div class="bg-white rounded-lg shadow-xl p-8">
-            <!-- Header -->
-            <div class="mb-8">
-                <div class="flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4 mx-auto">
-                    <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+        <!-- Previous Rejection Notice -->
+        {% if latest_request and latest_request.status == 'REJECTED' %}
+        <div class="bg-red-50 border-l-4 border-red-500 rounded-lg p-6 mb-6">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <svg class="h-6 w-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-lg font-semibold text-red-800">Your Previous Verification Was Unsuccessful</h3>
+                    {% if latest_request.rejection_reason %}
+                    <p class="mt-2 text-red-700"><strong>Reason:</strong> {{ latest_request.rejection_reason }}</p>
+                    {% endif %}
+                    <p class="mt-2 text-red-600 text-sm">Please address the issues above and resubmit your documents below.</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Previous Flagged Notice -->
+        {% if latest_request and latest_request.status == 'FLAGGED' %}
+        <div class="bg-purple-50 border-l-4 border-purple-500 rounded-lg p-6 mb-6">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-flag text-purple-500 text-xl"></i>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-lg font-semibold text-purple-800">Your Verification Is Under Further Review</h3>
+                    <p class="mt-2 text-purple-700">Our team has flagged your submission for additional checks. You may resubmit with clearer documents if you wish.</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="bg-white rounded-xl shadow-xl p-8">
+            <!-- Header with Fazz Pitchside Branding -->
+            <div class="mb-8 text-center">
+                <div class="flex items-center justify-center w-20 h-20 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full mb-4 mx-auto shadow-lg">
+                    <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
                     </svg>
                 </div>
-                <h1 class="text-3xl font-bold text-gray-900 text-center">Verify Your Coaching Qualifications</h1>
-                <p class="text-gray-600 text-center mt-2">Upload your certificate to get verified and build trust with players and clubs</p>
+                <h1 class="text-3xl font-bold text-gray-900">Fazz Pitchside Verification</h1>
+                <p class="text-gray-600 mt-2">Verify your coaching qualifications to build trust with players and clubs</p>
+                <div class="mt-3 inline-flex items-center px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-medium">
+                    <i class="fas fa-shield-alt mr-1"></i>
+                    Platform-Level Verification
+                </div>
             </div>
 
-            <!-- Information Box -->
-            <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
-                <div class="flex">
+            <!-- What You Need - Conditional Info -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-5 mb-6">
+                <div class="flex items-start">
                     <div class="flex-shrink-0">
-                        <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                        <svg class="h-6 w-6 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
                         </svg>
                     </div>
                     <div class="ml-3">
-                        <h3 class="text-sm font-medium text-blue-800">What You Need:</h3>
-                        <div class="mt-2 text-sm text-blue-700">
-                            <ul class="list-disc list-inside space-y-1">
-                                <li>A clear photo or scan of your coaching certificate</li>
-                                <li>Make sure your name is visible on the certificate</li>
-                                <li>The certificate should show the qualification level</li>
-                                <li>Optional: Your FA FAN Number for faster verification</li>
-                            </ul>
+                        <h3 class="text-sm font-bold text-blue-900">What You Need:</h3>
+                        <div class="mt-2 text-sm text-blue-800">
+                            <ol class="list-decimal list-inside space-y-2">
+                                <li><strong>Coaching Certificate</strong> — A clear photo or scan of your FA coaching certificate. Your full name and qualification level must be visible.</li>
+                            </ol>
+                            <div id="info-extra-docs" class="mt-2 hidden">
+                                <ol class="list-decimal list-inside space-y-2" start="2">
+                                    <li><strong>England Football Dashboard Screenshot</strong> — Log into <a href="https://learn.englandfootball.com" target="_blank" class="underline font-semibold">England Football Learning</a>, take a screenshot showing your name, FAN number, and licence level.</li>
+                                    <li><strong>FA FAN Number</strong> — Your Football Affiliate Number. This must match the FAN shown in your dashboard screenshot.</li>
+                                </ol>
+                                <p class="mt-3 text-xs text-blue-600 font-medium">
+                                    <i class="fas fa-exclamation-circle mr-1"></i>
+                                    All three items are required for formal qualifications. This ensures we can perform a thorough cross-check.
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -44,85 +91,201 @@
                 {% csrf_token %}
                 
                 {% if form.non_field_errors %}
-                    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative">
-                        {{ form.non_field_errors }}
+                    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                        {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
                     </div>
                 {% endif %}
 
-                <!-- Qualification Type -->
-                <div>
-                    <label for="{{ form.qualification_type.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-                        {{ form.qualification_type.label }} <span class="text-red-500">*</span>
-                    </label>
-                    {{ form.qualification_type }}
-                    {% if form.qualification_type.errors %}
-                        <p class="mt-1 text-sm text-red-600">{{ form.qualification_type.errors.0 }}</p>
-                    {% endif %}
+                <!-- Step 1: Qualification Type -->
+                <div class="bg-gray-50 rounded-lg p-5">
+                    <div class="flex items-center mb-3">
+                        <span class="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">1</span>
+                        <label for="{{ form.qualification_type.id_for_label }}" class="text-lg font-semibold text-gray-900">
+                            {{ form.qualification_type.label }} <span class="text-red-500">*</span>
+                        </label>
+                    </div>
+                    <div class="ml-11">
+                        {{ form.qualification_type }}
+                        {% if form.qualification_type.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.qualification_type.errors.0 }}</p>
+                        {% endif %}
+                    </div>
                 </div>
 
-                <!-- Certificate Image -->
-                <div>
-                    <label for="{{ form.certificate_image.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-                        {{ form.certificate_image.label }} <span class="text-red-500">*</span>
-                    </label>
-                    {{ form.certificate_image }}
-                    {% if form.certificate_image.errors %}
-                        <p class="mt-1 text-sm text-red-600">{{ form.certificate_image.errors.0 }}</p>
-                    {% endif %}
-                    <p class="mt-1 text-xs text-gray-500">{{ form.certificate_image.help_text }}</p>
+                <!-- Step 2: Certificate Upload -->
+                <div class="bg-gray-50 rounded-lg p-5">
+                    <div class="flex items-center mb-3">
+                        <span class="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">2</span>
+                        <label for="{{ form.certificate_image.id_for_label }}" class="text-lg font-semibold text-gray-900">
+                            {{ form.certificate_image.label }} <span class="text-red-500">*</span>
+                        </label>
+                    </div>
+                    <div class="ml-11">
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
+                            {{ form.certificate_image }}
+                            <p class="mt-2 text-xs text-gray-500">
+                                <i class="fas fa-cloud-upload-alt mr-1"></i>
+                                {{ form.certificate_image.help_text }}
+                            </p>
+                        </div>
+                        {% if form.certificate_image.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.certificate_image.errors.0 }}</p>
+                        {% endif %}
+                    </div>
                 </div>
 
-                <!-- FA FAN Number -->
-                <div>
-                    <label for="{{ form.fa_fan_number.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-                        {{ form.fa_fan_number.label }}
-                    </label>
-                    {{ form.fa_fan_number }}
-                    {% if form.fa_fan_number.errors %}
-                        <p class="mt-1 text-sm text-red-600">{{ form.fa_fan_number.errors.0 }}</p>
-                    {% endif %}
-                    <p class="mt-1 text-xs text-gray-500">{{ form.fa_fan_number.help_text }}</p>
+                <!-- Step 3: Dashboard Screenshot (conditional - hidden for 'No Formal Qualification') -->
+                <div id="step-dashboard" class="bg-gray-50 rounded-lg p-5 hidden">
+                    <div class="flex items-center mb-3">
+                        <span class="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">3</span>
+                        <label for="{{ form.dashboard_screenshot.id_for_label }}" class="text-lg font-semibold text-gray-900">
+                            {{ form.dashboard_screenshot.label }} <span class="text-red-500">*</span>
+                        </label>
+                    </div>
+                    <div class="ml-11">
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
+                            {{ form.dashboard_screenshot }}
+                            <p class="mt-2 text-xs text-gray-500">
+                                <i class="fas fa-desktop mr-1"></i>
+                                {{ form.dashboard_screenshot.help_text }}
+                            </p>
+                        </div>
+                        {% if form.dashboard_screenshot.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.dashboard_screenshot.errors.0 }}</p>
+                        {% endif %}
+                        <div class="mt-3 bg-indigo-50 border border-indigo-200 rounded p-3">
+                            <p class="text-xs text-indigo-700">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                <strong>How to get your dashboard screenshot:</strong>
+                                Go to <a href="https://learn.englandfootball.com" target="_blank" class="underline font-bold">learn.englandfootball.com</a> &rarr; 
+                                Log in &rarr; Go to your profile/qualifications page &rarr; 
+                                Take a screenshot showing your name, FAN number, and licence level.
+                            </p>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Buttons -->
+                <!-- Step 4: FAN Number (conditional - hidden for 'No Formal Qualification') -->
+                <div id="step-fan" class="bg-gray-50 rounded-lg p-5 hidden">
+                    <div class="flex items-center mb-3">
+                        <span class="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">4</span>
+                        <label for="{{ form.fa_fan_number.id_for_label }}" class="text-lg font-semibold text-gray-900">
+                            {{ form.fa_fan_number.label }} <span class="text-red-500">*</span>
+                        </label>
+                    </div>
+                    <div class="ml-11">
+                        {{ form.fa_fan_number }}
+                        {% if form.fa_fan_number.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.fa_fan_number.errors.0 }}</p>
+                        {% endif %}
+                        <p class="mt-1 text-xs text-gray-500">{{ form.fa_fan_number.help_text }}</p>
+                    </div>
+                </div>
+
+                <!-- Fraud Warning -->
+                <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <div class="flex items-start">
+                        <svg class="h-5 w-5 text-red-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                        </svg>
+                        <p class="ml-3 text-sm text-red-800">
+                            <strong>Warning:</strong> Submitting fraudulent or falsified documents may result in permanent account suspension. 
+                            All submissions are thoroughly reviewed by our admin team.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Submit Buttons -->
                 <div class="flex space-x-4 pt-4">
                     <button type="submit" 
-                            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-300 flex items-center justify-center">
+                            class="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-300 flex items-center justify-center shadow-lg">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
                         </svg>
-                        Submit for Verification
+                        Submit for Fazz Pitchside Verification
                     </button>
                     <a href="{% url 'dashboard' %}" 
-                       class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-3 px-6 rounded-lg transition duration-300 text-center">
+                       class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 px-6 rounded-lg transition duration-300 text-center">
                         Cancel
                     </a>
                 </div>
             </form>
 
-            <!-- Process Information -->
-            <div class="mt-8 p-4 bg-gray-50 rounded-lg">
-                <h3 class="text-sm font-semibold text-gray-900 mb-2">Verification Process:</h3>
-                <ol class="text-sm text-gray-700 space-y-2">
-                    <li class="flex items-start">
-                        <span class="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-bold mr-2">1</span>
-                        <span>You upload your coaching certificate</span>
-                    </li>
-                    <li class="flex items-start">
-                        <span class="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-bold mr-2">2</span>
-                        <span>Our admin team reviews your certificate (typically within 24-48 hours)</span>
-                    </li>
-                    <li class="flex items-start">
-                        <span class="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-bold mr-2">3</span>
-                        <span>You'll see a "Verified" badge on your profile once approved</span>
-                    </li>
-                </ol>
+            <!-- Verification Process Timeline -->
+            <div class="mt-8 p-5 bg-gray-50 rounded-lg">
+                <h3 class="text-sm font-bold text-gray-900 mb-4">How the Verification Process Works:</h3>
+                <div class="space-y-4">
+                    <div class="flex items-start">
+                        <span class="flex-shrink-0 w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-bold mr-3">1</span>
+                        <div>
+                            <p class="font-semibold text-gray-800">You Submit Your Documents</p>
+                            <p class="text-sm text-gray-600">Upload your certificate, dashboard screenshot, and enter your FAN number.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="flex-shrink-0 w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-bold mr-3">2</span>
+                        <div>
+                            <p class="font-semibold text-gray-800">Admin Reviews Your Submission</p>
+                            <p class="text-sm text-gray-600">Our team cross-checks your certificate against your dashboard screenshot and FAN number. This typically takes a few days to a few weeks.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="flex-shrink-0 w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-bold mr-3">3</span>
+                        <div>
+                            <p class="font-semibold text-gray-800">Decision Is Made</p>
+                            <p class="text-sm text-gray-600">You'll see a <strong>"Fazz Pitchside Verified"</strong> badge on your profile once approved, or feedback if further action is needed.</p>
+                        </div>
+                    </div>
+                </div>
             </div>
+
+            <!-- Previous Verification History -->
+            {% if existing_requests %}
+            <div class="mt-8 p-5 bg-white border border-gray-200 rounded-lg">
+                <h3 class="text-sm font-bold text-gray-900 mb-4">Your Verification History:</h3>
+                <div class="space-y-3">
+                    {% for req in existing_requests %}
+                    <div class="flex items-center justify-between border-b border-gray-100 pb-3 last:border-0">
+                        <div>
+                            <p class="font-medium text-gray-800">{{ req.get_qualification_type_display }}</p>
+                            <p class="text-xs text-gray-500">Submitted: {{ req.submitted_at|date:"M d, Y" }}</p>
+                        </div>
+                        <div>
+                            {% if req.status == 'PENDING' %}
+                                <span class="bg-yellow-100 text-yellow-800 text-xs font-semibold px-3 py-1 rounded-full">
+                                    <i class="fas fa-clock mr-1"></i> Pending Review
+                                </span>
+                            {% elif req.status == 'APPROVED' %}
+                                <span class="bg-green-100 text-green-800 text-xs font-semibold px-3 py-1 rounded-full">
+                                    <i class="fas fa-check-circle mr-1"></i> Fazz Pitchside Verified
+                                </span>
+                            {% elif req.status == 'REJECTED' %}
+                                <span class="bg-red-100 text-red-800 text-xs font-semibold px-3 py-1 rounded-full">
+                                    <i class="fas fa-times-circle mr-1"></i> Rejected
+                                </span>
+                            {% elif req.status == 'FLAGGED' %}
+                                <span class="bg-purple-100 text-purple-800 text-xs font-semibold px-3 py-1 rounded-full">
+                                    <i class="fas fa-flag mr-1"></i> Under Review
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
         </div>
 
+        <!-- Disclaimer -->
         <div class="mt-6 text-center">
-            <p class="text-sm text-gray-500">
-                Your certificate information is kept secure and will only be used for verification purposes.
+            <p class="text-xs text-gray-500 max-w-lg mx-auto leading-relaxed">
+                <i class="fas fa-info-circle mr-1"></i>
+                Fazz Pitchside Verification is a platform-level document review process. While we conduct thorough checks 
+                including certificate inspection, dashboard cross-referencing, and FAN number consistency verification, 
+                this is <strong>not</strong> an official endorsement by The Football Association. 
+                Your documents are stored securely and used solely for verification purposes.
             </p>
         </div>
     </div>
@@ -145,8 +308,36 @@
     input[type="file"]:focus,
     select:focus {
         outline: none;
-        border-color: #2563eb;
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
     }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const qualSelect = document.getElementById('id_qualification_type');
+    const dashboardStep = document.getElementById('step-dashboard');
+    const fanStep = document.getElementById('step-fan');
+    const infoExtra = document.getElementById('info-extra-docs');
+
+    function toggleConditionalFields() {
+        const val = qualSelect.value;
+        const showExtra = val && val !== 'NONE';
+
+        if (showExtra) {
+            dashboardStep.classList.remove('hidden');
+            fanStep.classList.remove('hidden');
+            infoExtra.classList.remove('hidden');
+        } else {
+            dashboardStep.classList.add('hidden');
+            fanStep.classList.add('hidden');
+            infoExtra.classList.add('hidden');
+        }
+    }
+
+    qualSelect.addEventListener('change', toggleConditionalFields);
+    // Run on page load in case the form is re-rendered after a validation error
+    toggleConditionalFields();
+});
+</script>
 {% endblock %}

@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Contact Us - FazzPitchSideHub{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-3xl mx-auto">
+        <div class="bg-white rounded-lg shadow-xl p-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-8">Contact Us</h1>
+
+            <div class="prose max-w-none text-gray-700 space-y-6">
+                <p>Have a question, suggestion, or need support? We'd love to hear from you.</p>
+
+                <div class="bg-gray-50 rounded-lg p-6 space-y-4">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-envelope text-green-600 text-xl"></i>
+                        <div>
+                            <p class="font-medium text-gray-900">Email</p>
+                            <a href="mailto:support@fazzpitchsidehub.com" class="text-green-600 hover:text-green-700">
+                                support@fazzpitchsidehub.com
+                            </a>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <i class="fab fa-twitter text-blue-500 text-xl"></i>
+                        <div>
+                            <p class="font-medium text-gray-900">Twitter / X</p>
+                            <a href="https://twitter.com/FazzPitchside" target="_blank" class="text-blue-500 hover:text-blue-600">
+                                @FazzPitchside
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <h2 class="text-xl font-semibold text-gray-900">Report an Issue</h2>
+                <p>If you've found a bug or have a feature request, please email us with details and we'll get back to you within 48 hours.</p>
+
+                <h2 class="text-xl font-semibold text-gray-900">Data Requests</h2>
+                <p>For GDPR data access, portability, or deletion requests, please email us from the address associated with your account.
+                You can also <a href="{% url 'delete_account' %}" class="text-red-600 hover:text-red-700">delete your account</a> directly from settings.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

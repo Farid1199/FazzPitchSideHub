@@ -2,8 +2,9 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
 from .models import (
-    User, PlayerProfile, ClubProfile, ScoutProfile, 
-    ManagerProfile, QualificationVerification, Opportunity, Post
+    User, PlayerProfile, ClubProfile, ScoutProfile,
+    ManagerProfile, QualificationVerification, ScoutVerification, Opportunity, Post,
+    FanProfile
 )
 
 def validate_video_file_size(file):
@@ -48,6 +49,8 @@ class PlayerProfileForm(forms.ModelForm):
             'position', 
             'current_team',
             'available_for_club',
+            'availability_status',
+            'bio',
             'location_postcode', 
             'playing_level', 
             'height', 
@@ -58,15 +61,23 @@ class PlayerProfileForm(forms.ModelForm):
         ]
         widgets = {
             'previous_clubs': forms.Textarea(attrs={'rows': 3}),
+            'bio': forms.Textarea(attrs={'rows': 3, 'placeholder': 'A short professional bio shown on your profile...', 'maxlength': '500'}),
+            'availability_status': forms.Select(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent'
+            }),
         }
         labels = {
-            'available_for_club': 'Looking for a Club',
+            'available_for_club': 'Looking for a Club (legacy)',
+            'availability_status': 'Availability Status',
+            'bio': 'Professional Bio',
             'current_team': 'Current Team/Club',
             'youtube_highlight_url': 'YouTube Highlights URL',
         }
         help_texts = {
             'current_team': 'Leave blank if you are currently without a team.',
-            'available_for_club': 'Check this box if you are actively looking for a new club.',
+            'available_for_club': 'Legacy field — use Availability Status instead.',
+            'availability_status': 'Set your current availability so scouts and clubs can see your status.',
+            'bio': 'Write a short professional bio, or use the AI generator.',
         }
 
 class ClubProfileForm(forms.ModelForm):
@@ -155,27 +166,313 @@ class ManagerProfileForm(forms.ModelForm):
 
 class QualificationVerificationForm(forms.ModelForm):
     """
-    Form for managers to upload coaching certificates for verification.
+    Form for managers to upload coaching certificates for Fazz Pitchside verification.
+    
+    - Certificate image is ALWAYS required.
+    - Dashboard screenshot and FA FAN Number are ONLY required when the
+      qualification type is NOT 'NONE' (No Formal Qualification).
     """
     class Meta:
         model = QualificationVerification
         fields = [
             'qualification_type',
             'certificate_image',
+            'dashboard_screenshot',
             'fa_fan_number',
         ]
         widgets = {
-            'certificate_image': forms.FileInput(attrs={'accept': 'image/*'}),
+            'certificate_image': forms.FileInput(attrs={'accept': 'image/*,.pdf'}),
+            'dashboard_screenshot': forms.FileInput(attrs={'accept': 'image/*'}),
+            'fa_fan_number': forms.TextInput(attrs={
+                'placeholder': 'e.g., FAN1234567',
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            }),
         }
         labels = {
             'qualification_type': 'Which Qualification Are You Verifying?',
             'certificate_image': 'Upload Certificate Photo/Scan',
-            'fa_fan_number': 'FA FAN Number (Optional)',
+            'dashboard_screenshot': 'Upload England Football Dashboard Screenshot',
+            'fa_fan_number': 'FA FAN Number',
         }
         help_texts = {
-            'certificate_image': 'Take a clear photo or scan of your coaching certificate.',
-            'fa_fan_number': 'Your FA Football Affiliate Number, if you have one.',
+            'certificate_image': 'Upload a clear photo or scan of your coaching certificate. Your full name and qualification level must be visible.',
+            'dashboard_screenshot': 'Log into England Football Learning, take a screenshot showing your name, FAN number, and licence level.',
+            'fa_fan_number': 'Your FA Football Affiliate Number. This must match the FAN shown on your dashboard screenshot.',
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Make dashboard_screenshot and fa_fan_number not required at the field level;
+        # we enforce them conditionally in clean() based on qualification_type.
+        self.fields['dashboard_screenshot'].required = False
+        self.fields['fa_fan_number'].required = False
+
+    def clean_certificate_image(self):
+        cert = self.cleaned_data.get('certificate_image')
+        if not cert:
+            raise ValidationError('Certificate image is required. You cannot submit for verification without it.')
+        return cert
+
+    def clean(self):
+        cleaned_data = super().clean()
+        qualification_type = cleaned_data.get('qualification_type')
+
+        # If the manager selected an actual qualification (not NONE),
+        # FAN number and dashboard screenshot become mandatory.
+        if qualification_type and qualification_type != 'NONE':
+            fan = cleaned_data.get('fa_fan_number', '').strip()
+            screenshot = cleaned_data.get('dashboard_screenshot')
+
+            if not fan:
+                self.add_error('fa_fan_number', 'FA FAN Number is required when verifying a formal qualification.')
+            if not screenshot:
+                self.add_error('dashboard_screenshot', 'Dashboard screenshot is required when verifying a formal qualification.')
+
+        return cleaned_data
+
+
+class ScoutVerificationForm(forms.ModelForm):
+    """
+    Form for scouts to submit verification documents.
+
+    Validation rules:
+    - certificate_file: always required. Max 10 MB. PDF/JPG/PNG only.
+    - qualification_body + qualification_level: always required.
+    - If qualification_body == 'FA': fa_fan_number + dashboard_screenshot required.
+    - If requested_tier in TIER2/TIER3: safeguarding_certificate + dbs_expiry_date required;
+      dbs_expiry_date must be in the future.
+    - If requested_tier == TIER3: club_affiliation_proof + sample_scout_report required.
+    """
+
+    _ALLOWED_CERT_TYPES = ('.pdf', '.jpg', '.jpeg', '.png')
+    _ALLOWED_IMAGE_TYPES = ('.jpg', '.jpeg', '.png')
+    _MAX_FILE_BYTES = 10 * 1024 * 1024  # 10 MB
+
+    class Meta:
+        model = ScoutVerification
+        fields = [
+            'requested_tier',
+            'qualification_body',
+            'qualification_level',
+            'fa_fan_number',
+            'certificate_file',
+            'dashboard_screenshot',
+            'safeguarding_certificate',
+            'dbs_expiry_date',
+            'club_affiliation_proof',
+            'sample_scout_report',
+        ]
+        widgets = {
+            'requested_tier': forms.Select(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500',
+                'id': 'id_requested_tier',
+            }),
+            'qualification_body': forms.Select(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500',
+                'id': 'id_qualification_body',
+            }),
+            'qualification_level': forms.Select(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500',
+            }),
+            'fa_fan_number': forms.TextInput(attrs={
+                'placeholder': 'e.g., FAN1234567',
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500',
+            }),
+            'certificate_file': forms.FileInput(attrs={'accept': '.pdf,image/*'}),
+            'dashboard_screenshot': forms.FileInput(attrs={'accept': 'image/*'}),
+            'safeguarding_certificate': forms.FileInput(attrs={'accept': '.pdf,image/*'}),
+            'dbs_expiry_date': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500',
+            }),
+            'club_affiliation_proof': forms.FileInput(attrs={'accept': '.pdf,image/*'}),
+            'sample_scout_report': forms.FileInput(attrs={'accept': '.pdf,image/*'}),
+        }
+        labels = {
+            'requested_tier': 'Verification Tier Requested',
+            'qualification_body': 'Awarding Body',
+            'qualification_level': 'Qualification Level',
+            'fa_fan_number': 'FA FAN Number',
+            'certificate_file': 'Upload Certificate (PDF or Image)',
+            'dashboard_screenshot': 'England Football Dashboard Screenshot',
+            'safeguarding_certificate': 'Safeguarding Certificate (PDF or Image)',
+            'dbs_expiry_date': 'DBS Certificate Expiry Date',
+            'club_affiliation_proof': 'Club Affiliation Proof (PDF or Image)',
+            'sample_scout_report': 'Sample Scouting Report (PDF or Image)',
+        }
+        help_texts = {
+            'certificate_file': 'Clear scan or photo of your qualification certificate. Max 10 MB.',
+            'dashboard_screenshot': 'Log into learn.englandfootball.com and screenshot your qualifications page.',
+            'safeguarding_certificate': 'Required for Tier 2 and above. Max 10 MB.',
+            'dbs_expiry_date': 'Required for Tier 2 and above. Must be a future date.',
+            'club_affiliation_proof': 'Official signed letter from your club (Tier 3 only). Max 10 MB.',
+            'sample_scout_report': 'Anonymised sample report demonstrating scouting knowledge (Tier 3 only). Max 10 MB.',
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # All conditional fields are not required at the Django field level;
+        # enforcement is done in clean() based on cross-field logic.
+        conditional = [
+            'fa_fan_number', 'dashboard_screenshot', 'safeguarding_certificate',
+            'dbs_expiry_date', 'club_affiliation_proof', 'sample_scout_report',
+        ]
+        for field in conditional:
+            self.fields[field].required = False
+
+    # ------------------------------------------------------------------ #
+    # Helpers                                                              #
+    # ------------------------------------------------------------------ #
+    def _check_file_size(self, file, field_name):
+        import os
+        if file and hasattr(file, 'size') and file.size > self._MAX_FILE_BYTES:
+            size_mb = file.size / (1024 * 1024)
+            raise ValidationError(
+                f'{field_name} must be under 10 MB. Your file is {size_mb:.1f} MB.'
+            )
+
+    def _check_file_extension(self, file, allowed_exts, field_name):
+        import os
+        if file and hasattr(file, 'name'):
+            ext = os.path.splitext(file.name)[1].lower()
+            if ext not in allowed_exts:
+                raise ValidationError(
+                    f'{field_name}: unsupported file type "{ext}". '
+                    f'Allowed: {", ".join(allowed_exts)}.'
+                )
+
+    def _validate_mime(self, file, allowed_mimes, field_name):
+        """
+        Server-side MIME validation using python-magic where available.
+        Falls back to extension check if magic is not installed.
+        """
+        if not file:
+            return
+        try:
+            import magic
+            file.seek(0)
+            mime = magic.from_buffer(file.read(2048), mime=True)
+            file.seek(0)
+            if mime not in allowed_mimes:
+                raise ValidationError(
+                    f'{field_name}: file content type "{mime}" is not allowed.'
+                )
+        except ImportError:
+            pass  # python-magic not installed; extension check already performed
+
+    # ------------------------------------------------------------------ #
+    # Per-field clean methods                                              #
+    # ------------------------------------------------------------------ #
+    def clean_certificate_file(self):
+        f = self.cleaned_data.get('certificate_file')
+        if not f:
+            raise ValidationError('Certificate file is required.')
+        self._check_file_size(f, 'Certificate file')
+        self._check_file_extension(f, self._ALLOWED_CERT_TYPES, 'Certificate file')
+        self._validate_mime(
+            f,
+            {'application/pdf', 'image/jpeg', 'image/png'},
+            'Certificate file'
+        )
+        return f
+
+    def clean_dashboard_screenshot(self):
+        f = self.cleaned_data.get('dashboard_screenshot')
+        if f:
+            self._check_file_size(f, 'Dashboard screenshot')
+            self._check_file_extension(f, self._ALLOWED_IMAGE_TYPES, 'Dashboard screenshot')
+            self._validate_mime(f, {'image/jpeg', 'image/png'}, 'Dashboard screenshot')
+        return f
+
+    def clean_safeguarding_certificate(self):
+        f = self.cleaned_data.get('safeguarding_certificate')
+        if f:
+            self._check_file_size(f, 'Safeguarding certificate')
+            self._check_file_extension(f, self._ALLOWED_CERT_TYPES, 'Safeguarding certificate')
+            self._validate_mime(
+                f,
+                {'application/pdf', 'image/jpeg', 'image/png'},
+                'Safeguarding certificate'
+            )
+        return f
+
+    def clean_club_affiliation_proof(self):
+        f = self.cleaned_data.get('club_affiliation_proof')
+        if f:
+            self._check_file_size(f, 'Club affiliation proof')
+            self._check_file_extension(f, self._ALLOWED_CERT_TYPES, 'Club affiliation proof')
+            self._validate_mime(
+                f,
+                {'application/pdf', 'image/jpeg', 'image/png'},
+                'Club affiliation proof'
+            )
+        return f
+
+    def clean_sample_scout_report(self):
+        f = self.cleaned_data.get('sample_scout_report')
+        if f:
+            self._check_file_size(f, 'Sample scout report')
+            self._check_file_extension(f, self._ALLOWED_CERT_TYPES, 'Sample scout report')
+            self._validate_mime(
+                f,
+                {'application/pdf', 'image/jpeg', 'image/png'},
+                'Sample scout report'
+            )
+        return f
+
+    # ------------------------------------------------------------------ #
+    # Cross-field validation                                               #
+    # ------------------------------------------------------------------ #
+    def clean(self):
+        from django.utils import timezone
+        cleaned_data = super().clean()
+
+        qualification_body = cleaned_data.get('qualification_body')
+        requested_tier = cleaned_data.get('requested_tier')
+
+        # FA-specific fields
+        if qualification_body == 'FA':
+            if not cleaned_data.get('fa_fan_number', '').strip():
+                self.add_error('fa_fan_number', 'FA FAN Number is required for FA qualifications.')
+            if not cleaned_data.get('dashboard_screenshot'):
+                self.add_error(
+                    'dashboard_screenshot',
+                    'England Football dashboard screenshot is required for FA qualifications.'
+                )
+
+        # Tier 2 + Tier 3 requirements
+        if requested_tier in ('TIER2', 'TIER3'):
+            if not cleaned_data.get('safeguarding_certificate'):
+                self.add_error(
+                    'safeguarding_certificate',
+                    'Safeguarding certificate is required for Tier 2 and above.'
+                )
+            dbs_expiry = cleaned_data.get('dbs_expiry_date')
+            if not dbs_expiry:
+                self.add_error(
+                    'dbs_expiry_date',
+                    'DBS certificate expiry date is required for Tier 2 and above.'
+                )
+            elif dbs_expiry <= timezone.now().date():
+                self.add_error(
+                    'dbs_expiry_date',
+                    'DBS certificate has expired. Please renew it before applying.'
+                )
+
+        # Tier 3 only requirements
+        if requested_tier == 'TIER3':
+            if not cleaned_data.get('club_affiliation_proof'):
+                self.add_error(
+                    'club_affiliation_proof',
+                    'Club affiliation proof (signed letter or official email) is required for Tier 3.'
+                )
+            if not cleaned_data.get('sample_scout_report'):
+                self.add_error(
+                    'sample_scout_report',
+                    'A sample anonymised scouting report is required for Tier 3.'
+                )
+
+        return cleaned_data
 
 
 class OpportunityForm(forms.ModelForm):
@@ -196,22 +493,47 @@ class OpportunityForm(forms.ModelForm):
             'description',
             'published_date',
             'link',
+            'contract_type',
+            'age_min',
+            'age_max',
+            'trial_date',
+            'application_deadline',
+            'positions_needed',
+            'level_required',
         ]
         widgets = {
             'description': forms.Textarea(attrs={'rows': 5, 'placeholder': 'Provide details about the trial...'}),
             'link': forms.URLInput(attrs={'placeholder': 'https://example.com/trial-info (optional)'}),
+            'trial_date': forms.DateInput(attrs={'type': 'date'}),
+            'application_deadline': forms.DateInput(attrs={'type': 'date'}),
+            'positions_needed': forms.TextInput(attrs={'placeholder': 'e.g. ST, CM, CB'}),
+            'level_required': forms.TextInput(attrs={'placeholder': 'e.g. Step 3-4, Sunday League'}),
+            'age_min': forms.NumberInput(attrs={'min': '14', 'max': '50', 'placeholder': 'Min age'}),
+            'age_max': forms.NumberInput(attrs={'min': '14', 'max': '50', 'placeholder': 'Max age'}),
         }
         labels = {
             'title': 'Trial Title',
-            'target_position': 'Position Needed',
+            'target_position': 'Primary Position Needed',
             'description': 'Trial Description',
             'link': 'More Information Link (Optional)',
+            'contract_type': 'Contract Type',
+            'age_min': 'Minimum Age',
+            'age_max': 'Maximum Age',
+            'trial_date': 'Trial Date',
+            'application_deadline': 'Application Deadline',
+            'positions_needed': 'All Positions Needed',
+            'level_required': 'Level/Standard Required',
         }
         help_texts = {
             'title': 'e.g., "Striker Trial - Open Day"',
             'target_position': 'e.g., "Striker", "Midfielder", "All Positions"',
             'description': 'Include any additional details players should know.',
             'link': 'Link to your website or social media post with more details.',
+            'contract_type': 'What type of contract is offered?',
+            'trial_date': 'Date of the trial.',
+            'application_deadline': 'Last date to apply.',
+            'positions_needed': 'Comma-separated list of all positions you need.',
+            'level_required': 'Minimum playing standard expected.',
         }
 
 
@@ -426,4 +748,34 @@ class PostForm(forms.ModelForm):
             'strengths': 'Key Strengths',
             'areas_for_improvement': 'Areas for Improvement',
             'potential_rating': 'Potential Rating (out of 10)',
+        }
+
+
+class FanProfileForm(forms.ModelForm):
+    """
+    Form for creating/updating a Fan Profile.
+    """
+    class Meta:
+        model = FanProfile
+        fields = ['favourite_club', 'location', 'bio']
+        widgets = {
+            'favourite_club': forms.TextInput(attrs={
+                'placeholder': 'e.g., Halesowen Town FC',
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent',
+            }),
+            'location': forms.TextInput(attrs={
+                'placeholder': 'e.g., Birmingham',
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent',
+            }),
+            'bio': forms.Textarea(attrs={
+                'rows': 3,
+                'placeholder': 'Tell us about yourself...',
+                'maxlength': '300',
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent',
+            }),
+        }
+        labels = {
+            'favourite_club': 'Favourite Club',
+            'location': 'Location',
+            'bio': 'About You',
         }

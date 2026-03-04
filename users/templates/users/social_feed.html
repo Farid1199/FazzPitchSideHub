@@ -219,18 +219,67 @@
 
                                 <!-- Like and Comment Bar -->
                                 <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-                                    <button onclick="likePost({{ post.pk }})" 
-                                            class="flex items-center space-x-2 text-gray-600 hover:text-green-600 transition-colors"
-                                            id="likeBtn_{{ post.pk }}">
-                                        <i class="{% if user in post.likes.all %}fas text-green-600{% else %}far{% endif %} fa-heart fa-lg" 
-                                           id="likeIcon_{{ post.pk }}"></i>
-                                        <span id="likeCount_{{ post.pk }}" class="font-semibold">{{ post.total_likes }}</span>
-                                    </button>
+                                    <div class="flex items-center space-x-5">
+                                        <button onclick="likePost({{ post.pk }})" 
+                                                class="flex items-center space-x-2 text-gray-600 hover:text-green-600 transition-colors"
+                                                id="likeBtn_{{ post.pk }}">
+                                            <i class="{% if user in post.likes.all %}fas text-green-600{% else %}far{% endif %} fa-heart fa-lg" 
+                                               id="likeIcon_{{ post.pk }}"></i>
+                                            <span id="likeCount_{{ post.pk }}" class="font-semibold">{{ post.total_likes }}</span>
+                                        </button>
+                                        <button onclick="toggleComments({{ post.pk }})" 
+                                                class="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors">
+                                            <i class="far fa-comment fa-lg"></i>
+                                            <span id="commentCount_{{ post.pk }}" class="font-semibold">{{ post.total_comments }}</span>
+                                        </button>
+                                    </div>
                                     <div class="text-sm text-gray-500">
                                         {% if post.minutes_played %}
                                             <i class="fas fa-clock mr-1"></i>{{ post.minutes_played }} mins played
                                         {% endif %}
                                     </div>
+                                </div>
+
+                                <!-- Comments Section -->
+                                <div id="commentsSection_{{ post.pk }}" class="hidden border-t border-gray-200">
+                                    <div id="commentsList_{{ post.pk }}" class="px-6 py-3 space-y-3 max-h-64 overflow-y-auto">
+                                        {% for comment in post.comments.all %}
+                                        <div class="flex items-start space-x-3 group" id="comment_{{ comment.id }}">
+                                            <div class="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                                <span class="text-green-700 text-xs font-bold">{{ comment.user.username|make_list|first|upper }}</span>
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <div class="flex items-center space-x-2">
+                                                    <span class="text-sm font-semibold text-gray-800">{{ comment.user.username }}</span>
+                                                    <span class="text-xs text-gray-400">{{ comment.created_at|timesince }} ago</span>
+                                                    {% if comment.user == user or post.user == user %}
+                                                    <button onclick="deleteComment({{ comment.id }}, {{ post.pk }})" 
+                                                            class="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 transition-all ml-auto"
+                                                            title="Delete comment">
+                                                        <i class="fas fa-trash-alt text-xs"></i>
+                                                    </button>
+                                                    {% endif %}
+                                                </div>
+                                                <p class="text-sm text-gray-700 mt-0.5 break-words">{{ comment.body }}</p>
+                                            </div>
+                                        </div>
+                                        {% empty %}
+                                        <p class="text-sm text-gray-400 italic" id="noComments_{{ post.pk }}">No comments yet. Be the first!</p>
+                                        {% endfor %}
+                                    </div>
+                                    {% if user.is_authenticated %}
+                                    <div class="px-6 py-3 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
+                                        <form onsubmit="addComment(event, {{ post.pk }})" class="flex items-center space-x-3">
+                                            <input type="text" id="commentInput_{{ post.pk }}" 
+                                                   placeholder="Write a comment..." maxlength="500"
+                                                   class="flex-1 text-sm border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                                            <button type="submit" 
+                                                    class="bg-green-600 text-white rounded-full px-4 py-2 text-sm font-semibold hover:bg-green-700 transition-colors">
+                                                Post
+                                            </button>
+                                        </form>
+                                    </div>
+                                    {% endif %}
                                 </div>
 
                             </div>
@@ -305,6 +354,91 @@
                 }
                 
                 likeCount.textContent = data.total_likes;
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function toggleComments(postId) {
+        const section = document.getElementById(`commentsSection_${postId}`);
+        section.classList.toggle('hidden');
+    }
+
+    function addComment(event, postId) {
+        event.preventDefault();
+        const input = document.getElementById(`commentInput_${postId}`);
+        const body = input.value.trim();
+        if (!body) return;
+
+        const formData = new FormData();
+        formData.append('body', body);
+
+        fetch(`/posts/${postId}/comment/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const list = document.getElementById(`commentsList_${postId}`);
+                const noComments = document.getElementById(`noComments_${postId}`);
+                if (noComments) noComments.remove();
+
+                const c = data.comment;
+                const initial = c.username.charAt(0).toUpperCase();
+                const deleteBtn = c.can_delete 
+                    ? `<button onclick="deleteComment(${c.id}, ${postId})" class="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 transition-all ml-auto" title="Delete comment"><i class="fas fa-trash-alt text-xs"></i></button>`
+                    : '';
+
+                const commentHtml = `
+                    <div class="flex items-start space-x-3 group" id="comment_${c.id}">
+                        <div class="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                            <span class="text-green-700 text-xs font-bold">${initial}</span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm font-semibold text-gray-800">${c.username}</span>
+                                <span class="text-xs text-gray-400">${c.created_at}</span>
+                                ${deleteBtn}
+                            </div>
+                            <p class="text-sm text-gray-700 mt-0.5 break-words">${c.body}</p>
+                        </div>
+                    </div>`;
+                list.insertAdjacentHTML('beforeend', commentHtml);
+
+                document.getElementById(`commentCount_${postId}`).textContent = data.total_comments;
+                input.value = '';
+                list.scrollTop = list.scrollHeight;
+            } else {
+                alert(data.error || 'Failed to add comment.');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function deleteComment(commentId, postId) {
+        if (!confirm('Delete this comment?')) return;
+
+        fetch(`/comments/${commentId}/delete/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const el = document.getElementById(`comment_${commentId}`);
+                if (el) el.remove();
+                document.getElementById(`commentCount_${postId}`).textContent = data.total_comments;
+
+                const list = document.getElementById(`commentsList_${postId}`);
+                if (list && list.children.length === 0) {
+                    list.innerHTML = '<p class="text-sm text-gray-400 italic" id="noComments_' + postId + '">No comments yet. Be the first!</p>';
+                }
             }
         })
         .catch(error => console.error('Error:', error));

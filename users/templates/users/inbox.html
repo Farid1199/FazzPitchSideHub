@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Messages - FazzPitchSideHub{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-3xl mx-auto">
+        <div class="bg-white rounded-lg shadow-xl">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h1 class="text-2xl font-bold text-gray-900">
+                    <i class="fas fa-envelope mr-2 text-green-600"></i> Messages
+                </h1>
+            </div>
+
+            {% if conversations %}
+            <div class="divide-y divide-gray-200">
+                {% for item in conversations %}
+                <a href="{% url 'conversation' item.conversation.id %}"
+                   class="flex items-center px-6 py-4 hover:bg-gray-50 transition {% if item.unread > 0 %}bg-green-50{% endif %}">
+                    <div class="flex-shrink-0 w-12 h-12 bg-green-200 rounded-full flex items-center justify-center">
+                        <span class="text-green-700 font-bold text-lg">
+                            {% if item.other_user %}{{ item.other_user.username|first|upper }}{% else %}?{% endif %}
+                        </span>
+                    </div>
+                    <div class="ml-4 flex-1 min-w-0">
+                        <div class="flex items-center justify-between">
+                            <p class="text-sm font-medium text-gray-900 truncate">
+                                {% if item.other_user %}{{ item.other_user.username }}{% else %}Deleted User{% endif %}
+                            </p>
+                            {% if item.last_message %}
+                            <p class="text-xs text-gray-500">{{ item.last_message.sent_at|timesince }} ago</p>
+                            {% endif %}
+                        </div>
+                        <p class="text-sm text-gray-500 truncate">
+                            {% if item.last_message %}{{ item.last_message.body|truncatewords:10 }}{% else %}No messages yet{% endif %}
+                        </p>
+                    </div>
+                    {% if item.unread > 0 %}
+                    <span class="ml-2 px-2.5 py-0.5 rounded-full bg-green-600 text-white text-xs font-bold">{{ item.unread }}</span>
+                    {% endif %}
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="px-6 py-16 text-center">
+                <i class="fas fa-comments text-4xl text-gray-300 mb-4"></i>
+                <p class="text-gray-500 text-lg">No conversations yet.</p>
+                <p class="text-gray-400 text-sm mt-1">Visit a player's profile and click "Message" to start a conversation.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

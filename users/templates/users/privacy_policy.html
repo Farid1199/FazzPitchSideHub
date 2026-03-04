@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Privacy Policy - FazzPitchSideHub{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="bg-white rounded-lg shadow-xl p-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-8">Privacy Policy</h1>
+            <p class="text-sm text-gray-500 mb-6">Last updated: {{ "now"|date:"d F Y" }}</p>
+
+            <div class="prose max-w-none text-gray-700 space-y-6">
+                <h2 class="text-xl font-semibold text-gray-900">1. Introduction</h2>
+                <p>Fazz Pitchside Hub ("we", "our", "us") is committed to protecting your personal data.
+                This privacy policy explains how we collect, use, and safeguard your information when you use our platform.</p>
+
+                <h2 class="text-xl font-semibold text-gray-900">2. Data We Collect</h2>
+                <ul class="list-disc pl-6 space-y-1">
+                    <li>Account information: username, email address, password (hashed).</li>
+                    <li>Profile data: position, playing level, height, preferred foot, clubs, bio.</li>
+                    <li>Uploaded media: profile images, highlight videos, verification documents.</li>
+                    <li>Activity data: trial applications, posts, messages, follows.</li>
+                    <li>Technical data: IP address, browser type, device information.</li>
+                </ul>
+
+                <h2 class="text-xl font-semibold text-gray-900">3. How We Use Your Data</h2>
+                <ul class="list-disc pl-6 space-y-1">
+                    <li>To provide and personalise the platform experience.</li>
+                    <li>To match players with relevant trial opportunities.</li>
+                    <li>To enable messaging and social features.</li>
+                    <li>To verify user identities and qualifications.</li>
+                    <li>To improve the platform and fix issues.</li>
+                </ul>
+
+                <h2 class="text-xl font-semibold text-gray-900">4. Data Sharing</h2>
+                <p>We do not sell your personal data. Your profile information is visible to other users based on your privacy settings.
+                Verification documents are only accessible to platform administrators.</p>
+
+                <h2 class="text-xl font-semibold text-gray-900">5. Data Retention</h2>
+                <p>We retain your data for as long as your account is active. You can delete your account at any time, which will
+                permanently remove all your data from our systems.</p>
+
+                <h2 class="text-xl font-semibold text-gray-900">6. Your Rights (GDPR)</h2>
+                <ul class="list-disc pl-6 space-y-1">
+                    <li><strong>Access:</strong> You can view all data we hold about you in your profile.</li>
+                    <li><strong>Rectification:</strong> You can update your information via Edit Profile.</li>
+                    <li><strong>Erasure:</strong> You can delete your account via Settings &gt; Delete Account.</li>
+                    <li><strong>Portability:</strong> Contact us to request a data export.</li>
+                    <li><strong>Restrict/Object:</strong> You can set your profile to private.</li>
+                </ul>
+
+                <h2 class="text-xl font-semibold text-gray-900">7. Cookies</h2>
+                <p>We use essential cookies for session management and authentication.
+                We use localStorage for user preference settings (e.g., cookie consent, accessibility preferences).</p>
+
+                <h2 class="text-xl font-semibold text-gray-900">8. Contact</h2>
+                <p>For any privacy-related queries, please contact us via the <a href="{% url 'contact' %}" class="text-green-600 hover:text-green-700">Contact Page</a>.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

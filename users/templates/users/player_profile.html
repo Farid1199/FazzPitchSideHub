@@ -64,6 +64,15 @@
                                     ✓ Available
                                 </span>
                             {% endif %}
+                            <!-- Availability Status Badge -->
+                            <span class="px-4 py-1 rounded-full text-sm font-bold
+                                {% if player.availability_status == 'AVAILABLE' %}bg-green-400 text-green-900
+                                {% elif player.availability_status == 'OPEN' %}bg-blue-400 text-blue-900
+                                {% elif player.availability_status == 'TRIALLING' %}bg-yellow-400 text-yellow-900
+                                {% elif player.availability_status == 'INJURED' %}bg-red-400 text-red-900
+                                {% else %}bg-gray-400 text-gray-900{% endif %}">
+                                {{ player.get_availability_status_display }}
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -151,50 +160,70 @@
                     </div>
                 {% endif %}
 
-                <!-- Contact Section -->
+                <!-- Bio -->
+                {% if player.bio %}
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">About</h2>
+                    <div class="bg-gray-50 rounded-lg p-6">
+                        <p class="text-gray-700">{{ player.bio }}</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Contact / Action Section -->
                 <div class="border-t pt-8">
-                    <h2 class="text-2xl font-bold text-gray-900 mb-4">Interested in This Player?</h2>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">Actions</h2>
                     
                     {% if user.is_authenticated %}
-                        {% if user.role == 'CLUB' or user.role == 'SCOUT' or user.role == 'MANAGER' %}
-                            <div class="bg-blue-50 border-l-4 border-blue-400 p-6 rounded mb-6">
-                                <div class="flex">
-                                    <div class="flex-shrink-0">
-                                        <svg class="h-6 w-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                        </svg>
-                                    </div>
-                                    <div class="ml-3 flex-1">
-                                        <h3 class="text-lg font-medium text-blue-800">Send a Message</h3>
-                                        <p class="mt-2 text-sm text-blue-700">
-                                            Use the messaging feature below to contact {{ player_user.username }} about trial opportunities, club information, or any questions you may have.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
+                        <!-- Follow / Message buttons for everyone -->
+                        {% if user != player_user %}
+                        <div class="flex flex-wrap gap-3 mb-6">
+                            <!-- Follow Button -->
+                            <button id="follow-btn" onclick="toggleFollow()"
+                                class="px-6 py-3 rounded-lg font-bold transition flex items-center
+                                {% if is_following %}bg-gray-200 text-gray-700 hover:bg-gray-300{% else %}bg-green-600 text-white hover:bg-green-700{% endif %}">
+                                <i class="fas fa-user-plus mr-2"></i>
+                                <span id="follow-text">{% if is_following %}Following{% elif has_requested %}Requested{% else %}Follow{% endif %}</span>
+                            </button>
 
-                            <div class="flex flex-col sm:flex-row gap-4">
-                                <button onclick="alert('Messaging feature coming soon! For now, you can view the player\'s contact information in your dashboard.')" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 rounded-lg transition duration-300 flex items-center justify-center">
-                                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                    </svg>
-                                    Send Message
-                                </button>
-                                
-                                <button onclick="alert('Email: {{ player_user.email }}')" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-lg transition duration-300 flex items-center justify-center">
-                                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                                    </svg>
-                                    View Contact Info
-                                </button>
-                            </div>
-                        {% else %}
-                            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-6 rounded">
-                                <p class="text-yellow-800">
-                                    Only clubs, scouts, and managers can contact players. If you're interested in finding opportunities, check out our <a href="{% url 'home' %}" class="font-semibold underline">latest trials</a>.
-                                </p>
-                            </div>
+                            <!-- Message Button -->
+                            <a href="{% url 'start_conversation' player_user.id %}"
+                                class="px-6 py-3 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition flex items-center">
+                                <i class="fas fa-envelope mr-2"></i> Message
+                            </a>
+
+                            <!-- Watchlist (Scout) -->
+                            {% if user.role == 'SCOUT' %}
+                            <button id="watchlist-btn" onclick="toggleWatchlist()"
+                                class="px-6 py-3 rounded-lg font-bold transition flex items-center
+                                {% if on_watchlist %}bg-purple-200 text-purple-700 hover:bg-purple-300{% else %}bg-purple-600 text-white hover:bg-purple-700{% endif %}">
+                                <i class="fas fa-binoculars mr-2"></i>
+                                <span id="watchlist-text">{% if on_watchlist %}On Watchlist{% else %}Add to Watchlist{% endif %}</span>
+                            </button>
+                            {% endif %}
+
+                            <!-- Shortlist (Club) -->
+                            {% if user.role == 'CLUB' %}
+                            <button id="shortlist-btn" onclick="toggleShortlist()"
+                                class="px-6 py-3 rounded-lg font-bold transition flex items-center
+                                {% if on_shortlist %}bg-blue-200 text-blue-700 hover:bg-blue-300{% else %}bg-blue-600 text-white hover:bg-blue-700{% endif %}">
+                                <i class="fas fa-clipboard-list mr-2"></i>
+                                <span id="shortlist-text">{% if on_shortlist %}Shortlisted{% else %}Add to Shortlist{% endif %}</span>
+                            </button>
+                            {% endif %}
+                        </div>
+
+                        <!-- Follower counts -->
+                        <div class="flex space-x-6 text-sm text-gray-500 mb-6">
+                            <a href="{% url 'followers_list' player_user.id %}" class="hover:text-green-600">
+                                <strong class="text-gray-900">{{ follower_count|default:"0" }}</strong> Followers
+                            </a>
+                            <a href="{% url 'following_list' player_user.id %}" class="hover:text-green-600">
+                                <strong class="text-gray-900">{{ following_count|default:"0" }}</strong> Following
+                            </a>
+                        </div>
                         {% endif %}
+
                     {% else %}
                         <div class="bg-gray-50 border-l-4 border-gray-400 p-6 rounded">
                             <p class="text-gray-800">
@@ -215,4 +244,80 @@
         aspect-ratio: 16 / 9;
     }
 </style>
+
+{% if user.is_authenticated and user != player_user %}
+<script>
+let isFollowing = {{ is_following|yesno:"true,false" }};
+let hasRequested = {{ has_requested|yesno:"true,false" }};
+let onWatchlist = {{ on_watchlist|yesno:"true,false" }};
+let onShortlist = {{ on_shortlist|yesno:"true,false" }};
+const csrfToken = '{{ csrf_token }}';
+const playerId = {{ player_user.id }};
+const playerProfileId = {{ player.id }};
+
+function toggleFollow() {
+    const url = isFollowing || hasRequested
+        ? `/unfollow/${playerId}/`
+        : `/follow/${playerId}/`;
+    fetch(url, {
+        method: 'POST',
+        headers: {'X-CSRFToken': csrfToken, 'X-Requested-With': 'XMLHttpRequest'}
+    }).then(r => r.json()).then(data => {
+        const btn = document.getElementById('follow-btn');
+        const text = document.getElementById('follow-text');
+        if (data.status === 'following') {
+            isFollowing = true; hasRequested = false;
+            text.textContent = 'Following';
+            btn.className = btn.className.replace(/bg-green-600 text-white hover:bg-green-700/g, 'bg-gray-200 text-gray-700 hover:bg-gray-300');
+        } else if (data.status === 'requested') {
+            hasRequested = true;
+            text.textContent = 'Requested';
+            btn.className = btn.className.replace(/bg-green-600 text-white hover:bg-green-700/g, 'bg-gray-200 text-gray-700 hover:bg-gray-300');
+        } else if (data.status === 'unfollowed') {
+            isFollowing = false; hasRequested = false;
+            text.textContent = 'Follow';
+            btn.className = btn.className.replace(/bg-gray-200 text-gray-700 hover:bg-gray-300/g, 'bg-green-600 text-white hover:bg-green-700');
+        }
+    });
+}
+
+function toggleWatchlist() {
+    const url = onWatchlist
+        ? `/watchlist/remove/${playerProfileId}/`
+        : `/watchlist/add/${playerProfileId}/`;
+    fetch(url, {
+        method: 'POST',
+        headers: {'X-CSRFToken': csrfToken, 'X-Requested-With': 'XMLHttpRequest'}
+    }).then(r => r.json()).then(data => {
+        const text = document.getElementById('watchlist-text');
+        if (data.status === 'added' || data.status === 'already_exists') {
+            onWatchlist = true;
+            text.textContent = 'On Watchlist';
+        } else {
+            onWatchlist = false;
+            text.textContent = 'Add to Watchlist';
+        }
+    });
+}
+
+function toggleShortlist() {
+    const url = onShortlist
+        ? `/shortlist/remove/${playerProfileId}/`
+        : `/shortlist/add/${playerProfileId}/`;
+    fetch(url, {
+        method: 'POST',
+        headers: {'X-CSRFToken': csrfToken, 'X-Requested-With': 'XMLHttpRequest'}
+    }).then(r => r.json()).then(data => {
+        const text = document.getElementById('shortlist-text');
+        if (data.status === 'added' || data.status === 'already_exists') {
+            onShortlist = true;
+            text.textContent = 'Shortlisted';
+        } else {
+            onShortlist = false;
+            text.textContent = 'Add to Shortlist';
+        }
+    });
+}
+</script>
+{% endif %}
 {% endblock %}

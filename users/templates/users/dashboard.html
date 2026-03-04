@@ -19,6 +19,8 @@
                 Scout Dashboard
                 {% elif user.role == 'MANAGER' %}
                 Manager Dashboard
+                {% elif user.role == 'FAN' %}
+                Fan Dashboard
                 {% endif %}
             </p>
         </div>
@@ -403,6 +405,10 @@
                     Find Players
                 </a>
             </div>
+            <a href="{% url 'club_shortlist' %}"
+                class="mt-3 block w-full bg-yellow-500 hover:bg-yellow-600 text-white text-center font-semibold py-2 px-4 rounded-lg transition duration-300">
+                <i class="fas fa-clipboard-list mr-1"></i> My Shortlist
+            </a>
 
             <!-- Claim & Verify Feature UI -->
             {% if unverified_opportunities %}
@@ -468,6 +474,10 @@
             <a href="{% url 'search_players' %}"
                 class="mt-6 block w-full bg-purple-600 hover:bg-purple-700 text-white text-center font-semibold py-2 px-4 rounded-lg transition duration-300">
                 Find Players
+            </a>
+            <a href="{% url 'scout_watchlist' %}"
+                class="mt-3 block w-full bg-yellow-500 hover:bg-yellow-600 text-white text-center font-semibold py-2 px-4 rounded-lg transition duration-300">
+                <i class="fas fa-binoculars mr-1"></i> My Watchlist
             </a>
             {% endif %}
         </div>
@@ -568,20 +578,20 @@
                         <span class="font-semibold">{{ user.manager_profile.get_highest_qualification_display }}</span>
                     </div>
                     <div class="flex justify-between items-center">
-                        <span class="text-gray-600">Status:</span>
+                        <span class="text-gray-600">Verification:</span>
                         {% if user.manager_profile.qualification_verified %}
                         <span
-                            class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded flex items-center">
+                            class="bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded flex items-center border border-blue-200">
                             <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd"
                                     d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                                     clip-rule="evenodd" />
                             </svg>
-                            Verified
+                            Fazz Pitchside Verified
                         </span>
                         {% else %}
                         <span
-                            class="bg-gray-100 text-gray-800 text-xs font-semibold px-2.5 py-0.5 rounded">Unverified</span>
+                            class="bg-gray-100 text-gray-800 text-xs font-semibold px-2.5 py-0.5 rounded">Not Verified</span>
                         {% endif %}
                     </div>
                     <div class="flex justify-between">
@@ -603,8 +613,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-gray-500 text-sm">Experience</p>
-                            <p class="text-3xl font-bold text-gray-900">{{
-                                user.manager_profile.years_of_experience|default:"0" }}</p>
+                            <p class="text-3xl font-bold text-gray-900">{{ user.manager_profile.years_of_experience|default:"0" }}</p>
                             <p class="text-sm text-gray-500">Years</p>
                         </div>
                         <svg class="w-12 h-12 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -618,8 +627,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-gray-500 text-sm">Games Managed</p>
-                            <p class="text-3xl font-bold text-gray-900">{{
-                                user.manager_profile.games_managed|default:"0" }}</p>
+                            <p class="text-3xl font-bold text-gray-900">{{ user.manager_profile.games_managed|default:"0" }}</p>
                         </div>
                         <svg class="w-12 h-12 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -644,8 +652,29 @@
             </div>
         </div>
 
-        <!-- Qualification Verification Section -->
-        {% if not user.manager_profile.qualification_verified %}
+        <!-- Fazz Pitchside Verified Badge Display -->
+        {% if user.manager_profile.qualification_verified %}
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 mb-8">
+            <div class="flex items-start">
+                <div class="flex-shrink-0 w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                    <svg class="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="ml-4 flex-1">
+                    <h3 class="text-lg font-bold text-blue-900 flex items-center">
+                        Fazz Pitchside Verified — {{ user.manager_profile.get_highest_qualification_display }}
+                    </h3>
+                    <p class="mt-1 text-sm text-blue-700">Your coaching qualification has been verified through our platform's document review process.</p>
+                    <p class="mt-2 text-xs text-gray-500 italic">
+                        This verification was conducted by Fazz Pitchside through certificate inspection, FA dashboard cross-referencing, and FAN number consistency checks. 
+                        This is a platform-level verification and is not an official endorsement by The Football Association.
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <!-- Qualification Verification CTA -->
         <div class="bg-yellow-50 border-l-4 border-yellow-400 p-6 mb-8">
             <div class="flex">
                 <div class="flex-shrink-0">
@@ -656,19 +685,19 @@
                     </svg>
                 </div>
                 <div class="ml-3 flex-1">
-                    <h3 class="text-sm font-medium text-yellow-800">Verify Your Coaching Qualifications</h3>
+                    <h3 class="text-sm font-medium text-yellow-800">Get Fazz Pitchside Verified</h3>
                     <div class="mt-2 text-sm text-yellow-700">
-                        <p>Get a verified badge to increase trust with players and clubs. Upload your coaching
-                            certificate for admin review.</p>
+                        <p>Earn a <strong>Fazz Pitchside Verified</strong> badge by uploading your coaching certificate, 
+                            England Football dashboard screenshot, and FA FAN number. Build trust with players and clubs.</p>
                     </div>
                     <div class="mt-4">
                         <a href="{% url 'submit_verification' %}"
-                            class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 inline-flex items-center">
+                            class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 inline-flex items-center shadow-md">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                    d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
                             </svg>
-                            Upload Certificate
+                            Start Verification
                         </a>
                     </div>
                 </div>
@@ -682,29 +711,44 @@
             <h2 class="text-2xl font-bold text-gray-900 mb-4">Verification Requests</h2>
             <div class="space-y-4">
                 {% for request in verification_requests %}
-                <div class="border border-gray-200 rounded-lg p-4 flex items-center justify-between">
-                    <div>
-                        <h3 class="font-semibold text-gray-900">{{ request.get_qualification_type_display }}</h3>
-                        <p class="text-sm text-gray-500">Submitted: {{ request.submitted_at|date:"M d, Y" }}</p>
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="font-semibold text-gray-900">{{ request.get_qualification_type_display }}</h3>
+                            <p class="text-sm text-gray-500">Submitted: {{ request.submitted_at|date:"M d, Y" }}</p>
+                        </div>
+                        <div>
+                            {% if request.status == 'PENDING' %}
+                            <span class="bg-yellow-100 text-yellow-800 text-sm font-semibold px-3 py-1 rounded-full">
+                                <i class="fas fa-clock mr-1"></i> Pending Review
+                            </span>
+                            {% elif request.status == 'APPROVED' %}
+                            <span
+                                class="bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 text-sm font-semibold px-3 py-1 rounded-full border border-blue-200 flex items-center">
+                                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd"
+                                        d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                                Fazz Pitchside Verified
+                            </span>
+                            {% elif request.status == 'REJECTED' %}
+                            <span class="bg-red-100 text-red-800 text-sm font-semibold px-3 py-1 rounded-full">
+                                <i class="fas fa-times-circle mr-1"></i> Rejected
+                            </span>
+                            {% elif request.status == 'FLAGGED' %}
+                            <span class="bg-purple-100 text-purple-800 text-sm font-semibold px-3 py-1 rounded-full">
+                                <i class="fas fa-flag mr-1"></i> Under Review
+                            </span>
+                            {% endif %}
+                        </div>
                     </div>
-                    <div>
-                        {% if request.status == 'PENDING' %}
-                        <span class="bg-yellow-100 text-yellow-800 text-sm font-semibold px-3 py-1 rounded">Pending
-                            Review</span>
-                        {% elif request.status == 'APPROVED' %}
-                        <span
-                            class="bg-green-100 text-green-800 text-sm font-semibold px-3 py-1 rounded flex items-center">
-                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd"
-                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                    clip-rule="evenodd" />
-                            </svg>
-                            Approved
-                        </span>
-                        {% elif request.status == 'REJECTED' %}
-                        <span class="bg-red-100 text-red-800 text-sm font-semibold px-3 py-1 rounded">Rejected</span>
-                        {% endif %}
+                    {% if request.status == 'REJECTED' and request.rejection_reason %}
+                    <div class="mt-3 bg-red-50 border border-red-200 rounded p-3">
+                        <p class="text-sm text-red-700"><strong>Reason:</strong> {{ request.rejection_reason }}</p>
+                        <a href="{% url 'submit_verification' %}" class="text-sm text-red-600 underline font-semibold mt-1 inline-block">Resubmit Documents</a>
                     </div>
+                    {% endif %}
                 </div>
                 {% endfor %}
             </div>
@@ -814,6 +858,52 @@
                     <strong>Tip:</strong> Share your tactical insights, formations, team performance updates, and
                     coaching methodology to showcase your expertise!
                 </p>
+            </div>
+        </div>
+
+        {% elif user.role == 'FAN' %}
+        <!-- Fan Dashboard -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <div class="flex items-center space-x-4 mb-6">
+                <div class="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center">
+                    <i class="fas fa-heart text-pink-500 text-3xl"></i>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900">Fan Hub</h2>
+                    <p class="text-gray-600">Welcome to the grassroots community!</p>
+                </div>
+            </div>
+
+            {% if user.fan_profile %}
+            <div class="space-y-3 mb-6">
+                {% if user.fan_profile.favourite_club %}
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Favourite Club:</span>
+                    <span class="font-semibold">{{ user.fan_profile.favourite_club }}</span>
+                </div>
+                {% endif %}
+                {% if user.fan_profile.location %}
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Location:</span>
+                    <span class="font-semibold">{{ user.fan_profile.location }}</span>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <a href="{% url 'feeds' %}" class="block bg-green-50 hover:bg-green-100 rounded-lg p-4 text-center transition">
+                    <i class="fas fa-newspaper text-green-600 text-2xl mb-2"></i>
+                    <p class="text-sm font-semibold text-gray-700">Latest News</p>
+                </a>
+                <a href="{% url 'community_hub' %}" class="block bg-purple-50 hover:bg-purple-100 rounded-lg p-4 text-center transition">
+                    <i class="fas fa-users text-purple-600 text-2xl mb-2"></i>
+                    <p class="text-sm font-semibold text-gray-700">Community Hub</p>
+                </a>
+                <a href="{% url 'home' %}" class="block bg-blue-50 hover:bg-blue-100 rounded-lg p-4 text-center transition">
+                    <i class="fas fa-futbol text-blue-600 text-2xl mb-2"></i>
+                    <p class="text-sm font-semibold text-gray-700">Trial Board</p>
+                </a>
             </div>
         </div>
 

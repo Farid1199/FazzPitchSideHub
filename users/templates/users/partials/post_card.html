@@ -247,20 +247,72 @@
         </div>
     {% endif %}
 
-    <!-- Like Bar -->
+    <!-- Like & Comment Bar -->
     <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-        <button onclick="likePost({{ post.pk }})" 
-                class="flex items-center space-x-2 text-gray-600 hover:text-green-600 transition-colors"
-                id="likeBtn_{{ post.pk }}">
-            <i class="{% if user in post.likes.all %}fas text-green-600{% else %}far{% endif %} fa-heart fa-lg" 
-               id="likeIcon_{{ post.pk }}"></i>
-            <span id="likeCount_{{ post.pk }}" class="font-semibold">{{ post.total_likes }}</span>
-        </button>
+        <div class="flex items-center space-x-5">
+            <button onclick="likePost({{ post.pk }})" 
+                    class="flex items-center space-x-2 text-gray-600 hover:text-green-600 transition-colors"
+                    id="likeBtn_{{ post.pk }}">
+                <i class="{% if user in post.likes.all %}fas text-green-600{% else %}far{% endif %} fa-heart fa-lg" 
+                   id="likeIcon_{{ post.pk }}"></i>
+                <span id="likeCount_{{ post.pk }}" class="font-semibold">{{ post.total_likes }}</span>
+            </button>
+            <button onclick="toggleComments({{ post.pk }})" 
+                    class="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors">
+                <i class="far fa-comment fa-lg"></i>
+                <span id="commentCount_{{ post.pk }}" class="font-semibold">{{ post.total_comments }}</span>
+            </button>
+        </div>
         <div class="text-sm text-gray-500">
             {% if post.minutes_played %}
                 <i class="fas fa-clock mr-1"></i>{{ post.minutes_played }} mins played
             {% endif %}
         </div>
+    </div>
+
+    <!-- Comments Section (hidden by default) -->
+    <div id="commentsSection_{{ post.pk }}" class="hidden border-t border-gray-200">
+        <!-- Existing Comments -->
+        <div id="commentsList_{{ post.pk }}" class="px-6 py-3 space-y-3 max-h-64 overflow-y-auto">
+            {% for comment in post.comments.all %}
+            <div class="flex items-start space-x-3 group" id="comment_{{ comment.id }}">
+                <div class="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                    <span class="text-green-700 text-xs font-bold">{{ comment.user.username|make_list|first|upper }}</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm font-semibold text-gray-800">{{ comment.user.username }}</span>
+                        <span class="text-xs text-gray-400">{{ comment.created_at|timesince }} ago</span>
+                        {% if comment.user == user or post.user == user %}
+                        <button onclick="deleteComment({{ comment.id }}, {{ post.pk }})" 
+                                class="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 transition-all ml-auto"
+                                title="Delete comment">
+                            <i class="fas fa-trash-alt text-xs"></i>
+                        </button>
+                        {% endif %}
+                    </div>
+                    <p class="text-sm text-gray-700 mt-0.5 break-words">{{ comment.body }}</p>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-sm text-gray-400 italic" id="noComments_{{ post.pk }}">No comments yet. Be the first!</p>
+            {% endfor %}
+        </div>
+
+        <!-- Add Comment Form -->
+        {% if user.is_authenticated %}
+        <div class="px-6 py-3 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
+            <form onsubmit="addComment(event, {{ post.pk }})" class="flex items-center space-x-3">
+                <input type="text" id="commentInput_{{ post.pk }}" 
+                       placeholder="Write a comment..." maxlength="500"
+                       class="flex-1 text-sm border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                <button type="submit" 
+                        class="bg-green-600 text-white rounded-full px-4 py-2 text-sm font-semibold hover:bg-green-700 transition-colors">
+                    Post
+                </button>
+            </form>
+        </div>
+        {% endif %}
     </div>
 
 </div>

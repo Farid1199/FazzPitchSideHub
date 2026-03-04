@@ -153,6 +153,87 @@
                                     j, Y \a\t g:i A" }}</p>
                             </div>
                         </div>
+
+                        <!-- Extended Trial Details -->
+                        {% if opportunity.contract_type %}
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 mt-1">
+                                <i class="fas fa-file-contract w-5 h-5 text-green-600"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-gray-500">Contract Type</p>
+                                <p class="text-lg font-semibold text-gray-900">{{ opportunity.get_contract_type_display }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if opportunity.age_min or opportunity.age_max %}
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 mt-1">
+                                <i class="fas fa-users w-5 h-5 text-green-600"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-gray-500">Age Range</p>
+                                <p class="text-lg font-semibold text-gray-900">
+                                    {% if opportunity.age_min and opportunity.age_max %}
+                                        {{ opportunity.age_min }} – {{ opportunity.age_max }} years
+                                    {% elif opportunity.age_min %}
+                                        {{ opportunity.age_min }}+ years
+                                    {% else %}
+                                        Up to {{ opportunity.age_max }} years
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if opportunity.trial_date %}
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 mt-1">
+                                <i class="fas fa-calendar-check w-5 h-5 text-green-600"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-gray-500">Trial Date</p>
+                                <p class="text-lg font-semibold text-gray-900">{{ opportunity.trial_date|date:"l, F j, Y" }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if opportunity.application_deadline %}
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 mt-1">
+                                <i class="fas fa-clock w-5 h-5 text-red-500"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-gray-500">Application Deadline</p>
+                                <p class="text-lg font-semibold text-gray-900">{{ opportunity.application_deadline|date:"l, F j, Y" }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if opportunity.positions_needed %}
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 mt-1">
+                                <i class="fas fa-list-ol w-5 h-5 text-green-600"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-gray-500">Positions Needed</p>
+                                <p class="text-lg font-semibold text-gray-900">{{ opportunity.positions_needed }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if opportunity.level_required %}
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 mt-1">
+                                <i class="fas fa-chart-line w-5 h-5 text-green-600"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-gray-500">Level Required</p>
+                                <p class="text-lg font-semibold text-gray-900">{{ opportunity.level_required }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
 

@@ -10,7 +10,7 @@
             <p class="text-xl text-gray-600">Let's get started. What best describes you?</p>
         </div>
 
-        <form method="post" class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <form method="post" class="grid md:grid-cols-2 lg:grid-cols-5 gap-8">
             {% csrf_token %}
             
             <!-- Player Card -->
@@ -79,6 +79,24 @@
                 <p class="text-gray-600 mb-4">Lead teams, develop strategies, and build successful squads</p>
                 <div class="inline-flex items-center text-orange-600 font-semibold group-hover:text-orange-700">
                     Continue as Manager
+                    <svg class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                </div>
+            </button>
+
+            <!-- Fan Card -->
+            <button type="submit" name="role" value="FAN" 
+                    class="group bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 p-8 text-center hover:scale-105 border-2 border-transparent hover:border-green-400">
+                <div class="mb-6">
+                    <svg class="w-20 h-20 mx-auto text-green-500 group-hover:text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-3">Fan</h2>
+                <p class="text-gray-600 mb-4">Follow players, clubs, and stay updated on grassroots football</p>
+                <div class="inline-flex items-center text-green-500 font-semibold group-hover:text-green-600">
+                    Continue as Fan
                     <svg class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>

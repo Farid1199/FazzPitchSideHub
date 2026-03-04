@@ -127,6 +127,110 @@
                     {% endif %}
                 </div>
 
+                <!-- Extended Trial Details -->
+                <div class="border-t border-gray-200 pt-6 mt-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                        <i class="fas fa-clipboard-list text-green-600 mr-2"></i>
+                        Extended Trial Details <span class="text-gray-400 text-sm font-normal ml-2">(Optional)</span>
+                    </h3>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Contract Type -->
+                        {% if form.contract_type %}
+                        <div>
+                            <label for="{{ form.contract_type.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                {{ form.contract_type.label }}
+                            </label>
+                            {{ form.contract_type }}
+                            {% if form.contract_type.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.contract_type.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Level Required -->
+                        {% if form.level_required %}
+                        <div>
+                            <label for="{{ form.level_required.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                {{ form.level_required.label }}
+                            </label>
+                            {{ form.level_required }}
+                            {% if form.level_required.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.level_required.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Age Min -->
+                        {% if form.age_min %}
+                        <div>
+                            <label for="{{ form.age_min.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                {{ form.age_min.label }}
+                            </label>
+                            {{ form.age_min }}
+                            {% if form.age_min.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.age_min.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Age Max -->
+                        {% if form.age_max %}
+                        <div>
+                            <label for="{{ form.age_max.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                {{ form.age_max.label }}
+                            </label>
+                            {{ form.age_max }}
+                            {% if form.age_max.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.age_max.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Trial Date -->
+                        {% if form.trial_date %}
+                        <div>
+                            <label for="{{ form.trial_date.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                {{ form.trial_date.label }}
+                            </label>
+                            {{ form.trial_date }}
+                            {% if form.trial_date.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.trial_date.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Application Deadline -->
+                        {% if form.application_deadline %}
+                        <div>
+                            <label for="{{ form.application_deadline.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                {{ form.application_deadline.label }}
+                            </label>
+                            {{ form.application_deadline }}
+                            {% if form.application_deadline.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.application_deadline.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Positions Needed (full width) -->
+                    {% if form.positions_needed %}
+                    <div class="mt-4">
+                        <label for="{{ form.positions_needed.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            {{ form.positions_needed.label }}
+                        </label>
+                        {{ form.positions_needed }}
+                        {% if form.positions_needed.help_text %}
+                            <p class="mt-1 text-sm text-gray-500">{{ form.positions_needed.help_text }}</p>
+                        {% endif %}
+                        {% if form.positions_needed.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.positions_needed.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+
                 <!-- Info Box -->
                 <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
                     <div class="flex">

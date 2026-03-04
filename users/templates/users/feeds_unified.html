@@ -216,6 +216,91 @@
         })
         .catch(error => console.error('Error:', error));
     }
+
+    function toggleComments(postId) {
+        const section = document.getElementById(`commentsSection_${postId}`);
+        section.classList.toggle('hidden');
+    }
+
+    function addComment(event, postId) {
+        event.preventDefault();
+        const input = document.getElementById(`commentInput_${postId}`);
+        const body = input.value.trim();
+        if (!body) return;
+
+        const formData = new FormData();
+        formData.append('body', body);
+
+        fetch(`/posts/${postId}/comment/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const list = document.getElementById(`commentsList_${postId}`);
+                const noComments = document.getElementById(`noComments_${postId}`);
+                if (noComments) noComments.remove();
+
+                const c = data.comment;
+                const initial = c.username.charAt(0).toUpperCase();
+                const deleteBtn = c.can_delete 
+                    ? `<button onclick="deleteComment(${c.id}, ${postId})" class="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 transition-all ml-auto" title="Delete comment"><i class="fas fa-trash-alt text-xs"></i></button>`
+                    : '';
+
+                const commentHtml = `
+                    <div class="flex items-start space-x-3 group" id="comment_${c.id}">
+                        <div class="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                            <span class="text-green-700 text-xs font-bold">${initial}</span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm font-semibold text-gray-800">${c.username}</span>
+                                <span class="text-xs text-gray-400">${c.created_at}</span>
+                                ${deleteBtn}
+                            </div>
+                            <p class="text-sm text-gray-700 mt-0.5 break-words">${c.body}</p>
+                        </div>
+                    </div>`;
+                list.insertAdjacentHTML('beforeend', commentHtml);
+
+                document.getElementById(`commentCount_${postId}`).textContent = data.total_comments;
+                input.value = '';
+                list.scrollTop = list.scrollHeight;
+            } else {
+                alert(data.error || 'Failed to add comment.');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function deleteComment(commentId, postId) {
+        if (!confirm('Delete this comment?')) return;
+
+        fetch(`/comments/${commentId}/delete/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const el = document.getElementById(`comment_${commentId}`);
+                if (el) el.remove();
+                document.getElementById(`commentCount_${postId}`).textContent = data.total_comments;
+
+                const list = document.getElementById(`commentsList_${postId}`);
+                if (list && list.children.length === 0) {
+                    list.innerHTML = '<p class="text-sm text-gray-400 italic" id="noComments_' + postId + '">No comments yet. Be the first!</p>';
+                }
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
 </script>
 
 {% endblock %}

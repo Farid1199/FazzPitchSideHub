@@ -1,0 +1,383 @@
+{% extends 'base.html' %}
+
+{% block title %}Scout Verification — FazzPitchSideHub{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-3xl mx-auto">
+
+    <!-- Rejection/Flagged notice (resubmission) -->
+    {% if existing and existing.status == 'REJECTED' %}
+    <div class="bg-red-50 border-l-4 border-red-500 rounded-lg p-6 mb-6">
+      <div class="flex items-start">
+        <svg class="h-6 w-6 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+        </svg>
+        <div class="ml-3">
+          <h3 class="text-lg font-semibold text-red-800">Previous Application Unsuccessful</h3>
+          {% if existing.rejection_reason %}
+          <p class="mt-2 text-red-700"><strong>Reason:</strong> {{ existing.rejection_reason }}</p>
+          {% endif %}
+          <p class="mt-2 text-red-600 text-sm">Please address the issues above and resubmit.</p>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if existing and existing.status == 'FLAGGED' %}
+    <div class="bg-purple-50 border-l-4 border-purple-500 rounded-lg p-6 mb-6">
+      <div class="flex items-start">
+        <svg class="h-6 w-6 text-purple-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 21v-4a4 4 0 014-4h10a4 4 0 014 4v4M12 3a4 4 0 100 8 4 4 0 000-8z"/>
+        </svg>
+        <div class="ml-3">
+          <h3 class="text-lg font-semibold text-purple-800">Submission Flagged for Further Review</h3>
+          <p class="mt-2 text-purple-700">You may resubmit with clearer documents if you wish.</p>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Main card -->
+    <div class="bg-white rounded-xl shadow-xl p-8">
+
+      <!-- Header -->
+      <div class="mb-8 text-center">
+        <div class="flex items-center justify-center w-20 h-20 bg-gradient-to-r from-green-500 to-teal-600 rounded-full mb-4 mx-auto shadow-lg">
+          <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806
+                     3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806
+                     3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946
+                     3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946
+                     3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806
+                     3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806
+                     3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946
+                     3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946
+                     3.42 3.42 0 013.138-3.138z"/>
+          </svg>
+        </div>
+        <h1 class="text-3xl font-bold text-gray-900">Scout Verification</h1>
+        <p class="text-gray-600 mt-2">Verify your scouting credentials to unlock full platform features</p>
+        <div class="mt-3 inline-flex items-center px-3 py-1 rounded-full bg-green-50 text-green-700 text-xs font-medium">
+          <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd"
+                  d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 
+                     0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 
+                     16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 
+                     10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                  clip-rule="evenodd"/>
+          </svg>
+          Platform-Level Verification
+        </div>
+      </div>
+
+      <!-- Tier explanation cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div class="border-2 border-green-200 rounded-lg p-4 text-center bg-green-50">
+          <div class="text-2xl font-bold text-green-700">Tier 1</div>
+          <div class="text-sm font-semibold text-green-600 mt-1">Grassroots</div>
+          <p class="mt-2 text-xs text-gray-600">Recreational or grassroots scouting. Basic certificate.</p>
+        </div>
+        <div class="border-2 border-blue-200 rounded-lg p-4 text-center bg-blue-50">
+          <div class="text-2xl font-bold text-blue-700">Tier 2</div>
+          <div class="text-sm font-semibold text-blue-600 mt-1">Semi-Professional</div>
+          <p class="mt-2 text-xs text-gray-600">Semi-pro clubs or academies. Safeguarding + DBS required.</p>
+        </div>
+        <div class="border-2 border-purple-200 rounded-lg p-4 text-center bg-purple-50">
+          <div class="text-2xl font-bold text-purple-700">Tier 3</div>
+          <div class="text-sm font-semibold text-purple-600 mt-1">Professional</div>
+          <p class="mt-2 text-xs text-gray-600">Professional clubs or full-time scouts. Affiliation proof + sample report required.</p>
+        </div>
+      </div>
+
+      <!-- Django messages -->
+      {% if messages %}
+      <div class="mb-6 space-y-2">
+        {% for message in messages %}
+        <div class="p-3 rounded
+          {% if message.tags == 'error' %}bg-red-50 text-red-700 border border-red-200
+          {% elif message.tags == 'success' %}bg-green-50 text-green-700 border border-green-200
+          {% else %}bg-blue-50 text-blue-700 border border-blue-200{% endif %}">
+          {{ message }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- Form non-field errors -->
+      {% if form.non_field_errors %}
+      <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+        {% for error in form.non_field_errors %}
+        <p class="text-red-700 text-sm">{{ error }}</p>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <form method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+
+        <!-- ── Step 1: Tier & Qualification ── -->
+        <div class="border-t border-gray-100 pt-6 mb-6">
+          <h2 class="text-lg font-semibold text-gray-800 mb-4">1. Verification Tier &amp; Qualification</h2>
+
+          <!-- Requested Tier -->
+          <div class="mb-5">
+            <label class="block text-sm font-medium text-gray-700 mb-1" for="{{ form.requested_tier.id_for_label }}">
+              Requested Tier <span class="text-red-500">*</span>
+            </label>
+            <select id="{{ form.requested_tier.id_for_label }}" name="{{ form.requested_tier.html_name }}"
+                    class="w-full border {% if form.requested_tier.errors %}border-red-400{% else %}border-gray-300{% endif %} rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-400">
+              <option value="">-- Select tier --</option>
+              {% for value, label in form.fields.requested_tier.choices %}
+              <option value="{{ value }}" {% if form.requested_tier.value == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+            {% if form.requested_tier.errors %}
+            <p class="text-red-600 text-xs mt-1">{{ form.requested_tier.errors|join:", " }}</p>
+            {% endif %}
+          </div>
+
+          <!-- Qualification Body -->
+          <div class="mb-5">
+            <label class="block text-sm font-medium text-gray-700 mb-1" for="{{ form.qualification_body.id_for_label }}">
+              Qualification Body <span class="text-red-500">*</span>
+            </label>
+            <select id="{{ form.qualification_body.id_for_label }}" name="{{ form.qualification_body.html_name }}"
+                    class="w-full border {% if form.qualification_body.errors %}border-red-400{% else %}border-gray-300{% endif %} rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-400">
+              <option value="">-- Select body --</option>
+              {% for value, label in form.fields.qualification_body.choices %}
+              <option value="{{ value }}" {% if form.qualification_body.value == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+            {% if form.qualification_body.errors %}
+            <p class="text-red-600 text-xs mt-1">{{ form.qualification_body.errors|join:", " }}</p>
+            {% endif %}
+          </div>
+
+          <!-- Qualification Level -->
+          <div class="mb-5">
+            <label class="block text-sm font-medium text-gray-700 mb-1" for="{{ form.qualification_level.id_for_label }}">
+              Qualification Level <span class="text-red-500">*</span>
+            </label>
+            <select id="{{ form.qualification_level.id_for_label }}" name="{{ form.qualification_level.html_name }}"
+                    class="w-full border {% if form.qualification_level.errors %}border-red-400{% else %}border-gray-300{% endif %} rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-400">
+              <option value="">-- Select level --</option>
+              {% for value, label in form.fields.qualification_level.choices %}
+              <option value="{{ value }}" {% if form.qualification_level.value == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+            {% if form.qualification_level.errors %}
+            <p class="text-red-600 text-xs mt-1">{{ form.qualification_level.errors|join:", " }}</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- ── Step 2: FA-Specific Fields (shown only when body=FA) ── -->
+        <div id="fa-section" class="border-t border-gray-100 pt-6 mb-6 hidden">
+          <h2 class="text-lg font-semibold text-gray-800 mb-1">2. England Football / FA Details</h2>
+          <p class="text-sm text-gray-500 mb-4">Required for FA-qualified scouts.</p>
+
+          <!-- FAN Number -->
+          <div class="mb-5">
+            <label class="block text-sm font-medium text-gray-700 mb-1" for="{{ form.fa_fan_number.id_for_label }}">
+              FA FAN Number <span class="text-red-500">*</span>
+            </label>
+            <input type="text" id="{{ form.fa_fan_number.id_for_label }}" name="{{ form.fa_fan_number.html_name }}"
+                   value="{{ form.fa_fan_number.value|default:'' }}"
+                   placeholder="e.g. 12345678"
+                   class="w-full border {% if form.fa_fan_number.errors %}border-red-400{% else %}border-gray-300{% endif %} rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-400">
+            <p class="text-xs text-gray-500 mt-1">Your Football Affiliate Number from the England Football Learning portal.</p>
+            {% if form.fa_fan_number.errors %}
+            <p class="text-red-600 text-xs mt-1">{{ form.fa_fan_number.errors|join:", " }}</p>
+            {% endif %}
+          </div>
+
+          <!-- Dashboard Screenshot -->
+          <div class="mb-5">
+            <label class="block text-sm font-medium text-gray-700 mb-1" for="{{ form.dashboard_screenshot.id_for_label }}">
+              England Football Dashboard Screenshot <span class="text-red-500">*</span>
+            </label>
+            <p class="text-xs text-gray-500 mb-2">
+              Log into <a href="https://learn.englandfootball.com" target="_blank" class="text-blue-600 underline">England Football Learning</a>,
+              take a screenshot showing your name, FAN number, and licence level. Max 10 MB.
+            </p>
+            <input type="file" id="{{ form.dashboard_screenshot.id_for_label }}" name="{{ form.dashboard_screenshot.html_name }}"
+                   accept="image/*"
+                   class="w-full text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100">
+            {% if form.dashboard_screenshot.errors %}
+            <p class="text-red-600 text-xs mt-1">{{ form.dashboard_screenshot.errors|join:", " }}</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- ── Step 3: Certificate Upload (always shown) ── -->
+        <div class="border-t border-gray-100 pt-6 mb-6">
+          <h2 class="text-lg font-semibold text-gray-800 mb-1">3. Scouting Certificate</h2>
+          <p class="text-sm text-gray-500 mb-4">Upload a clear scan or photo of your scouting qualification certificate. Accepted: PDF, JPG, PNG, WEBP — max 10 MB.</p>
+
+          <div class="mb-5">
+            <label class="block text-sm font-medium text-gray-700 mb-1" for="{{ form.certificate_file.id_for_label }}">
+              Certificate File <span class="text-red-500">*</span>
+            </label>
+            <input type="file" id="{{ form.certificate_file.id_for_label }}" name="{{ form.certificate_file.html_name }}"
+                   accept=".pdf,image/*"
+                   class="w-full text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100">
+            {% if form.certificate_file.errors %}
+            <p class="text-red-600 text-xs mt-1">{{ form.certificate_file.errors|join:", " }}</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- ── Step 4: Safeguarding + DBS (Tier 2 & 3 only) ── -->
+        <div id="tier2-section" class="border-t border-gray-100 pt-6 mb-6 hidden">
+          <h2 class="text-lg font-semibold text-gray-800 mb-1">4. Safeguarding &amp; DBS</h2>
+          <p class="text-sm text-gray-500 mb-4">Required for Tier 2 (Semi-Professional) and Tier 3 (Professional) verification.</p>
+
+          <div class="mb-5">
+            <label class="block text-sm font-medium text-gray-700 mb-1" for="{{ form.safeguarding_certificate.id_for_label }}">
+              Safeguarding Certificate <span class="text-red-500">*</span>
+            </label>
+            <input type="file" id="{{ form.safeguarding_certificate.id_for_label }}" name="{{ form.safeguarding_certificate.html_name }}"
+                   accept=".pdf,image/*"
+                   class="w-full text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+            {% if form.safeguarding_certificate.errors %}
+            <p class="text-red-600 text-xs mt-1">{{ form.safeguarding_certificate.errors|join:", " }}</p>
+            {% endif %}
+          </div>
+
+          <div class="mb-5">
+            <label class="block text-sm font-medium text-gray-700 mb-1" for="{{ form.dbs_expiry_date.id_for_label }}">
+              DBS Check Expiry Date <span class="text-red-500">*</span>
+            </label>
+            <input type="date" id="{{ form.dbs_expiry_date.id_for_label }}" name="{{ form.dbs_expiry_date.html_name }}"
+                   value="{{ form.dbs_expiry_date.value|default:'' }}"
+                   class="w-full border {% if form.dbs_expiry_date.errors %}border-red-400{% else %}border-gray-300{% endif %} rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+            <p class="text-xs text-gray-500 mt-1">Must be a future date.</p>
+            {% if form.dbs_expiry_date.errors %}
+            <p class="text-red-600 text-xs mt-1">{{ form.dbs_expiry_date.errors|join:", " }}</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- ── Step 5: Club Affiliation + Sample Report (Tier 3 only) ── -->
+        <div id="tier3-section" class="border-t border-gray-100 pt-6 mb-6 hidden">
+          <h2 class="text-lg font-semibold text-gray-800 mb-1">5. Professional Club Affiliation</h2>
+          <p class="text-sm text-gray-500 mb-4">Required for Tier 3 (Professional) verification only.</p>
+
+          <div class="mb-5">
+            <label class="block text-sm font-medium text-gray-700 mb-1" for="{{ form.club_affiliation_proof.id_for_label }}">
+              Club Affiliation Proof <span class="text-red-500">*</span>
+            </label>
+            <p class="text-xs text-gray-500 mb-2">A letter, contract excerpt, or official document confirming your affiliation with a professional club. Max 10 MB.</p>
+            <input type="file" id="{{ form.club_affiliation_proof.id_for_label }}" name="{{ form.club_affiliation_proof.html_name }}"
+                   accept=".pdf,image/*"
+                   class="w-full text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100">
+            {% if form.club_affiliation_proof.errors %}
+            <p class="text-red-600 text-xs mt-1">{{ form.club_affiliation_proof.errors|join:", " }}</p>
+            {% endif %}
+          </div>
+
+          <div class="mb-5">
+            <label class="block text-sm font-medium text-gray-700 mb-1" for="{{ form.sample_scout_report.id_for_label }}">
+              Sample Scout Report <span class="text-red-500">*</span>
+            </label>
+            <p class="text-xs text-gray-500 mb-2">An anonymised sample of your scouting work demonstrating professional-level analysis. Max 10 MB.</p>
+            <input type="file" id="{{ form.sample_scout_report.id_for_label }}" name="{{ form.sample_scout_report.html_name }}"
+                   accept=".pdf,image/*"
+                   class="w-full text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100">
+            {% if form.sample_scout_report.errors %}
+            <p class="text-red-600 text-xs mt-1">{{ form.sample_scout_report.errors|join:", " }}</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- ── Legal Disclaimer ── -->
+        <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+          <h3 class="text-sm font-bold text-amber-900 mb-2">Declaration</h3>
+          <p class="text-xs text-amber-800 leading-relaxed">
+            By submitting this application I confirm that all documents provided are genuine, unmodified, and belong to me.
+            I understand that submitting fraudulent documents may result in permanent account suspension and may be reported
+            to the relevant governing body.  FazzPitchSideHub reserves the right to contact the issuing body to verify
+            the authenticity of any submitted credential.
+          </p>
+        </div>
+
+        <!-- ── Timeline note ── -->
+        <div class="flex items-start gap-3 bg-gray-50 border border-gray-200 rounded-lg p-4 mb-8">
+          <svg class="h-5 w-5 text-gray-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <p class="text-sm text-gray-600">
+            <strong>Review timeline:</strong> Applications are reviewed manually and typically take
+            <strong>a few days to a few weeks</strong>. You will receive a notification when a decision has been made.
+          </p>
+        </div>
+
+        <div class="flex gap-4">
+          <button type="submit"
+                  class="flex-1 bg-gradient-to-r from-green-500 to-teal-600 text-white py-3 px-6 rounded-lg font-semibold text-sm hover:from-green-600 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-green-400 shadow-md transition">
+            {% if existing %}Update &amp; Resubmit Application{% else %}Submit Application{% endif %}
+          </button>
+          <a href="{% url 'dashboard' %}"
+             class="px-6 py-3 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition">
+            Cancel
+          </a>
+        </div>
+
+      </form>
+    </div><!-- /card -->
+  </div>
+</div>
+
+<script>
+(function () {
+  const tierSelect = document.getElementById('{{ form.requested_tier.id_for_label }}');
+  const bodySelect = document.getElementById('{{ form.qualification_body.id_for_label }}');
+
+  const faSection    = document.getElementById('fa-section');
+  const tier2Section = document.getElementById('tier2-section');
+  const tier3Section = document.getElementById('tier3-section');
+
+  // Fields inside conditional sections
+  const fanInput        = document.getElementById('{{ form.fa_fan_number.id_for_label }}');
+  const dashInput       = document.getElementById('{{ form.dashboard_screenshot.id_for_label }}');
+  const safeguardInput  = document.getElementById('{{ form.safeguarding_certificate.id_for_label }}');
+  const dbsInput        = document.getElementById('{{ form.dbs_expiry_date.id_for_label }}');
+  const affiliationInput= document.getElementById('{{ form.club_affiliation_proof.id_for_label }}');
+  const reportInput     = document.getElementById('{{ form.sample_scout_report.id_for_label }}');
+
+  function updateSections() {
+    const tier = tierSelect ? tierSelect.value : '';
+    const body = bodySelect ? bodySelect.value : '';
+
+    // FA section
+    const showFA = (body === 'FA');
+    faSection.classList.toggle('hidden', !showFA);
+    if (fanInput)   fanInput.required   = showFA;
+    if (dashInput)  dashInput.required  = showFA;
+
+    // Tier 2+ section
+    const showTier2 = (tier === 'TIER2' || tier === 'TIER3');
+    tier2Section.classList.toggle('hidden', !showTier2);
+    if (safeguardInput) safeguardInput.required = showTier2;
+    if (dbsInput)       dbsInput.required       = showTier2;
+
+    // Tier 3 section
+    const showTier3 = (tier === 'TIER3');
+    tier3Section.classList.toggle('hidden', !showTier3);
+    if (affiliationInput) affiliationInput.required = showTier3;
+    if (reportInput)      reportInput.required      = showTier3;
+  }
+
+  if (tierSelect) tierSelect.addEventListener('change', updateSections);
+  if (bodySelect) bodySelect.addEventListener('change', updateSections);
+
+  // Run on page load (handles form re-display after POST validation failure)
+  updateSections();
+})();
+</script>
+{% endblock %}
