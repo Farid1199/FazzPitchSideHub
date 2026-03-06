@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="bg-gray-50 min-h-screen">
+
+    <!-- Hero Section -->
+    <div class="bg-gradient-to-br from-[#1E5631] via-[#2d7a48] to-[#1E5631] text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 text-center">
+            <div class="inline-flex items-center bg-white/10 backdrop-blur rounded-full px-4 py-1 mb-6">
+                <i class="fas fa-compass text-green-300 mr-2"></i>
+                <span class="text-sm font-medium text-green-100">Football Pathways</span>
+            </div>
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 leading-tight">
+                Start Your Journey<br>in Football
+            </h1>
+            <p class="text-lg md:text-xl text-green-100 max-w-2xl mx-auto mb-8">
+                Whether you want to play, manage, or scout — learn how to enter the football industry, understand the non-league pyramid, and discover real opportunities.
+            </p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="#choose-pathway" class="bg-white text-[#1E5631] font-bold px-8 py-3 rounded-lg hover:bg-green-50 transition shadow-lg">
+                    Choose Your Pathway <i class="fas fa-arrow-down ml-2"></i>
+                </a>
+                <a href="{% url 'pathways_non_league' %}" class="border-2 border-white text-white font-bold px-8 py-3 rounded-lg hover:bg-white/10 transition">
+                    Learn the Pyramid <i class="fas fa-layer-group ml-2"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Choose Your Pathway -->
+    <div id="choose-pathway" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 mb-3">Choose Your Pathway</h2>
+            <p class="text-gray-600 max-w-xl mx-auto">Select the role that interests you most. Each pathway guides you through the steps, qualifications, and opportunities available.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Player Card -->
+            <a href="{% url 'pathways_player' %}" class="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200 hover:border-[#1E5631]">
+                <div class="bg-gradient-to-r from-green-500 to-green-600 p-6 text-white text-center">
+                    <i class="fas fa-running text-5xl mb-3 group-hover:scale-110 transition-transform"></i>
+                    <h3 class="text-2xl font-bold">Become a Player</h3>
+                </div>
+                <div class="p-6">
+                    <ul class="space-y-2 text-sm text-gray-600 mb-4">
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Understand the player pathway</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>How to find and attend trials</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Building your football CV</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Progressing up the pyramid</li>
+                    </ul>
+                    <span class="inline-flex items-center text-[#1E5631] font-semibold text-sm group-hover:underline">
+                        Explore pathway <i class="fas fa-arrow-right ml-2"></i>
+                    </span>
+                </div>
+            </a>
+
+            <!-- Manager Card -->
+            <a href="{% url 'pathways_manager' %}" class="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200 hover:border-blue-600">
+                <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-6 text-white text-center">
+                    <i class="fas fa-chalkboard-teacher text-5xl mb-3 group-hover:scale-110 transition-transform"></i>
+                    <h3 class="text-2xl font-bold">Become a Manager</h3>
+                </div>
+                <div class="p-6">
+                    <ul class="space-y-2 text-sm text-gray-600 mb-4">
+                        <li><i class="fas fa-check text-blue-500 mr-2"></i>Coaching qualifications explained</li>
+                        <li><i class="fas fa-check text-blue-500 mr-2"></i>Manager responsibilities</li>
+                        <li><i class="fas fa-check text-blue-500 mr-2"></i>Building your coaching career</li>
+                        <li><i class="fas fa-check text-blue-500 mr-2"></i>Getting real-world experience</li>
+                    </ul>
+                    <span class="inline-flex items-center text-blue-600 font-semibold text-sm group-hover:underline">
+                        Explore pathway <i class="fas fa-arrow-right ml-2"></i>
+                    </span>
+                </div>
+            </a>
+
+            <!-- Scout Card -->
+            <a href="{% url 'pathways_scout' %}" class="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200 hover:border-purple-600">
+                <div class="bg-gradient-to-r from-purple-500 to-purple-600 p-6 text-white text-center">
+                    <i class="fas fa-binoculars text-5xl mb-3 group-hover:scale-110 transition-transform"></i>
+                    <h3 class="text-2xl font-bold">Become a Scout</h3>
+                </div>
+                <div class="p-6">
+                    <ul class="space-y-2 text-sm text-gray-600 mb-4">
+                        <li><i class="fas fa-check text-purple-500 mr-2"></i>What scouts actually do</li>
+                        <li><i class="fas fa-check text-purple-500 mr-2"></i>Scouting qualifications</li>
+                        <li><i class="fas fa-check text-purple-500 mr-2"></i>Talent identification skills</li>
+                        <li><i class="fas fa-check text-purple-500 mr-2"></i>Writing scouting reports</li>
+                    </ul>
+                    <span class="inline-flex items-center text-purple-600 font-semibold text-sm group-hover:underline">
+                        Explore pathway <i class="fas fa-arrow-right ml-2"></i>
+                    </span>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Understanding Non-League Football -->
+    <div class="bg-white border-y border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h2 class="text-3xl font-bold text-gray-900 mb-4">Understanding Non-League Football</h2>
+                    <p class="text-gray-600 mb-6 leading-relaxed">
+                        The English football pyramid has more than 140 leagues across 24 levels. Below the EFL (League Two), the non-league system stretches from the National League (Step 1) down to local Sunday leagues. Understanding how this pyramid works is the first step to entering the football world.
+                    </p>
+                    <a href="{% url 'pathways_non_league' %}" class="inline-flex items-center bg-[#1E5631] text-white font-bold px-6 py-3 rounded-lg hover:bg-[#143d22] transition shadow">
+                        <i class="fas fa-layer-group mr-2"></i> Learn How the Pyramid Works
+                    </a>
+                </div>
+                <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                    <!-- Mini Pyramid Visual -->
+                    <div class="space-y-2 text-center text-sm font-semibold">
+                        <div class="bg-yellow-400 text-yellow-900 rounded py-2 mx-auto" style="width:40%">Premier League</div>
+                        <div class="bg-yellow-300 text-yellow-800 rounded py-2 mx-auto" style="width:50%">Championship</div>
+                        <div class="bg-yellow-200 text-yellow-700 rounded py-2 mx-auto" style="width:60%">League One &amp; Two</div>
+                        <div class="bg-green-200 text-green-800 rounded py-2 mx-auto border-2 border-green-400" style="width:70%">
+                            <i class="fas fa-arrow-right mr-1"></i> National League (Step 1)
+                        </div>
+                        <div class="bg-green-100 text-green-700 rounded py-2 mx-auto" style="width:78%">Step 2</div>
+                        <div class="bg-green-50 text-green-600 rounded py-2 mx-auto" style="width:86%">Step 3 &ndash; 4</div>
+                        <div class="bg-gray-100 text-gray-600 rounded py-2 mx-auto" style="width:94%">Step 5 &ndash; 7 &amp; Local Leagues</div>
+                    </div>
+                    <p class="text-xs text-gray-500 text-center mt-4">Highlighted = where most non-league players, managers and scouts start</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Football Qualifications CTA -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div class="bg-gradient-to-r from-gray-800 to-gray-900 rounded-2xl p-8 md:p-12 text-white">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div>
+                    <h2 class="text-3xl font-bold mb-4">Football Qualifications</h2>
+                    <p class="text-gray-300 mb-6 leading-relaxed">
+                        From FA coaching badges to Talent ID courses and safeguarding certificates — find out exactly what qualifications you need to work in football.
+                    </p>
+                    <a href="{% url 'pathways_qualifications' %}" class="inline-flex items-center bg-white text-gray-900 font-bold px-6 py-3 rounded-lg hover:bg-gray-100 transition shadow">
+                        <i class="fas fa-certificate mr-2"></i> View Qualifications Guide
+                    </a>
+                </div>
+                <div class="grid grid-cols-3 gap-4 text-center">
+                    <div class="bg-white/10 rounded-lg p-4">
+                        <i class="fas fa-whistle text-3xl text-green-400 mb-2"></i>
+                        <p class="text-sm font-medium">Coaching</p>
+                    </div>
+                    <div class="bg-white/10 rounded-lg p-4">
+                        <i class="fas fa-eye text-3xl text-purple-400 mb-2"></i>
+                        <p class="text-sm font-medium">Talent ID</p>
+                    </div>
+                    <div class="bg-white/10 rounded-lg p-4">
+                        <i class="fas fa-shield-alt text-3xl text-blue-400 mb-2"></i>
+                        <p class="text-sm font-medium">Safeguarding</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Final CTA -->
+    <div class="bg-[#1E5631] text-white">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
+            <h2 class="text-2xl md:text-3xl font-bold mb-3">Ready to Get Started?</h2>
+            <p class="text-green-100 mb-6">Create your free account and start discovering real opportunities today.</p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="{% url 'signup' %}" class="bg-white text-[#1E5631] font-bold px-8 py-3 rounded-lg hover:bg-green-50 transition shadow-lg">
+                    <i class="fas fa-user-plus mr-2"></i> Sign Up Free
+                </a>
+                <a href="{% url 'community_hub' %}" class="border-2 border-white text-white font-bold px-8 py-3 rounded-lg hover:bg-white/10 transition">
+                    <i class="fas fa-futbol mr-2"></i> View Trials
+                </a>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

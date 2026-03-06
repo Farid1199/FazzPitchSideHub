@@ -1,0 +1,250 @@
+{% extends 'pathways/base_pathways.html' %}
+
+{% block breadcrumb_extra %}
+<i class="fas fa-chevron-right mx-2 text-xs"></i>
+<span class="text-white font-medium">Become a Manager</span>
+{% endblock %}
+
+{% block pathway_title %}Become a Football Manager{% endblock %}
+{% block pathway_subtitle %}From grassroots coaching to managing a non-league club{% endblock %}
+
+{% block sidebar_sections %}
+<nav class="bg-white rounded-lg shadow-md overflow-hidden mt-4">
+    <div class="bg-blue-600 text-white px-4 py-3">
+        <h3 class="font-bold text-sm uppercase tracking-wider">
+            <i class="fas fa-list mr-2"></i>On This Page
+        </h3>
+    </div>
+    <div class="divide-y divide-gray-100 text-sm">
+        <a href="#overview" class="block px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50">Overview</a>
+        <a href="#pathway" class="block px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50">Coaching Career Path</a>
+        <a href="#qualifications" class="block px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50">Coaching Qualifications</a>
+        <a href="#responsibilities" class="block px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50">Manager Responsibilities</a>
+        <a href="#experience" class="block px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50">Getting Experience</a>
+        <a href="#resources" class="block px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50">Resources</a>
+    </div>
+</nav>
+{% endblock %}
+
+{% block pathway_content %}
+<div class="space-y-12">
+
+    <!-- Overview -->
+    <section id="overview" class="bg-white rounded-xl shadow-md p-6 md:p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+            <span class="w-1 h-8 bg-blue-500 mr-3 rounded"></span>
+            Overview
+        </h2>
+        <p class="text-gray-600 leading-relaxed mb-4">
+            Managing a football team is one of the most rewarding roles in the sport. At non-league level, managers are responsible for coaching sessions, recruitment, tactics, match-day management, and often much more behind the scenes.
+        </p>
+        <p class="text-gray-600 leading-relaxed">
+            You do not need to have been a professional player to become a successful manager. Many of the best non-league managers came through grassroots coaching, building their experience from local Sunday league teams up through the pyramid.
+        </p>
+    </section>
+
+    <!-- Coaching Career Path — Visual Steps -->
+    <section id="pathway" class="bg-white rounded-xl shadow-md p-6 md:p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+            <span class="w-1 h-8 bg-blue-500 mr-3 rounded"></span>
+            Coaching Career Path
+        </h2>
+        <div class="flex flex-col items-center space-y-1">
+            <div class="w-full md:w-3/4 bg-blue-50 border-l-4 border-blue-500 rounded-r-lg p-4 flex items-center">
+                <div class="flex items-center justify-center w-10 h-10 bg-blue-500 text-white rounded-full font-bold text-sm mr-4 flex-shrink-0">1</div>
+                <div>
+                    <h3 class="font-bold text-gray-800">Start Volunteering</h3>
+                    <p class="text-sm text-gray-600">Help out at a local youth team or Sunday league side. Get hands-on experience running sessions and organising match days.</p>
+                </div>
+            </div>
+            <div class="text-blue-400 text-xl"><i class="fas fa-arrow-down"></i></div>
+
+            <div class="w-full md:w-3/4 bg-blue-50 border-l-4 border-blue-500 rounded-r-lg p-4 flex items-center">
+                <div class="flex items-center justify-center w-10 h-10 bg-blue-500 text-white rounded-full font-bold text-sm mr-4 flex-shrink-0">2</div>
+                <div>
+                    <h3 class="font-bold text-gray-800">Get Your First Coaching Badge</h3>
+                    <p class="text-sm text-gray-600">The FA Introduction to Coaching (formerly Level 1) is the entry point. Costs around &pound;150 and takes a weekend.</p>
+                </div>
+            </div>
+            <div class="text-blue-400 text-xl"><i class="fas fa-arrow-down"></i></div>
+
+            <div class="w-full md:w-3/4 bg-blue-50 border-l-4 border-blue-500 rounded-r-lg p-4 flex items-center">
+                <div class="flex items-center justify-center w-10 h-10 bg-blue-500 text-white rounded-full font-bold text-sm mr-4 flex-shrink-0">3</div>
+                <div>
+                    <h3 class="font-bold text-gray-800">Coach a Team</h3>
+                    <p class="text-sm text-gray-600">Take charge of a youth or adult team. Sunday league or local county league clubs often need coaches and assistant managers.</p>
+                </div>
+            </div>
+            <div class="text-blue-400 text-xl"><i class="fas fa-arrow-down"></i></div>
+
+            <div class="w-full md:w-3/4 bg-blue-50 border-l-4 border-blue-500 rounded-r-lg p-4 flex items-center">
+                <div class="flex items-center justify-center w-10 h-10 bg-blue-500 text-white rounded-full font-bold text-sm mr-4 flex-shrink-0">4</div>
+                <div>
+                    <h3 class="font-bold text-gray-800">Progress Your Qualifications</h3>
+                    <p class="text-sm text-gray-600">Move through UEFA C, UEFA B and beyond. Higher badges open doors to Step 3+ management roles.</p>
+                </div>
+            </div>
+            <div class="text-blue-400 text-xl"><i class="fas fa-arrow-down"></i></div>
+
+            <div class="w-full md:w-3/4 bg-blue-50 border-l-4 border-blue-500 rounded-r-lg p-4 flex items-center">
+                <div class="flex items-center justify-center w-10 h-10 bg-blue-500 text-white rounded-full font-bold text-sm mr-4 flex-shrink-0">5</div>
+                <div>
+                    <h3 class="font-bold text-gray-800">Become an Assistant Manager</h3>
+                    <p class="text-sm text-gray-600">Work alongside an experienced manager at Step 4&ndash;6. Learn the tactical and man-management side of the role.</p>
+                </div>
+            </div>
+            <div class="text-blue-400 text-xl"><i class="fas fa-arrow-down"></i></div>
+
+            <div class="w-full md:w-3/4 bg-blue-600 text-white rounded-lg p-4 flex items-center">
+                <div class="flex items-center justify-center w-10 h-10 bg-white text-blue-600 rounded-full font-bold text-sm mr-4 flex-shrink-0">6</div>
+                <div>
+                    <h3 class="font-bold">Manage Your Own Team</h3>
+                    <p class="text-sm text-blue-100">Take full charge of a non-league side. Build a squad, set tactics, and compete in the pyramid.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Coaching Qualifications -->
+    <section id="qualifications" class="bg-white rounded-xl shadow-md p-6 md:p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+            <span class="w-1 h-8 bg-blue-500 mr-3 rounded"></span>
+            Coaching Qualifications
+        </h2>
+        <p class="text-gray-600 leading-relaxed mb-6">
+            The FA runs a structured coaching pathway. Here are the key levels:
+        </p>
+        <div class="space-y-3">
+            <div class="flex items-center p-4 bg-gray-50 rounded-lg border">
+                <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center font-bold mr-4 flex-shrink-0">L1</div>
+                <div>
+                    <h3 class="font-bold text-gray-800 text-sm">FA Introduction to Coaching</h3>
+                    <p class="text-xs text-gray-600">Entry-level badge. Covers session planning, basic skills development. Weekend course (~&pound;150).</p>
+                </div>
+            </div>
+            <div class="flex items-center p-4 bg-gray-50 rounded-lg border">
+                <div class="w-12 h-12 bg-blue-200 text-blue-700 rounded-lg flex items-center justify-center font-bold mr-4 flex-shrink-0">L2</div>
+                <div>
+                    <h3 class="font-bold text-gray-800 text-sm">FA Level 2 / UEFA C Licence</h3>
+                    <p class="text-xs text-gray-600">Develops ability to plan and deliver sessions. Required to manage most Step 5+ teams (~&pound;300).</p>
+                </div>
+            </div>
+            <div class="flex items-center p-4 bg-gray-50 rounded-lg border">
+                <div class="w-12 h-12 bg-blue-300 text-blue-800 rounded-lg flex items-center justify-center font-bold mr-4 flex-shrink-0">L3</div>
+                <div>
+                    <h3 class="font-bold text-gray-800 text-sm">UEFA B Licence</h3>
+                    <p class="text-xs text-gray-600">Advanced coaching badge. Covers in-depth tactical and technical coaching. Year-long programme (~&pound;1,000).</p>
+                </div>
+            </div>
+            <div class="flex items-center p-4 bg-gray-50 rounded-lg border">
+                <div class="w-12 h-12 bg-blue-400 text-white rounded-lg flex items-center justify-center font-bold mr-4 flex-shrink-0">L4</div>
+                <div>
+                    <h3 class="font-bold text-gray-800 text-sm">UEFA A Licence</h3>
+                    <p class="text-xs text-gray-600">Elite-level coaching qualification. Required for National League management and above.</p>
+                </div>
+            </div>
+        </div>
+        <div class="mt-4">
+            <a href="{% url 'pathways_qualifications' %}" class="inline-flex items-center text-blue-600 font-semibold text-sm hover:underline">
+                View full qualifications guide <i class="fas fa-arrow-right ml-2"></i>
+            </a>
+        </div>
+    </section>
+
+    <!-- Manager Responsibilities -->
+    <section id="responsibilities" class="bg-white rounded-xl shadow-md p-6 md:p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+            <span class="w-1 h-8 bg-blue-500 mr-3 rounded"></span>
+            Manager Responsibilities
+        </h2>
+        <p class="text-gray-600 leading-relaxed mb-4">
+            At non-league level, a manager often wears many hats. Here&rsquo;s what the role typically involves:
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="p-4 bg-gray-50 rounded-lg border text-center">
+                <i class="fas fa-chalkboard text-3xl text-blue-500 mb-2"></i>
+                <h3 class="font-bold text-gray-800 text-sm mb-1">Training Sessions</h3>
+                <p class="text-xs text-gray-600">Planning and delivering weekly sessions to develop player skills and tactical understanding.</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg border text-center">
+                <i class="fas fa-chess text-3xl text-blue-500 mb-2"></i>
+                <h3 class="font-bold text-gray-800 text-sm mb-1">Tactics &amp; Selection</h3>
+                <p class="text-xs text-gray-600">Choosing formations, match-day squads, substitutions and set-piece routines.</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg border text-center">
+                <i class="fas fa-user-plus text-3xl text-blue-500 mb-2"></i>
+                <h3 class="font-bold text-gray-800 text-sm mb-1">Recruitment</h3>
+                <p class="text-xs text-gray-600">Scouting and signing players. Running trials and building a competitive squad.</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg border text-center">
+                <i class="fas fa-handshake text-3xl text-blue-500 mb-2"></i>
+                <h3 class="font-bold text-gray-800 text-sm mb-1">Man Management</h3>
+                <p class="text-xs text-gray-600">Motivation, discipline, dealing with player egos, and building team culture.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Getting Experience -->
+    <section id="experience" class="bg-white rounded-xl shadow-md p-6 md:p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+            <span class="w-1 h-8 bg-blue-500 mr-3 rounded"></span>
+            Getting Experience
+        </h2>
+        <div class="space-y-4 text-gray-600 leading-relaxed">
+            <p>The best way to learn management is by doing it. Here are practical ways to build experience:</p>
+            <ul class="space-y-2">
+                <li class="flex items-start"><i class="fas fa-check-circle text-blue-500 mt-1 mr-3"></i><span><strong>Volunteer as an assistant</strong> at a local Sunday league or youth club.</span></li>
+                <li class="flex items-start"><i class="fas fa-check-circle text-blue-500 mt-1 mr-3"></i><span><strong>Offer to run training sessions</strong> &mdash; even at a pub team, real sessions build real experience.</span></li>
+                <li class="flex items-start"><i class="fas fa-check-circle text-blue-500 mt-1 mr-3"></i><span><strong>Network at non-league matches</strong> &mdash; attend local games and talk to managers and chairmen.</span></li>
+                <li class="flex items-start"><i class="fas fa-check-circle text-blue-500 mt-1 mr-3"></i><span><strong>Apply for vacant roles</strong> &mdash; Step 6&ndash;7 clubs frequently advertise for managers on social media and County FA boards.</span></li>
+                <li class="flex items-start"><i class="fas fa-check-circle text-blue-500 mt-1 mr-3"></i><span><strong>Build your profile on FAZZ PitchsideHub</strong> &mdash; verified managers can post opportunities, manage their club, and attract players.</span></li>
+            </ul>
+        </div>
+        <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-5 text-center">
+            <p class="text-gray-700 font-medium mb-3">Are you already coaching?</p>
+            <a href="{% url 'signup' %}" class="inline-flex items-center bg-blue-600 text-white font-bold px-6 py-3 rounded-lg hover:bg-blue-700 transition shadow">
+                <i class="fas fa-user-plus mr-2"></i> Create Your Manager Profile
+            </a>
+        </div>
+    </section>
+
+    <!-- Resources -->
+    <section id="resources" class="bg-white rounded-xl shadow-md p-6 md:p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+            <span class="w-1 h-8 bg-blue-500 mr-3 rounded"></span>
+            Useful Resources
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <a href="https://learn.englandfootball.com/" target="_blank" rel="noopener" class="flex items-center p-4 bg-gray-50 rounded-lg border hover:border-blue-400 transition group">
+                <i class="fas fa-external-link-alt text-blue-500 mr-3"></i>
+                <div>
+                    <h4 class="font-bold text-gray-800 group-hover:text-blue-700 text-sm">England Football Learning</h4>
+                    <p class="text-xs text-gray-500">Book coaching courses and track your qualifications</p>
+                </div>
+            </a>
+            <a href="https://www.thefa.com/get-involved/coach" target="_blank" rel="noopener" class="flex items-center p-4 bg-gray-50 rounded-lg border hover:border-blue-400 transition group">
+                <i class="fas fa-external-link-alt text-blue-500 mr-3"></i>
+                <div>
+                    <h4 class="font-bold text-gray-800 group-hover:text-blue-700 text-sm">FA Coaching Pathway</h4>
+                    <p class="text-xs text-gray-500">Official coaching qualification information</p>
+                </div>
+            </a>
+            <a href="{% url 'pathways_qualifications' %}" class="flex items-center p-4 bg-blue-50 rounded-lg border border-blue-200 group">
+                <i class="fas fa-certificate text-blue-600 mr-3"></i>
+                <div>
+                    <h4 class="font-bold text-blue-800 text-sm">FAZZ Qualifications Guide</h4>
+                    <p class="text-xs text-blue-600">Our full guide to football qualifications</p>
+                </div>
+            </a>
+            <a href="{% url 'pathways_non_league' %}" class="flex items-center p-4 bg-blue-50 rounded-lg border border-blue-200 group">
+                <i class="fas fa-layer-group text-blue-600 mr-3"></i>
+                <div>
+                    <h4 class="font-bold text-blue-800 text-sm">Non-League Structure</h4>
+                    <p class="text-xs text-blue-600">Understand the pyramid and league levels</p>
+                </div>
+            </a>
+        </div>
+    </section>
+
+</div>
+{% endblock %}

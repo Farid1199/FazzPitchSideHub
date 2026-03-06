@@ -1,0 +1,403 @@
+{% extends 'pathways/base_pathways.html' %}
+
+{% block breadcrumb_extra %}
+<i class="fas fa-chevron-right mx-2 text-xs"></i>
+<span class="text-white font-medium">Qualifications &amp; Courses</span>
+{% endblock %}
+
+{% block pathway_title %}Qualifications &amp; Courses{% endblock %}
+{% block pathway_subtitle %}Every coaching licence, scouting course and safeguarding certificate explained{% endblock %}
+
+{% block sidebar_sections %}
+<nav class="bg-white rounded-lg shadow-md overflow-hidden mt-4">
+    <div class="bg-amber-600 text-white px-4 py-3">
+        <h3 class="font-bold text-sm uppercase tracking-wider">
+            <i class="fas fa-list mr-2"></i>On This Page
+        </h3>
+    </div>
+    <div class="divide-y divide-gray-100 text-sm">
+        <a href="#overview" class="block px-4 py-2 text-gray-600 hover:text-amber-600 hover:bg-gray-50">Overview</a>
+        <a href="#coaching" class="block px-4 py-2 text-gray-600 hover:text-amber-600 hover:bg-gray-50">Coaching Licences</a>
+        <a href="#scouting" class="block px-4 py-2 text-gray-600 hover:text-amber-600 hover:bg-gray-50">Scouting Qualifications</a>
+        <a href="#safeguarding" class="block px-4 py-2 text-gray-600 hover:text-amber-600 hover:bg-gray-50">Safeguarding &amp; DBS</a>
+        <a href="#first-aid" class="block px-4 py-2 text-gray-600 hover:text-amber-600 hover:bg-gray-50">First Aid</a>
+        <a href="#costs" class="block px-4 py-2 text-gray-600 hover:text-amber-600 hover:bg-gray-50">Costs &amp; Funding</a>
+    </div>
+</nav>
+{% endblock %}
+
+{% block pathway_content %}
+<div class="space-y-12">
+
+    <!-- Overview -->
+    <section id="overview" class="bg-white rounded-xl shadow-md p-6 md:p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+            <span class="w-1 h-8 bg-amber-500 mr-3 rounded"></span>
+            Overview
+        </h2>
+        <p class="text-gray-600 leading-relaxed mb-4">
+            Whether you want to coach, manage, scout, or work in football development, there&rsquo;s a qualification pathway for you. The FA delivers qualifications through <strong>England Football Learning</strong>, their online learning portal. Most courses combine online modules with practical assessments.
+        </p>
+        <p class="text-gray-600 leading-relaxed">
+            This page brings together every key qualification relevant to non-league football in one place &mdash; coaching licences from Level 1 to the UEFA A Licence, scouting and Talent ID courses, safeguarding certificates, and first aid training.
+        </p>
+    </section>
+
+    <!-- Coaching Licences -->
+    <section id="coaching" class="bg-white rounded-xl shadow-md p-6 md:p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+            <span class="w-1 h-8 bg-amber-500 mr-3 rounded"></span>
+            FA Coaching Licences
+        </h2>
+        <p class="text-gray-600 leading-relaxed mb-6">
+            The FA coaching pathway takes you from complete beginner to elite level. Each licence builds on the last. Here&rsquo;s the full ladder:
+        </p>
+        <div class="space-y-4">
+            <!-- Playmaker -->
+            <div class="border rounded-lg overflow-hidden">
+                <div class="bg-green-50 border-l-4 border-green-500 p-4">
+                    <div class="flex items-start justify-between flex-wrap gap-2">
+                        <div>
+                            <h3 class="font-bold text-gray-800">FA Playmaker</h3>
+                            <p class="text-sm text-gray-600 mt-1">Free online course. Perfect starting point for parents and complete beginners. Learn basic session planning and how to make football fun for children.</p>
+                        </div>
+                        <div class="text-right flex-shrink-0">
+                            <span class="inline-block bg-green-100 text-green-700 text-xs font-bold px-2 py-0.5 rounded">FREE</span>
+                            <p class="text-xs text-gray-500 mt-1">Online &bull; ~3 hrs</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Level 1 -->
+            <div class="border rounded-lg overflow-hidden">
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-4">
+                    <div class="flex items-start justify-between flex-wrap gap-2">
+                        <div>
+                            <h3 class="font-bold text-gray-800">FA Level 1 in Coaching Football</h3>
+                            <p class="text-sm text-gray-600 mt-1">Introduction to coaching. Covers session planning, basic techniques, and working with small groups. Suitable for anyone 16+. Often the entry requirement for coaching at grassroots clubs.</p>
+                        </div>
+                        <div class="text-right flex-shrink-0">
+                            <span class="inline-block bg-blue-100 text-blue-700 text-xs font-bold px-2 py-0.5 rounded">&pound;150&ndash;&pound;200</span>
+                            <p class="text-xs text-gray-500 mt-1">30&ndash;40 hrs</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Level 2 -->
+            <div class="border rounded-lg overflow-hidden">
+                <div class="bg-indigo-50 border-l-4 border-indigo-500 p-4">
+                    <div class="flex items-start justify-between flex-wrap gap-2">
+                        <div>
+                            <h3 class="font-bold text-gray-800">FA Level 2 in Coaching Football</h3>
+                            <p class="text-sm text-gray-600 mt-1">Develop your coaching skills further. Learn to plan and deliver sessions with clear outcomes. Required to manage most non-league teams from Step 5 downward. Covers tactical principles and player development.</p>
+                        </div>
+                        <div class="text-right flex-shrink-0">
+                            <span class="inline-block bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-0.5 rounded">&pound;300&ndash;&pound;400</span>
+                            <p class="text-xs text-gray-500 mt-1">80&ndash;120 hrs</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- UEFA C -->
+            <div class="border rounded-lg overflow-hidden">
+                <div class="bg-purple-50 border-l-4 border-purple-500 p-4">
+                    <div class="flex items-start justify-between flex-wrap gap-2">
+                        <div>
+                            <h3 class="font-bold text-gray-800">UEFA C Licence</h3>
+                            <p class="text-sm text-gray-600 mt-1">First UEFA-recognised qualification. Designed for coaches working with 11v11 teams. Strong emphasis on match-day coaching, team shape, and in-game management. Commonly held by Step 3&ndash;5 managers.</p>
+                        </div>
+                        <div class="text-right flex-shrink-0">
+                            <span class="inline-block bg-purple-100 text-purple-700 text-xs font-bold px-2 py-0.5 rounded">&pound;500&ndash;&pound;700</span>
+                            <p class="text-xs text-gray-500 mt-1">120+ hrs</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- UEFA B -->
+            <div class="border rounded-lg overflow-hidden">
+                <div class="bg-amber-50 border-l-4 border-amber-500 p-4">
+                    <div class="flex items-start justify-between flex-wrap gap-2">
+                        <div>
+                            <h3 class="font-bold text-gray-800">UEFA B Licence</h3>
+                            <p class="text-sm text-gray-600 mt-1">Advanced coaching qualification. Focuses on long-term player development, advanced tactics, and leadership. Required by many Step 1&ndash;2 clubs. Often held by academy coaches and experienced managers.</p>
+                        </div>
+                        <div class="text-right flex-shrink-0">
+                            <span class="inline-block bg-amber-100 text-amber-700 text-xs font-bold px-2 py-0.5 rounded">&pound;800&ndash;&pound;1,200</span>
+                            <p class="text-xs text-gray-500 mt-1">180+ hrs</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- UEFA A -->
+            <div class="border rounded-lg overflow-hidden">
+                <div class="bg-red-50 border-l-4 border-red-500 p-4">
+                    <div class="flex items-start justify-between flex-wrap gap-2">
+                        <div>
+                            <h3 class="font-bold text-gray-800">UEFA A Licence</h3>
+                            <p class="text-sm text-gray-600 mt-1">Elite coaching qualification. For first-team managers at semi-professional and professional level. Covers high-performance environments, team management, and strategic planning. Held by EFL and National League managers.</p>
+                        </div>
+                        <div class="text-right flex-shrink-0">
+                            <span class="inline-block bg-red-100 text-red-700 text-xs font-bold px-2 py-0.5 rounded">&pound;3,000+</span>
+                            <p class="text-xs text-gray-500 mt-1">240+ hrs</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-6 bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg">
+            <p class="text-sm text-amber-800">
+                <i class="fas fa-lightbulb mr-1"></i>
+                <strong>Tip:</strong> You don&rsquo;t need to rush. Many successful non-league managers spent years at Level 2 before progressing. Focus on gaining experience alongside your qualifications.
+            </p>
+        </div>
+    </section>
+
+    <!-- Scouting Qualifications -->
+    <section id="scouting" class="bg-white rounded-xl shadow-md p-6 md:p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+            <span class="w-1 h-8 bg-amber-500 mr-3 rounded"></span>
+            Scouting &amp; Talent Identification
+        </h2>
+        <div class="space-y-4">
+            <div class="border rounded-lg overflow-hidden">
+                <div class="bg-purple-50 border-l-4 border-purple-500 p-4">
+                    <div class="flex items-start justify-between flex-wrap gap-2">
+                        <div>
+                            <h3 class="font-bold text-gray-800">FA Talent Identification Course</h3>
+                            <p class="text-sm text-gray-600 mt-1">The primary scouting qualification. Learn a structured approach to evaluating players across technical, tactical, physical and psychological attributes. Suitable for scouts, coaches and club recruitment staff.</p>
+                        </div>
+                        <div class="text-right flex-shrink-0">
+                            <span class="inline-block bg-purple-100 text-purple-700 text-xs font-bold px-2 py-0.5 rounded">&pound;150&ndash;&pound;250</span>
+                            <p class="text-xs text-gray-500 mt-1">Weekend course</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="border rounded-lg overflow-hidden">
+                <div class="bg-purple-50 border-l-4 border-purple-500 p-4">
+                    <div class="flex items-start justify-between flex-wrap gap-2">
+                        <div>
+                            <h3 class="font-bold text-gray-800">Advanced Talent Identification</h3>
+                            <p class="text-sm text-gray-600 mt-1">For experienced scouts. Covers data-driven scouting, video analysis, advanced report-writing, and working with club recruitment departments. Often required for academy scouting roles.</p>
+                        </div>
+                        <div class="text-right flex-shrink-0">
+                            <span class="inline-block bg-purple-100 text-purple-700 text-xs font-bold px-2 py-0.5 rounded">&pound;300&ndash;&pound;500</span>
+                            <p class="text-xs text-gray-500 mt-1">Multi-day course</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="mt-4">
+            <a href="{% url 'pathways_scout' %}" class="inline-flex items-center text-purple-600 font-semibold text-sm hover:underline">
+                Read the full scouting pathway guide <i class="fas fa-arrow-right ml-2"></i>
+            </a>
+        </div>
+    </section>
+
+    <!-- Safeguarding & DBS -->
+    <section id="safeguarding" class="bg-white rounded-xl shadow-md p-6 md:p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+            <span class="w-1 h-8 bg-amber-500 mr-3 rounded"></span>
+            Safeguarding &amp; DBS Checks
+        </h2>
+        <p class="text-gray-600 leading-relaxed mb-4">
+            Anyone working with children or vulnerable adults in football <strong>must</strong> hold valid safeguarding qualifications. These are mandatory at every level of the game.
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="p-5 bg-gray-50 rounded-lg border">
+                <h3 class="font-bold text-gray-800 mb-2"><i class="fas fa-shield-alt text-amber-500 mr-2"></i>FA Safeguarding Children Workshop</h3>
+                <p class="text-sm text-gray-600 mb-2">Mandatory for all coaches, scouts and volunteers working with anyone under 18. Covers recognition of abuse, reporting procedures, and best practice.</p>
+                <div class="flex items-center justify-between text-xs text-gray-500">
+                    <span>&pound;20&ndash;&pound;30</span>
+                    <span>3&ndash;4 hours &bull; Renew every 3 years</span>
+                </div>
+            </div>
+            <div class="p-5 bg-gray-50 rounded-lg border">
+                <h3 class="font-bold text-gray-800 mb-2"><i class="fas fa-id-card text-amber-500 mr-2"></i>DBS Check (Enhanced)</h3>
+                <p class="text-sm text-gray-600 mb-2">Criminal records check required for anyone in &ldquo;regulated activity&rdquo; with children. Applied for through the FA&rsquo;s CRB/DBS process via your County FA.</p>
+                <div class="flex items-center justify-between text-xs text-gray-500">
+                    <span>Free (via FA)</span>
+                    <span>2&ndash;8 weeks processing</span>
+                </div>
+            </div>
+        </div>
+        <div class="mt-4 bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg">
+            <p class="text-sm text-red-800">
+                <i class="fas fa-exclamation-circle mr-1"></i>
+                <strong>Important:</strong> You cannot coach, manage, or scout at any FA-affiliated club without a valid DBS check if your role involves contact with children. Clubs face sanctions if this is not enforced.
+            </p>
+        </div>
+    </section>
+
+    <!-- First Aid -->
+    <section id="first-aid" class="bg-white rounded-xl shadow-md p-6 md:p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+            <span class="w-1 h-8 bg-amber-500 mr-3 rounded"></span>
+            First Aid
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="p-5 bg-gray-50 rounded-lg border">
+                <h3 class="font-bold text-gray-800 mb-2"><i class="fas fa-first-aid text-red-500 mr-2"></i>FA Emergency First Aid in Football</h3>
+                <p class="text-sm text-gray-600 mb-2">Mandatory for all qualified coaches. Covers treating common football injuries, CPR, and when to call emergency services. Practical and theory-based.</p>
+                <div class="flex items-center justify-between text-xs text-gray-500">
+                    <span>&pound;50&ndash;&pound;80</span>
+                    <span>6&ndash;8 hours &bull; Renew every 3 years</span>
+                </div>
+            </div>
+            <div class="p-5 bg-gray-50 rounded-lg border">
+                <h3 class="font-bold text-gray-800 mb-2"><i class="fas fa-heartbeat text-red-500 mr-2"></i>FA Advanced First Aid</h3>
+                <p class="text-sm text-gray-600 mb-2">For physiotherapists, sports therapists and medical staff at higher non-league clubs. Covers advanced trauma, concussion protocols and match-day medical requirements.</p>
+                <div class="flex items-center justify-between text-xs text-gray-500">
+                    <span>&pound;150&ndash;&pound;250</span>
+                    <span>16+ hours</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Costs & Funding -->
+    <section id="costs" class="bg-white rounded-xl shadow-md p-6 md:p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+            <span class="w-1 h-8 bg-amber-500 mr-3 rounded"></span>
+            Costs &amp; Funding Options
+        </h2>
+        <p class="text-gray-600 leading-relaxed mb-4">
+            Qualifications aren&rsquo;t cheap, but there are ways to reduce the cost or get funding:
+        </p>
+        <div class="space-y-3">
+            <div class="flex items-start p-4 bg-gray-50 rounded-lg border">
+                <i class="fas fa-piggy-bank text-amber-500 mr-3 mt-0.5"></i>
+                <div>
+                    <h3 class="font-bold text-gray-800 text-sm">County FA Bursaries</h3>
+                    <p class="text-xs text-gray-600">Many County FAs offer bursaries or subsidised course places for coaches from underrepresented groups or working in deprived areas.</p>
+                </div>
+            </div>
+            <div class="flex items-start p-4 bg-gray-50 rounded-lg border">
+                <i class="fas fa-hands-helping text-amber-500 mr-3 mt-0.5"></i>
+                <div>
+                    <h3 class="font-bold text-gray-800 text-sm">Club Sponsorship</h3>
+                    <p class="text-xs text-gray-600">Some non-league clubs will fund qualifications for their coaches. Ask your club committee &mdash; it&rsquo;s an investment in the club&rsquo;s future.</p>
+                </div>
+            </div>
+            <div class="flex items-start p-4 bg-gray-50 rounded-lg border">
+                <i class="fas fa-football-ball text-amber-500 mr-3 mt-0.5"></i>
+                <div>
+                    <h3 class="font-bold text-gray-800 text-sm">Football Foundation Grants</h3>
+                    <p class="text-xs text-gray-600">The Football Foundation sometimes funds coach education as part of wider community projects. Check their website for current programmes.</p>
+                </div>
+            </div>
+            <div class="flex items-start p-4 bg-gray-50 rounded-lg border">
+                <i class="fas fa-laptop text-amber-500 mr-3 mt-0.5"></i>
+                <div>
+                    <h3 class="font-bold text-gray-800 text-sm">England Football Learning Portal</h3>
+                    <p class="text-xs text-gray-600">Free and low-cost CPD modules available online. Build your knowledge between formal qualifications with micro-courses.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Summary Table -->
+    <section class="bg-white rounded-xl shadow-md p-6 md:p-8 overflow-x-auto">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+            <span class="w-1 h-8 bg-amber-500 mr-3 rounded"></span>
+            Quick Reference
+        </h2>
+        <table class="w-full text-sm text-left">
+            <thead class="bg-gray-100 text-gray-700 uppercase text-xs">
+                <tr>
+                    <th class="px-4 py-3 rounded-tl-lg">Qualification</th>
+                    <th class="px-4 py-3">Type</th>
+                    <th class="px-4 py-3">Cost (approx)</th>
+                    <th class="px-4 py-3 rounded-tr-lg">Duration</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3 font-medium">FA Playmaker</td>
+                    <td class="px-4 py-3">Coaching</td>
+                    <td class="px-4 py-3 text-green-600 font-bold">Free</td>
+                    <td class="px-4 py-3">~3 hours</td>
+                </tr>
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3 font-medium">FA Level 1</td>
+                    <td class="px-4 py-3">Coaching</td>
+                    <td class="px-4 py-3">&pound;150&ndash;200</td>
+                    <td class="px-4 py-3">30&ndash;40 hrs</td>
+                </tr>
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3 font-medium">FA Level 2</td>
+                    <td class="px-4 py-3">Coaching</td>
+                    <td class="px-4 py-3">&pound;300&ndash;400</td>
+                    <td class="px-4 py-3">80&ndash;120 hrs</td>
+                </tr>
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3 font-medium">UEFA C Licence</td>
+                    <td class="px-4 py-3">Coaching</td>
+                    <td class="px-4 py-3">&pound;500&ndash;700</td>
+                    <td class="px-4 py-3">120+ hrs</td>
+                </tr>
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3 font-medium">UEFA B Licence</td>
+                    <td class="px-4 py-3">Coaching</td>
+                    <td class="px-4 py-3">&pound;800&ndash;1,200</td>
+                    <td class="px-4 py-3">180+ hrs</td>
+                </tr>
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3 font-medium">UEFA A Licence</td>
+                    <td class="px-4 py-3">Coaching</td>
+                    <td class="px-4 py-3">&pound;3,000+</td>
+                    <td class="px-4 py-3">240+ hrs</td>
+                </tr>
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3 font-medium">FA Talent ID</td>
+                    <td class="px-4 py-3">Scouting</td>
+                    <td class="px-4 py-3">&pound;150&ndash;250</td>
+                    <td class="px-4 py-3">Weekend</td>
+                </tr>
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3 font-medium">Safeguarding</td>
+                    <td class="px-4 py-3">Mandatory</td>
+                    <td class="px-4 py-3">&pound;20&ndash;30</td>
+                    <td class="px-4 py-3">3&ndash;4 hrs</td>
+                </tr>
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3 font-medium">DBS Check</td>
+                    <td class="px-4 py-3">Mandatory</td>
+                    <td class="px-4 py-3 text-green-600 font-bold">Free (via FA)</td>
+                    <td class="px-4 py-3">2&ndash;8 weeks</td>
+                </tr>
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3 font-medium">Emergency First Aid</td>
+                    <td class="px-4 py-3">First Aid</td>
+                    <td class="px-4 py-3">&pound;50&ndash;80</td>
+                    <td class="px-4 py-3">6&ndash;8 hrs</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- CTA -->
+    <section class="bg-gradient-to-r from-amber-500 to-amber-600 rounded-xl shadow-md p-6 md:p-8 text-center text-white">
+        <h2 class="text-2xl font-bold mb-2">Ready to Start Your Journey?</h2>
+        <p class="text-amber-100 mb-6 max-w-2xl mx-auto">
+            Browse coaching, scouting, and non-league pathways to find the right route for you. Create a profile on FAZZ PitchsideHub and connect with clubs already.
+        </p>
+        <div class="flex flex-wrap justify-center gap-3">
+            <a href="{% url 'pathways_home' %}" class="inline-flex items-center px-5 py-2.5 bg-white text-amber-700 font-bold rounded-lg hover:bg-gray-100 transition shadow">
+                <i class="fas fa-compass mr-2"></i> Explore Pathways
+            </a>
+            <a href="{% url 'signup' %}" class="inline-flex items-center px-5 py-2.5 bg-amber-700 text-white font-bold rounded-lg hover:bg-amber-800 transition shadow">
+                <i class="fas fa-user-plus mr-2"></i> Create Your Profile
+            </a>
+        </div>
+    </section>
+
+</div>
+{% endblock %}

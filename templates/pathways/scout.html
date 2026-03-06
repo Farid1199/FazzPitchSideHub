@@ -1,0 +1,212 @@
+{% extends 'pathways/base_pathways.html' %}
+
+{% block breadcrumb_extra %}
+<i class="fas fa-chevron-right mx-2 text-xs"></i>
+<span class="text-white font-medium">Become a Scout</span>
+{% endblock %}
+
+{% block pathway_title %}Become a Football Scout{% endblock %}
+{% block pathway_subtitle %}How to identify talent and build a career in scouting{% endblock %}
+
+{% block sidebar_sections %}
+<nav class="bg-white rounded-lg shadow-md overflow-hidden mt-4">
+    <div class="bg-purple-600 text-white px-4 py-3">
+        <h3 class="font-bold text-sm uppercase tracking-wider">
+            <i class="fas fa-list mr-2"></i>On This Page
+        </h3>
+    </div>
+    <div class="divide-y divide-gray-100 text-sm">
+        <a href="#overview" class="block px-4 py-2 text-gray-600 hover:text-purple-600 hover:bg-gray-50">Overview</a>
+        <a href="#what-scouts-do" class="block px-4 py-2 text-gray-600 hover:text-purple-600 hover:bg-gray-50">What Scouts Do</a>
+        <a href="#qualifications" class="block px-4 py-2 text-gray-600 hover:text-purple-600 hover:bg-gray-50">Scouting Qualifications</a>
+        <a href="#talent-id" class="block px-4 py-2 text-gray-600 hover:text-purple-600 hover:bg-gray-50">Talent Identification</a>
+        <a href="#reports" class="block px-4 py-2 text-gray-600 hover:text-purple-600 hover:bg-gray-50">Scouting Reports</a>
+        <a href="#resources" class="block px-4 py-2 text-gray-600 hover:text-purple-600 hover:bg-gray-50">Resources</a>
+    </div>
+</nav>
+{% endblock %}
+
+{% block pathway_content %}
+<div class="space-y-12">
+
+    <!-- Overview -->
+    <section id="overview" class="bg-white rounded-xl shadow-md p-6 md:p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+            <span class="w-1 h-8 bg-purple-500 mr-3 rounded"></span>
+            Overview
+        </h2>
+        <p class="text-gray-600 leading-relaxed mb-4">
+            Football scouts are the eyes and ears of clubs. They identify talented players, assess their abilities, and recommend signings. At non-league level, scouting is vital &mdash; clubs rely on scouts to find players who can make a difference on a limited budget.
+        </p>
+        <p class="text-gray-600 leading-relaxed">
+            Scouting is one of the most accessible roles in football. There is no age limit, you don&rsquo;t need to have been a player, and there are now formal qualifications that give you credibility. If you have a genuine eye for talent and a passion for watching football, this could be your pathway.
+        </p>
+    </section>
+
+    <!-- What Scouts Do -->
+    <section id="what-scouts-do" class="bg-white rounded-xl shadow-md p-6 md:p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+            <span class="w-1 h-8 bg-purple-500 mr-3 rounded"></span>
+            What Scouts Actually Do
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div class="p-4 bg-gray-50 rounded-lg border text-center">
+                <i class="fas fa-binoculars text-3xl text-purple-500 mb-2"></i>
+                <h3 class="font-bold text-gray-800 text-sm mb-1">Match Attendance</h3>
+                <p class="text-xs text-gray-600">Watch live matches at all levels to assess players in competitive environments. Non-league games are ideal &mdash; affordable entry and raw talent on show.</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg border text-center">
+                <i class="fas fa-file-alt text-3xl text-purple-500 mb-2"></i>
+                <h3 class="font-bold text-gray-800 text-sm mb-1">Player Reports</h3>
+                <p class="text-xs text-gray-600">Write detailed assessments of players covering technical ability, physical attributes, mentality, and potential for development.</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg border text-center">
+                <i class="fas fa-chart-line text-3xl text-purple-500 mb-2"></i>
+                <h3 class="font-bold text-gray-800 text-sm mb-1">Talent Identification</h3>
+                <p class="text-xs text-gray-600">Spot the players that others miss. Identify hidden qualities such as decision-making, work rate and positional intelligence.</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg border text-center">
+                <i class="fas fa-people-arrows text-3xl text-purple-500 mb-2"></i>
+                <h3 class="font-bold text-gray-800 text-sm mb-1">Recommendations</h3>
+                <p class="text-xs text-gray-600">Report findings to club managers, directors of football, or recruitment teams. Your recommendation can change a player&rsquo;s career.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scouting Qualifications -->
+    <section id="qualifications" class="bg-white rounded-xl shadow-md p-6 md:p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+            <span class="w-1 h-8 bg-purple-500 mr-3 rounded"></span>
+            Scouting Qualifications
+        </h2>
+        <p class="text-gray-600 leading-relaxed mb-6">
+            While scouting doesn&rsquo;t strictly require qualifications, having them significantly boosts your credibility with clubs:
+        </p>
+        <div class="space-y-3">
+            <div class="flex items-center p-4 bg-gray-50 rounded-lg border">
+                <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center font-bold mr-4 flex-shrink-0"><i class="fas fa-eye"></i></div>
+                <div>
+                    <h3 class="font-bold text-gray-800 text-sm">FA Talent Identification Course</h3>
+                    <p class="text-xs text-gray-600">The primary scouting qualification from the FA. Teaches a structured approach to assessing players. Often delivered as a weekend course.</p>
+                </div>
+            </div>
+            <div class="flex items-center p-4 bg-gray-50 rounded-lg border">
+                <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center font-bold mr-4 flex-shrink-0"><i class="fas fa-search-plus"></i></div>
+                <div>
+                    <h3 class="font-bold text-gray-800 text-sm">Advanced Talent ID</h3>
+                    <p class="text-xs text-gray-600">For experienced scouts looking to work at higher levels. Covers data analysis, video scouting, and advanced assessment frameworks.</p>
+                </div>
+            </div>
+            <div class="flex items-center p-4 bg-gray-50 rounded-lg border">
+                <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center font-bold mr-4 flex-shrink-0"><i class="fas fa-shield-alt"></i></div>
+                <div>
+                    <h3 class="font-bold text-gray-800 text-sm">Safeguarding Certificate</h3>
+                    <p class="text-xs text-gray-600">Required if you work with youth players. An FA Safeguarding course and an up-to-date DBS check are standard requirements.</p>
+                </div>
+            </div>
+        </div>
+        <div class="mt-4">
+            <a href="{% url 'pathways_qualifications' %}" class="inline-flex items-center text-purple-600 font-semibold text-sm hover:underline">
+                View full qualifications guide <i class="fas fa-arrow-right ml-2"></i>
+            </a>
+        </div>
+    </section>
+
+    <!-- Talent Identification -->
+    <section id="talent-id" class="bg-white rounded-xl shadow-md p-6 md:p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+            <span class="w-1 h-8 bg-purple-500 mr-3 rounded"></span>
+            Talent Identification &mdash; What to Look For
+        </h2>
+        <p class="text-gray-600 leading-relaxed mb-4">
+            Good scouts don&rsquo;t just watch the ball. They watch the players who don&rsquo;t have it. Here are the four pillars of talent identification used by professional scouting networks:
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-purple-50 border border-purple-200 rounded-lg p-5">
+                <h3 class="font-bold text-purple-800 mb-2"><i class="fas fa-futbol mr-2"></i>Technical</h3>
+                <p class="text-sm text-gray-600">First touch, passing range, dribbling ability, shooting technique. Can the player execute skills consistently under pressure?</p>
+            </div>
+            <div class="bg-purple-50 border border-purple-200 rounded-lg p-5">
+                <h3 class="font-bold text-purple-800 mb-2"><i class="fas fa-brain mr-2"></i>Tactical</h3>
+                <p class="text-sm text-gray-600">Positioning, movement off the ball, game reading, decision-making. Does the player understand their role in the team?</p>
+            </div>
+            <div class="bg-purple-50 border border-purple-200 rounded-lg p-5">
+                <h3 class="font-bold text-purple-800 mb-2"><i class="fas fa-bolt mr-2"></i>Physical</h3>
+                <p class="text-sm text-gray-600">Speed, strength, stamina, agility, balance. Physical profiles vary by position &mdash; a striker&rsquo;s needs differ from a full-back&rsquo;s.</p>
+            </div>
+            <div class="bg-purple-50 border border-purple-200 rounded-lg p-5">
+                <h3 class="font-bold text-purple-800 mb-2"><i class="fas fa-heart mr-2"></i>Psychological</h3>
+                <p class="text-sm text-gray-600">Attitude, resilience, leadership, coachability. Often the most important factor &mdash; talent without mentality rarely succeeds.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Example Scouting Report -->
+    <section id="reports" class="bg-white rounded-xl shadow-md p-6 md:p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+            <span class="w-1 h-8 bg-purple-500 mr-3 rounded"></span>
+            Example Scouting Report Structure
+        </h2>
+        <p class="text-gray-600 leading-relaxed mb-4">
+            A professional scouting report should follow a consistent template. Here&rsquo;s a structure used at non-league and academy level:
+        </p>
+        <div class="bg-gray-50 border border-gray-200 rounded-lg p-5">
+            <ol class="space-y-3 text-sm text-gray-700">
+                <li class="flex items-start"><span class="font-bold text-purple-600 mr-3">1.</span><span><strong>Player Details</strong> &mdash; Name, age, position, current club, match observed.</span></li>
+                <li class="flex items-start"><span class="font-bold text-purple-600 mr-3">2.</span><span><strong>Technical Assessment</strong> &mdash; Rate and comment on core technical skills.</span></li>
+                <li class="flex items-start"><span class="font-bold text-purple-600 mr-3">3.</span><span><strong>Tactical Awareness</strong> &mdash; How the player reads the game and makes decisions.</span></li>
+                <li class="flex items-start"><span class="font-bold text-purple-600 mr-3">4.</span><span><strong>Physical Profile</strong> &mdash; Speed, stamina, aerial ability, build.</span></li>
+                <li class="flex items-start"><span class="font-bold text-purple-600 mr-3">5.</span><span><strong>Psychological Traits</strong> &mdash; Leadership, reaction to adversity, communication.</span></li>
+                <li class="flex items-start"><span class="font-bold text-purple-600 mr-3">6.</span><span><strong>Key Strengths</strong> &mdash; Top 2&ndash;3 standout qualities.</span></li>
+                <li class="flex items-start"><span class="font-bold text-purple-600 mr-3">7.</span><span><strong>Areas for Improvement</strong> &mdash; Honest assessment of weaknesses.</span></li>
+                <li class="flex items-start"><span class="font-bold text-purple-600 mr-3">8.</span><span><strong>Overall Rating &amp; Recommendation</strong> &mdash; Score out of 10 and whether to sign, monitor, or pass.</span></li>
+            </ol>
+        </div>
+        <div class="mt-4 bg-purple-50 border-l-4 border-purple-500 p-4 rounded-r-lg">
+            <p class="text-sm text-purple-800">
+                <i class="fas fa-lightbulb text-purple-500 mr-1"></i>
+                <strong>Tip:</strong> On FAZZ PitchsideHub, verified scouts can create structured scouting reports as posts, visible to clubs they follow.
+            </p>
+        </div>
+    </section>
+
+    <!-- Resources -->
+    <section id="resources" class="bg-white rounded-xl shadow-md p-6 md:p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+            <span class="w-1 h-8 bg-purple-500 mr-3 rounded"></span>
+            Useful Resources
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <a href="https://learn.englandfootball.com/" target="_blank" rel="noopener" class="flex items-center p-4 bg-gray-50 rounded-lg border hover:border-purple-400 transition group">
+                <i class="fas fa-external-link-alt text-purple-500 mr-3"></i>
+                <div>
+                    <h4 class="font-bold text-gray-800 group-hover:text-purple-700 text-sm">England Football Learning</h4>
+                    <p class="text-xs text-gray-500">Find Talent ID courses and scouting qualifications</p>
+                </div>
+            </a>
+            <a href="https://www.thefa.com/get-involved" target="_blank" rel="noopener" class="flex items-center p-4 bg-gray-50 rounded-lg border hover:border-purple-400 transition group">
+                <i class="fas fa-external-link-alt text-purple-500 mr-3"></i>
+                <div>
+                    <h4 class="font-bold text-gray-800 group-hover:text-purple-700 text-sm">FA Get Involved</h4>
+                    <p class="text-xs text-gray-500">Official pathways into scouting and coaching</p>
+                </div>
+            </a>
+            <a href="{% url 'search_players' %}" class="flex items-center p-4 bg-purple-50 rounded-lg border border-purple-200 group">
+                <i class="fas fa-search text-purple-600 mr-3"></i>
+                <div>
+                    <h4 class="font-bold text-purple-800 text-sm">Browse Player Profiles</h4>
+                    <p class="text-xs text-purple-600">Search players by position, level and availability</p>
+                </div>
+            </a>
+            <a href="{% url 'signup' %}" class="flex items-center p-4 bg-purple-50 rounded-lg border border-purple-200 group">
+                <i class="fas fa-user-plus text-purple-600 mr-3"></i>
+                <div>
+                    <h4 class="font-bold text-purple-800 text-sm">Create Scout Profile</h4>
+                    <p class="text-xs text-purple-600">Sign up and get verified to access full scouting tools</p>
+                </div>
+            </a>
+        </div>
+    </section>
+
+</div>
+{% endblock %}

@@ -1,0 +1,250 @@
+{% extends 'pathways/base_pathways.html' %}
+
+{% block breadcrumb_extra %}
+<i class="fas fa-chevron-right mx-2 text-xs"></i>
+<span class="text-white font-medium">Become a Player</span>
+{% endblock %}
+
+{% block pathway_title %}Become a Football Player{% endblock %}
+{% block pathway_subtitle %}Your step-by-step guide to entering the non-league game{% endblock %}
+
+{% block sidebar_sections %}
+<nav class="bg-white rounded-lg shadow-md overflow-hidden mt-4">
+    <div class="bg-green-600 text-white px-4 py-3">
+        <h3 class="font-bold text-sm uppercase tracking-wider">
+            <i class="fas fa-list mr-2"></i>On This Page
+        </h3>
+    </div>
+    <div class="divide-y divide-gray-100 text-sm">
+        <a href="#overview" class="block px-4 py-2 text-gray-600 hover:text-[#1E5631] hover:bg-gray-50">Overview</a>
+        <a href="#pathway" class="block px-4 py-2 text-gray-600 hover:text-[#1E5631] hover:bg-gray-50">Player Pathway</a>
+        <a href="#trials" class="block px-4 py-2 text-gray-600 hover:text-[#1E5631] hover:bg-gray-50">Trials &amp; Opportunities</a>
+        <a href="#development" class="block px-4 py-2 text-gray-600 hover:text-[#1E5631] hover:bg-gray-50">Player Development</a>
+        <a href="#cv" class="block px-4 py-2 text-gray-600 hover:text-[#1E5631] hover:bg-gray-50">Football CV Guide</a>
+        <a href="#resources" class="block px-4 py-2 text-gray-600 hover:text-[#1E5631] hover:bg-gray-50">Resources</a>
+    </div>
+</nav>
+{% endblock %}
+
+{% block pathway_content %}
+<div class="space-y-12">
+
+    <!-- Overview -->
+    <section id="overview" class="bg-white rounded-xl shadow-md p-6 md:p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+            <span class="w-1 h-8 bg-green-500 mr-3 rounded"></span>
+            Overview
+        </h2>
+        <p class="text-gray-600 leading-relaxed mb-4">
+            Non-league football is the beating heart of the English game. Thousands of players compete across Steps 1&ndash;7 and local Sunday leagues every week. Unlike the professional game, non-league is accessible to almost anyone with talent, dedication, and the right approach.
+        </p>
+        <p class="text-gray-600 leading-relaxed">
+            Whether you&rsquo;re a teenager hoping to break into semi-professional football or an adult looking to get back into the game, this pathway will guide you through the key steps, what clubs look for, how to find trials, and how to build a football profile that gets noticed.
+        </p>
+    </section>
+
+    <!-- Player Pathway — Visual Steps -->
+    <section id="pathway" class="bg-white rounded-xl shadow-md p-6 md:p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+            <span class="w-1 h-8 bg-green-500 mr-3 rounded"></span>
+            Player Pathway
+        </h2>
+        <div class="relative">
+            <!-- Step Flow -->
+            <div class="space-y-0">
+                {% with steps="Start Playing Locally|Join a Local Club (Sunday/Step 6-7)|Attend Open Trials|Earn a Place at a Higher Club|Play Semi-Professional (Step 3-5)|Progress Up the Pyramid" %}
+                {% for step in steps|make_list %}{% endfor %}
+                {% endwith %}
+
+                <div class="flex flex-col items-center space-y-1">
+                    {% with step_list="Start Playing Locally,Join a Local Club (Sunday / Step 6-7),Attend Open Trials,Earn a Place at a Higher Club,Play Semi-Professional (Step 3-5),Progress Up the Pyramid" %}
+                    {% for step in step_list|cut:" " %}{% endfor %}
+                    {% endwith %}
+
+                    <!-- Manual step items for reliable rendering -->
+                    <div class="w-full md:w-3/4 bg-green-50 border-l-4 border-green-500 rounded-r-lg p-4 flex items-center">
+                        <div class="flex items-center justify-center w-10 h-10 bg-green-500 text-white rounded-full font-bold text-sm mr-4 flex-shrink-0">1</div>
+                        <div>
+                            <h3 class="font-bold text-gray-800">Start Playing Locally</h3>
+                            <p class="text-sm text-gray-600">Join a local park team, Sunday league, or 5-a-side group to get regular match experience.</p>
+                        </div>
+                    </div>
+                    <div class="text-green-400 text-xl"><i class="fas fa-arrow-down"></i></div>
+
+                    <div class="w-full md:w-3/4 bg-green-50 border-l-4 border-green-500 rounded-r-lg p-4 flex items-center">
+                        <div class="flex items-center justify-center w-10 h-10 bg-green-500 text-white rounded-full font-bold text-sm mr-4 flex-shrink-0">2</div>
+                        <div>
+                            <h3 class="font-bold text-gray-800">Join a Local Club (Sunday / Step 6&ndash;7)</h3>
+                            <p class="text-sm text-gray-600">Find a club at grassroots level. County FA websites list teams looking for players.</p>
+                        </div>
+                    </div>
+                    <div class="text-green-400 text-xl"><i class="fas fa-arrow-down"></i></div>
+
+                    <div class="w-full md:w-3/4 bg-green-50 border-l-4 border-green-500 rounded-r-lg p-4 flex items-center">
+                        <div class="flex items-center justify-center w-10 h-10 bg-green-500 text-white rounded-full font-bold text-sm mr-4 flex-shrink-0">3</div>
+                        <div>
+                            <h3 class="font-bold text-gray-800">Attend Open Trials</h3>
+                            <p class="text-sm text-gray-600">Clubs at Step 3&ndash;5 regularly hold open trials. FAZZ PitchsideHub lists these in the Trials section.</p>
+                        </div>
+                    </div>
+                    <div class="text-green-400 text-xl"><i class="fas fa-arrow-down"></i></div>
+
+                    <div class="w-full md:w-3/4 bg-green-50 border-l-4 border-green-500 rounded-r-lg p-4 flex items-center">
+                        <div class="flex items-center justify-center w-10 h-10 bg-green-500 text-white rounded-full font-bold text-sm mr-4 flex-shrink-0">4</div>
+                        <div>
+                            <h3 class="font-bold text-gray-800">Earn a Place at a Higher Club</h3>
+                            <p class="text-sm text-gray-600">Impress at trials and get signed. Playing at Step 4&ndash;5 is achievable with commitment and consistency.</p>
+                        </div>
+                    </div>
+                    <div class="text-green-400 text-xl"><i class="fas fa-arrow-down"></i></div>
+
+                    <div class="w-full md:w-3/4 bg-green-50 border-l-4 border-green-500 rounded-r-lg p-4 flex items-center">
+                        <div class="flex items-center justify-center w-10 h-10 bg-green-500 text-white rounded-full font-bold text-sm mr-4 flex-shrink-0">5</div>
+                        <div>
+                            <h3 class="font-bold text-gray-800">Play Semi-Professional (Step 3&ndash;5)</h3>
+                            <p class="text-sm text-gray-600">At this level clubs often pay match fees or small wages. Training is more structured and competitive.</p>
+                        </div>
+                    </div>
+                    <div class="text-green-400 text-xl"><i class="fas fa-arrow-down"></i></div>
+
+                    <div class="w-full md:w-3/4 bg-green-600 text-white rounded-lg p-4 flex items-center">
+                        <div class="flex items-center justify-center w-10 h-10 bg-white text-green-600 rounded-full font-bold text-sm mr-4 flex-shrink-0">6</div>
+                        <div>
+                            <h3 class="font-bold">Progress Up the Pyramid</h3>
+                            <p class="text-sm text-green-100">From Step 3 to the National League. Some players have gone from Sunday league to the Football League.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trials & Opportunities -->
+    <section id="trials" class="bg-white rounded-xl shadow-md p-6 md:p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+            <span class="w-1 h-8 bg-green-500 mr-3 rounded"></span>
+            Trials &amp; Opportunities
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="bg-gray-50 rounded-lg p-5 border border-gray-200">
+                <h3 class="font-bold text-gray-800 mb-2"><i class="fas fa-door-open text-green-500 mr-2"></i>Open Trials</h3>
+                <p class="text-sm text-gray-600">Most non-league clubs (Step 3&ndash;7) hold open trial days, especially during pre-season (May&ndash;July). These are open to anyone &mdash; just turn up, register, and play.</p>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-5 border border-gray-200">
+                <h3 class="font-bold text-gray-800 mb-2"><i class="fas fa-user-check text-green-500 mr-2"></i>Invitation Trials</h3>
+                <p class="text-sm text-gray-600">Some clubs run invite-only trials after watching players. Having a strong online profile and highlight reel increases your chances of being noticed by scouts.</p>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-5 border border-gray-200">
+                <h3 class="font-bold text-gray-800 mb-2"><i class="fas fa-bullhorn text-green-500 mr-2"></i>Where to Find Trials</h3>
+                <p class="text-sm text-gray-600">Club websites, social media, and platforms like FAZZ PitchsideHub aggregate trial listings so you can find them in one place.</p>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-5 border border-gray-200">
+                <h3 class="font-bold text-gray-800 mb-2"><i class="fas fa-clipboard-check text-green-500 mr-2"></i>What Clubs Look For</h3>
+                <p class="text-sm text-gray-600">Fitness, attitude, technical ability, and positional awareness. Communication and teamwork matter just as much as individual skill at trial level.</p>
+            </div>
+        </div>
+        <div class="bg-green-50 border border-green-200 rounded-lg p-5 text-center">
+            <p class="text-gray-700 font-medium mb-3">Looking for opportunities right now?</p>
+            <a href="{% url 'community_hub' %}" class="inline-flex items-center bg-green-600 text-white font-bold px-6 py-3 rounded-lg hover:bg-green-700 transition shadow">
+                <i class="fas fa-futbol mr-2"></i> View Open Trials
+            </a>
+        </div>
+    </section>
+
+    <!-- Player Development -->
+    <section id="development" class="bg-white rounded-xl shadow-md p-6 md:p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+            <span class="w-1 h-8 bg-green-500 mr-3 rounded"></span>
+            Player Development
+        </h2>
+        <div class="space-y-4 text-gray-600 leading-relaxed">
+            <p>
+                Talent alone is not enough. Clubs at every level of the pyramid value players who are committed to improving. Here are the key areas to focus on:
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="text-center p-4 bg-gray-50 rounded-lg border">
+                    <i class="fas fa-heartbeat text-3xl text-green-500 mb-2"></i>
+                    <h3 class="font-bold text-gray-800 mb-1">Fitness</h3>
+                    <p class="text-sm">Cardiovascular endurance, agility and strength are essential at higher steps.</p>
+                </div>
+                <div class="text-center p-4 bg-gray-50 rounded-lg border">
+                    <i class="fas fa-brain text-3xl text-green-500 mb-2"></i>
+                    <h3 class="font-bold text-gray-800 mb-1">Game Intelligence</h3>
+                    <p class="text-sm">Reading the game, positioning, and decision-making separate good from great players.</p>
+                </div>
+                <div class="text-center p-4 bg-gray-50 rounded-lg border">
+                    <i class="fas fa-users text-3xl text-green-500 mb-2"></i>
+                    <h3 class="font-bold text-gray-800 mb-1">Attitude &amp; Teamwork</h3>
+                    <p class="text-sm">Coaches consistently rate attitude, coachability and communication as top traits.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Football CV Guide -->
+    <section id="cv" class="bg-white rounded-xl shadow-md p-6 md:p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+            <span class="w-1 h-8 bg-green-500 mr-3 rounded"></span>
+            Building Your Football CV
+        </h2>
+        <p class="text-gray-600 leading-relaxed mb-4">
+            A football CV is your calling card. It tells clubs and scouts who you are before they&rsquo;ve seen you play. Here&rsquo;s what to include:
+        </p>
+        <div class="bg-gray-50 border border-gray-200 rounded-lg p-5">
+            <ol class="space-y-3 text-sm text-gray-700">
+                <li class="flex items-start"><span class="font-bold text-green-600 mr-3">1.</span><span><strong>Personal Details</strong> &mdash; Name, age, position, preferred foot, height.</span></li>
+                <li class="flex items-start"><span class="font-bold text-green-600 mr-3">2.</span><span><strong>Playing History</strong> &mdash; List clubs, teams, and leagues you&rsquo;ve played in (most recent first).</span></li>
+                <li class="flex items-start"><span class="font-bold text-green-600 mr-3">3.</span><span><strong>Key Stats</strong> &mdash; Goals, assists, appearances &mdash; be honest and specific.</span></li>
+                <li class="flex items-start"><span class="font-bold text-green-600 mr-3">4.</span><span><strong>Achievements</strong> &mdash; Cup wins, player-of-the-month awards, representative honours.</span></li>
+                <li class="flex items-start"><span class="font-bold text-green-600 mr-3">5.</span><span><strong>Video Highlights</strong> &mdash; A 2-3 minute YouTube reel of your best moments. Quality over quantity.</span></li>
+                <li class="flex items-start"><span class="font-bold text-green-600 mr-3">6.</span><span><strong>References</strong> &mdash; A previous manager or coach who can vouch for your ability and character.</span></li>
+            </ol>
+        </div>
+        <div class="mt-4 bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+            <p class="text-sm text-blue-800">
+                <i class="fas fa-lightbulb text-blue-500 mr-1"></i>
+                <strong>Tip:</strong> Your FAZZ PitchsideHub profile acts as a digital football CV. Fill it out completely &mdash; scouts and clubs search here for players.
+            </p>
+        </div>
+    </section>
+
+    <!-- Resources -->
+    <section id="resources" class="bg-white rounded-xl shadow-md p-6 md:p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+            <span class="w-1 h-8 bg-green-500 mr-3 rounded"></span>
+            Useful Resources
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <a href="https://www.englandfootball.com/" target="_blank" rel="noopener" class="flex items-center p-4 bg-gray-50 rounded-lg border hover:border-green-400 transition group">
+                <i class="fas fa-external-link-alt text-green-500 mr-3"></i>
+                <div>
+                    <h4 class="font-bold text-gray-800 group-hover:text-green-700 text-sm">England Football</h4>
+                    <p class="text-xs text-gray-500">Official FA platform for grassroots football</p>
+                </div>
+            </a>
+            <a href="https://www.thefa.com/get-involved" target="_blank" rel="noopener" class="flex items-center p-4 bg-gray-50 rounded-lg border hover:border-green-400 transition group">
+                <i class="fas fa-external-link-alt text-green-500 mr-3"></i>
+                <div>
+                    <h4 class="font-bold text-gray-800 group-hover:text-green-700 text-sm">FA Get Involved</h4>
+                    <p class="text-xs text-gray-500">Find clubs, leagues, and opportunities near you</p>
+                </div>
+            </a>
+            <a href="{% url 'community_hub' %}" class="flex items-center p-4 bg-green-50 rounded-lg border border-green-200 group">
+                <i class="fas fa-futbol text-green-600 mr-3"></i>
+                <div>
+                    <h4 class="font-bold text-green-800 text-sm">FAZZ Trials Board</h4>
+                    <p class="text-xs text-green-600">Browse current trial opportunities on our platform</p>
+                </div>
+            </a>
+            <a href="{% url 'search_clubs' %}" class="flex items-center p-4 bg-green-50 rounded-lg border border-green-200 group">
+                <i class="fas fa-shield-alt text-green-600 mr-3"></i>
+                <div>
+                    <h4 class="font-bold text-green-800 text-sm">Browse Clubs</h4>
+                    <p class="text-xs text-green-600">Search non-league clubs by level, location and league</p>
+                </div>
+            </a>
+        </div>
+    </section>
+
+</div>
+{% endblock %}

@@ -25,6 +25,9 @@ from .views import (
     generate_bio_view,
     # Part 12 – Security / GDPR
     delete_account_view, privacy_policy, about_page, contact_page, security_settings,
+    # Part 13 – Football Pathways
+    pathways_home, pathways_player, pathways_manager, pathways_scout,
+    pathways_non_league, pathways_qualifications,
 )
 
 urlpatterns = [
@@ -133,5 +136,13 @@ urlpatterns = [
         template_name='users/password_reset_complete.html',
     ), name='password_reset_complete'),
     
+    # Football Pathways — Educational Hub
+    path('pathways/', pathways_home, name='pathways_home'),
+    path('pathways/become-player/', pathways_player, name='pathways_player'),
+    path('pathways/become-manager/', pathways_manager, name='pathways_manager'),
+    path('pathways/become-scout/', pathways_scout, name='pathways_scout'),
+    path('pathways/non-league/', pathways_non_league, name='pathways_non_league'),
+    path('pathways/qualifications/', pathways_qualifications, name='pathways_qualifications'),
+
     path('', home_view, name='home'),
 ]

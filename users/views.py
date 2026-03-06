@@ -1808,6 +1808,40 @@ def contact_page(request):
     return render(request, 'users/contact.html')
 
 
+# =========================================================================
+# Football Pathways — Educational Hub
+# =========================================================================
+
+def pathways_home(request):
+    """Football Pathways landing page — choose your journey."""
+    return render(request, 'pathways/home.html')
+
+
+def pathways_player(request):
+    """Become a Player — pathway, trials, development."""
+    return render(request, 'pathways/player.html')
+
+
+def pathways_manager(request):
+    """Become a Manager — qualifications, career path."""
+    return render(request, 'pathways/manager.html')
+
+
+def pathways_scout(request):
+    """Become a Scout — what scouts do, qualifications, reports."""
+    return render(request, 'pathways/scout.html')
+
+
+def pathways_non_league(request):
+    """Understanding Non-League Football — the pyramid explained."""
+    return render(request, 'pathways/non_league.html')
+
+
+def pathways_qualifications(request):
+    """Football Qualifications — coaching, talent ID, safeguarding."""
+    return render(request, 'pathways/qualifications.html')
+
+
 @login_required
 def security_settings(request):
     """User security settings page: toggle privacy, change password link."""

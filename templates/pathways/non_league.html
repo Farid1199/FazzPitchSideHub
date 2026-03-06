@@ -1,0 +1,293 @@
+{% extends 'pathways/base_pathways.html' %}
+
+{% block breadcrumb_extra %}
+<i class="fas fa-chevron-right mx-2 text-xs"></i>
+<span class="text-white font-medium">Non-League Football</span>
+{% endblock %}
+
+{% block pathway_title %}Understanding Non-League Football{% endblock %}
+{% block pathway_subtitle %}The English football pyramid from the National League to grassroots{% endblock %}
+
+{% block sidebar_sections %}
+<nav class="bg-white rounded-lg shadow-md overflow-hidden mt-4">
+    <div class="bg-[#1E5631] text-white px-4 py-3">
+        <h3 class="font-bold text-sm uppercase tracking-wider">
+            <i class="fas fa-list mr-2"></i>On This Page
+        </h3>
+    </div>
+    <div class="divide-y divide-gray-100 text-sm">
+        <a href="#overview" class="block px-4 py-2 text-gray-600 hover:text-[#1E5631] hover:bg-gray-50">Overview</a>
+        <a href="#pyramid" class="block px-4 py-2 text-gray-600 hover:text-[#1E5631] hover:bg-gray-50">The Pyramid</a>
+        <a href="#semi-pro" class="block px-4 py-2 text-gray-600 hover:text-[#1E5631] hover:bg-gray-50">Semi-Pro vs Amateur</a>
+        <a href="#promotion" class="block px-4 py-2 text-gray-600 hover:text-[#1E5631] hover:bg-gray-50">Promotion &amp; Relegation</a>
+        <a href="#step-levels" class="block px-4 py-2 text-gray-600 hover:text-[#1E5631] hover:bg-gray-50">Step-by-Step Guide</a>
+        <a href="#involvement" class="block px-4 py-2 text-gray-600 hover:text-[#1E5631] hover:bg-gray-50">Get Involved</a>
+    </div>
+</nav>
+{% endblock %}
+
+{% block pathway_content %}
+<div class="space-y-12">
+
+    <!-- Overview -->
+    <section id="overview" class="bg-white rounded-xl shadow-md p-6 md:p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+            <span class="w-1 h-8 bg-[#1E5631] mr-3 rounded"></span>
+            What is Non-League Football?
+        </h2>
+        <p class="text-gray-600 leading-relaxed mb-4">
+            &ldquo;Non-league&rdquo; is the collective term for the leagues and clubs below the English Football League (EFL). It encompasses everything from the National League (Step 1) all the way down to weekend park football. There are over 40,000 clubs and hundreds of leagues across England.
+        </p>
+        <p class="text-gray-600 leading-relaxed">
+            Non-league is the heartbeat of English football. It&rsquo;s where future professionals are discovered, where communities come together, and where anyone &mdash; regardless of background &mdash; can get involved in the game through playing, coaching, scouting or volunteering.
+        </p>
+    </section>
+
+    <!-- The Pyramid -->
+    <section id="pyramid" class="bg-white rounded-xl shadow-md p-6 md:p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+            <span class="w-1 h-8 bg-[#1E5631] mr-3 rounded"></span>
+            The English Football Pyramid
+        </h2>
+        <p class="text-gray-600 leading-relaxed mb-6">
+            The pyramid is the interconnected league structure that links grassroots football all the way up to the Premier League. Clubs can rise and fall through promotion and relegation.
+        </p>
+        <div class="space-y-2">
+            <!-- Tier 1 -->
+            <div class="mx-auto" style="max-width: 100%;">
+                <div class="bg-gradient-to-r from-yellow-400 to-yellow-500 text-white rounded-lg p-3 text-center mx-auto" style="width: 30%;">
+                    <p class="font-bold text-sm">Premier League</p>
+                    <p class="text-xs opacity-90">Tier 1 &bull; 20 clubs</p>
+                </div>
+            </div>
+            <!-- Tier 2 -->
+            <div class="mx-auto" style="max-width: 100%;">
+                <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg p-3 text-center mx-auto" style="width: 40%;">
+                    <p class="font-bold text-sm">EFL Championship</p>
+                    <p class="text-xs opacity-90">Tier 2 &bull; 24 clubs</p>
+                </div>
+            </div>
+            <!-- Tier 3-4 -->
+            <div class="mx-auto" style="max-width: 100%;">
+                <div class="bg-gradient-to-r from-blue-400 to-blue-500 text-white rounded-lg p-3 text-center mx-auto" style="width: 50%;">
+                    <p class="font-bold text-sm">EFL League One &amp; Two</p>
+                    <p class="text-xs opacity-90">Tiers 3&ndash;4 &bull; 48 clubs</p>
+                </div>
+            </div>
+            <!-- Divider -->
+            <div class="text-center my-2">
+                <span class="inline-block bg-red-500 text-white text-xs font-bold px-4 py-1 rounded-full shadow">
+                    <i class="fas fa-arrow-down mr-1"></i> NON-LEAGUE STARTS HERE <i class="fas fa-arrow-down ml-1"></i>
+                </span>
+            </div>
+            <!-- Step 1 -->
+            <div class="mx-auto" style="max-width: 100%;">
+                <div class="bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg p-3 text-center mx-auto" style="width: 60%;">
+                    <p class="font-bold text-sm">National League</p>
+                    <p class="text-xs opacity-90">Step 1 &bull; Tier 5 &bull; 24 clubs &bull; Full-time / Semi-pro</p>
+                </div>
+            </div>
+            <!-- Step 2 -->
+            <div class="mx-auto" style="max-width: 100%;">
+                <div class="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg p-3 text-center mx-auto" style="width: 68%;">
+                    <p class="font-bold text-sm">National League North &amp; South</p>
+                    <p class="text-xs opacity-90">Step 2 &bull; Tier 6 &bull; 48 clubs &bull; Semi-pro</p>
+                </div>
+            </div>
+            <!-- Step 3 -->
+            <div class="mx-auto" style="max-width: 100%;">
+                <div class="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-lg p-3 text-center mx-auto" style="width: 76%;">
+                    <p class="font-bold text-sm">Northern / Southern / Isthmian Premier</p>
+                    <p class="text-xs opacity-90">Step 3 &bull; Tier 7 &bull; 66 clubs &bull; Semi-pro</p>
+                </div>
+            </div>
+            <!-- Step 4 -->
+            <div class="mx-auto" style="max-width: 100%;">
+                <div class="bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-lg p-3 text-center mx-auto" style="width: 84%;">
+                    <p class="font-bold text-sm">Northern / Southern / Isthmian Division One</p>
+                    <p class="text-xs opacity-90">Step 4 &bull; Tier 8 &bull; 132 clubs &bull; Semi-pro / Amateur</p>
+                </div>
+            </div>
+            <!-- Steps 5-6 -->
+            <div class="mx-auto" style="max-width: 100%;">
+                <div class="bg-gradient-to-r from-cyan-500 to-cyan-600 text-white rounded-lg p-3 text-center mx-auto" style="width: 92%;">
+                    <p class="font-bold text-sm">Steps 5&ndash;6: Regional Feeder Leagues</p>
+                    <p class="text-xs opacity-90">Tiers 9&ndash;10 &bull; 500+ clubs &bull; Mostly amateur</p>
+                </div>
+            </div>
+            <!-- Step 7 -->
+            <div class="mx-auto" style="max-width: 100%;">
+                <div class="bg-gradient-to-r from-gray-400 to-gray-500 text-white rounded-lg p-3 text-center mx-auto" style="width: 100%;">
+                    <p class="font-bold text-sm">Step 7: County Leagues &amp; Grassroots</p>
+                    <p class="text-xs opacity-90">Tiers 11+ &bull; Thousands of clubs &bull; Weekend / Sunday league</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Semi-Pro vs Amateur -->
+    <section id="semi-pro" class="bg-white rounded-xl shadow-md p-6 md:p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+            <span class="w-1 h-8 bg-[#1E5631] mr-3 rounded"></span>
+            Semi-Professional vs Amateur
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-green-50 border border-green-200 rounded-lg p-5">
+                <h3 class="font-bold text-green-800 text-lg mb-3"><i class="fas fa-pound-sign mr-2"></i>Semi-Professional</h3>
+                <ul class="space-y-2 text-sm text-gray-700">
+                    <li class="flex items-start"><i class="fas fa-check text-green-500 mr-2 mt-0.5"></i>Players receive a wage or match fee</li>
+                    <li class="flex items-start"><i class="fas fa-check text-green-500 mr-2 mt-0.5"></i>Training 2&ndash;4 evenings per week</li>
+                    <li class="flex items-start"><i class="fas fa-check text-green-500 mr-2 mt-0.5"></i>Most players have a day job alongside</li>
+                    <li class="flex items-start"><i class="fas fa-check text-green-500 mr-2 mt-0.5"></i>Typically Steps 1&ndash;4 (Tiers 5&ndash;8)</li>
+                    <li class="flex items-start"><i class="fas fa-check text-green-500 mr-2 mt-0.5"></i>Contracts &amp; registration rules apply</li>
+                </ul>
+            </div>
+            <div class="bg-gray-50 border border-gray-200 rounded-lg p-5">
+                <h3 class="font-bold text-gray-800 text-lg mb-3"><i class="fas fa-running mr-2"></i>Amateur</h3>
+                <ul class="space-y-2 text-sm text-gray-700">
+                    <li class="flex items-start"><i class="fas fa-check text-gray-500 mr-2 mt-0.5"></i>No payment &mdash; play purely for the love of it</li>
+                    <li class="flex items-start"><i class="fas fa-check text-gray-500 mr-2 mt-0.5"></i>Training 1&ndash;2 evenings per week (varies)</li>
+                    <li class="flex items-start"><i class="fas fa-check text-gray-500 mr-2 mt-0.5"></i>Open to all skill levels</li>
+                    <li class="flex items-start"><i class="fas fa-check text-gray-500 mr-2 mt-0.5"></i>Typically Steps 5&ndash;7 (Tiers 9+)</li>
+                    <li class="flex items-start"><i class="fas fa-check text-gray-500 mr-2 mt-0.5"></i>Less formal registration requirements</li>
+                </ul>
+            </div>
+        </div>
+        <div class="mt-4 bg-green-50 border-l-4 border-green-600 p-4 rounded-r-lg">
+            <p class="text-sm text-green-800">
+                <i class="fas fa-info-circle mr-1"></i>
+                <strong>Note:</strong> Some Step 1 (National League) clubs are now fully professional, paying full-time wages. The lines between &ldquo;non-league&rdquo; and &ldquo;league&rdquo; are increasingly blurred at the top end.
+            </p>
+        </div>
+    </section>
+
+    <!-- Promotion & Relegation -->
+    <section id="promotion" class="bg-white rounded-xl shadow-md p-6 md:p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+            <span class="w-1 h-8 bg-[#1E5631] mr-3 rounded"></span>
+            How Promotion &amp; Relegation Works
+        </h2>
+        <p class="text-gray-600 leading-relaxed mb-4">
+            The beauty of the English system is that any club can theoretically rise from a park pitch to the Premier League. Each season:
+        </p>
+        <div class="space-y-3">
+            <div class="flex items-start p-4 bg-green-50 border border-green-200 rounded-lg">
+                <i class="fas fa-arrow-up text-green-600 mr-3 mt-1"></i>
+                <div>
+                    <h3 class="font-bold text-gray-800 text-sm">Promotion</h3>
+                    <p class="text-xs text-gray-600">The top teams in each league go up. Often the champion goes up automatically, with a play-off for additional places. At lower steps, multiple teams can be promoted.</p>
+                </div>
+            </div>
+            <div class="flex items-start p-4 bg-red-50 border border-red-200 rounded-lg">
+                <i class="fas fa-arrow-down text-red-600 mr-3 mt-1"></i>
+                <div>
+                    <h3 class="font-bold text-gray-800 text-sm">Relegation</h3>
+                    <p class="text-xs text-gray-600">Bottom teams drop down to the league below. This applies all the way from the Premier League to lower non-league, though exact rules vary by league.</p>
+                </div>
+            </div>
+            <div class="flex items-start p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <i class="fas fa-exclamation-triangle text-yellow-600 mr-3 mt-1"></i>
+                <div>
+                    <h3 class="font-bold text-gray-800 text-sm">Ground Requirements</h3>
+                    <p class="text-xs text-gray-600">Many non-league clubs miss out on promotion because they can&rsquo;t meet ground grading requirements (floodlights, capacity, covered seating). This is one of the biggest challenges in non-league.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Step-by-Step Guide -->
+    <section id="step-levels" class="bg-white rounded-xl shadow-md p-6 md:p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+            <span class="w-1 h-8 bg-[#1E5631] mr-3 rounded"></span>
+            Step-by-Step Guide
+        </h2>
+        <div class="space-y-3">
+            <details class="bg-gray-50 border rounded-lg group">
+                <summary class="cursor-pointer p-4 font-bold text-gray-800 flex items-center justify-between hover:bg-gray-100 transition">
+                    <span><span class="inline-block bg-green-700 text-white text-xs font-bold px-2 py-0.5 rounded mr-2">Step 1</span> National League</span>
+                    <i class="fas fa-chevron-down text-gray-400 group-open:rotate-180 transition-transform"></i>
+                </summary>
+                <div class="p-4 pt-0 text-sm text-gray-600 border-t">
+                    <p>The highest non-league division. 24 clubs compete. The champion is promoted to League Two (EFL). Up to 3 additional clubs go up via play-offs. Many clubs here operate full-time. Average gates: 2,000&ndash;8,000. Notable examples: Wrexham (before EFL return), Stockport County, Notts County.</p>
+                </div>
+            </details>
+            <details class="bg-gray-50 border rounded-lg group">
+                <summary class="cursor-pointer p-4 font-bold text-gray-800 flex items-center justify-between hover:bg-gray-100 transition">
+                    <span><span class="inline-block bg-green-600 text-white text-xs font-bold px-2 py-0.5 rounded mr-2">Step 2</span> National League North &amp; South</span>
+                    <i class="fas fa-chevron-down text-gray-400 group-open:rotate-180 transition-transform"></i>
+                </summary>
+                <div class="p-4 pt-0 text-sm text-gray-600 border-t">
+                    <p>Two parallel divisions of 24 clubs each covering the north and south of England. Champions promoted directly; play-off winner also goes up. Mix of full-time and semi-pro clubs. Average gates: 500&ndash;3,000.</p>
+                </div>
+            </details>
+            <details class="bg-gray-50 border rounded-lg group">
+                <summary class="cursor-pointer p-4 font-bold text-gray-800 flex items-center justify-between hover:bg-gray-100 transition">
+                    <span><span class="inline-block bg-emerald-600 text-white text-xs font-bold px-2 py-0.5 rounded mr-2">Step 3</span> Regional Premier Divisions</span>
+                    <i class="fas fa-chevron-down text-gray-400 group-open:rotate-180 transition-transform"></i>
+                </summary>
+                <div class="p-4 pt-0 text-sm text-gray-600 border-t">
+                    <p>Three leagues: Northern Premier League Premier, Southern Premier League Premier (South &amp; Central), and Isthmian League Premier. Mostly semi-professional. This is the highest level where most &ldquo;non-league fans&rdquo; engage regularly. Gates: 200&ndash;1,500.</p>
+                </div>
+            </details>
+            <details class="bg-gray-50 border rounded-lg group">
+                <summary class="cursor-pointer p-4 font-bold text-gray-800 flex items-center justify-between hover:bg-gray-100 transition">
+                    <span><span class="inline-block bg-teal-600 text-white text-xs font-bold px-2 py-0.5 rounded mr-2">Step 4</span> Regional Division One</span>
+                    <i class="fas fa-chevron-down text-gray-400 group-open:rotate-180 transition-transform"></i>
+                </summary>
+                <div class="p-4 pt-0 text-sm text-gray-600 border-t">
+                    <p>Six divisions feeding into Step 3. Mix of paid and unpaid players. Many clubs operate on shoestring budgets. Players often combine football with full-time work. This is where many promising talents are spotted by scouts. Gates: 50&ndash;500.</p>
+                </div>
+            </details>
+            <details class="bg-gray-50 border rounded-lg group">
+                <summary class="cursor-pointer p-4 font-bold text-gray-800 flex items-center justify-between hover:bg-gray-100 transition">
+                    <span><span class="inline-block bg-cyan-600 text-white text-xs font-bold px-2 py-0.5 rounded mr-2">Steps 5&ndash;6</span> Feeder Leagues</span>
+                    <i class="fas fa-chevron-down text-gray-400 group-open:rotate-180 transition-transform"></i>
+                </summary>
+                <div class="p-4 pt-0 text-sm text-gray-600 border-t">
+                    <p>Dozens of regional leagues including the Combined Counties, Midland Football League, Eastern Counties, and more. Predominantly amateur. Some offer small expenses. This is the entry point for ambitious clubs and players looking to climb the pyramid.</p>
+                </div>
+            </details>
+            <details class="bg-gray-50 border rounded-lg group">
+                <summary class="cursor-pointer p-4 font-bold text-gray-800 flex items-center justify-between hover:bg-gray-100 transition">
+                    <span><span class="inline-block bg-gray-500 text-white text-xs font-bold px-2 py-0.5 rounded mr-2">Step 7</span> County &amp; Grassroots</span>
+                    <i class="fas fa-chevron-down text-gray-400 group-open:rotate-180 transition-transform"></i>
+                </summary>
+                <div class="p-4 pt-0 text-sm text-gray-600 border-t">
+                    <p>County leagues and Sunday leagues. Everyone is welcome &mdash; no trials needed. This is where most people first experience organised football. Clubs are community-run and always looking for new players, managers, and volunteers.</p>
+                </div>
+            </details>
+        </div>
+    </section>
+
+    <!-- Get Involved -->
+    <section id="involvement" class="bg-white rounded-xl shadow-md p-6 md:p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+            <span class="w-1 h-8 bg-[#1E5631] mr-3 rounded"></span>
+            Get Involved in Non-League
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <a href="{% url 'pathways_player' %}" class="block p-5 bg-green-50 border border-green-200 rounded-lg text-center hover:shadow-md transition">
+                <i class="fas fa-futbol text-3xl text-green-600 mb-2"></i>
+                <h3 class="font-bold text-gray-800 text-sm">Play</h3>
+                <p class="text-xs text-gray-600 mt-1">Find a club at your level and start playing. No experience required at grassroots level.</p>
+            </a>
+            <a href="{% url 'pathways_manager' %}" class="block p-5 bg-blue-50 border border-blue-200 rounded-lg text-center hover:shadow-md transition">
+                <i class="fas fa-chalkboard-teacher text-3xl text-blue-600 mb-2"></i>
+                <h3 class="font-bold text-gray-800 text-sm">Coach / Manage</h3>
+                <p class="text-xs text-gray-600 mt-1">Get your coaching badges and lead a team. Clubs are always looking for new managers.</p>
+            </a>
+            <a href="{% url 'pathways_scout' %}" class="block p-5 bg-purple-50 border border-purple-200 rounded-lg text-center hover:shadow-md transition">
+                <i class="fas fa-binoculars text-3xl text-purple-600 mb-2"></i>
+                <h3 class="font-bold text-gray-800 text-sm">Scout</h3>
+                <p class="text-xs text-gray-600 mt-1">Develop your eye for talent and help clubs discover their next star signing.</p>
+            </a>
+        </div>
+        <div class="mt-6 text-center">
+            <a href="{% url 'community_hub' %}" class="inline-flex items-center px-6 py-3 bg-[#1E5631] text-white font-bold rounded-lg hover:bg-green-800 transition shadow">
+                <i class="fas fa-users mr-2"></i> Explore the Community Hub
+            </a>
+        </div>
+    </section>
+
+</div>
+{% endblock %}
