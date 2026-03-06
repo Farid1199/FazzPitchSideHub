@@ -690,6 +690,7 @@ class Notification(models.Model):
         ('follow_request', 'Follow Request'),
         ('follow_accepted', 'Follow Request Accepted'),
         ('like', 'Post Liked'),
+        ('comment', 'Comment'),
         ('message', 'New Message'),
         ('opportunity', 'New Opportunity'),
         ('system', 'System Notification'),

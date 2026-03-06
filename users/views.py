@@ -507,7 +507,13 @@ def search_players(request):
     # Get choices for the filter form
     position_choices = PlayerProfile.POSITION_CHOICES
     level_choices = PlayerProfile.PLAYING_LEVEL_CHOICES
-    availability_choices = PlayerProfile.AVAILABILITY_CHOICES
+    # Only expose the three statuses that are actually searched — showing
+    # CONTRACTED or INJURED in the dropdown would confuse scouts (always 0 results).
+    SEARCHABLE_STATUSES = {'AVAILABLE', 'OPEN', 'TRIALLING'}
+    availability_choices = [
+        c for c in PlayerProfile.AVAILABILITY_CHOICES
+        if c[0] in SEARCHABLE_STATUSES
+    ]
     
     context = {
         'players': players,
@@ -716,10 +722,16 @@ def post_opportunity(request):
         if form.is_valid():
             opportunity = form.save(commit=False)
             opportunity.club = request.user.club_profile
-            # If no link provided, use a placeholder
+            # If no link provided, use a UUID placeholder so the unique constraint
+            # is satisfied; we'll update it to the canonical URL after the pk is known.
             if not opportunity.link:
-                opportunity.link = '#'
+                import uuid as _uuid
+                opportunity.link = f'/opportunity/placeholder/{_uuid.uuid4().hex[:16]}/'
             opportunity.save()
+            # Replace the placeholder with the canonical URL now that we have a pk
+            if '/opportunity/placeholder/' in opportunity.link:
+                opportunity.link = f'/opportunity/{opportunity.pk}/'
+                opportunity.save()
             # Notify followers that a new trial was posted
             from .models import Follow as FollowModel
             followers = FollowModel.objects.filter(following=request.user).select_related('follower')
