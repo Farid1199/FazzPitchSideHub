@@ -197,8 +197,15 @@
                 'Content-Type': 'application/json',
             },
         })
-        .then(response => response.json())
+        .then(response => {
+            if (response.redirected || response.status === 403) {
+                window.location.href = '{% url "login" %}?next=' + window.location.pathname;
+                return null;
+            }
+            return response.json();
+        })
         .then(data => {
+            if (!data) return;
             if (data.success) {
                 const likeIcon = document.getElementById(`likeIcon_${postId}`);
                 const likeCount = document.getElementById(`likeCount_${postId}`);
@@ -238,8 +245,15 @@
             },
             body: formData
         })
-        .then(response => response.json())
+        .then(response => {
+            if (response.redirected || response.status === 403) {
+                window.location.href = '{% url "login" %}?next=' + window.location.pathname;
+                return null;
+            }
+            return response.json();
+        })
         .then(data => {
+            if (!data) return;
             if (data.success) {
                 const list = document.getElementById(`commentsList_${postId}`);
                 const noComments = document.getElementById(`noComments_${postId}`);

@@ -220,6 +220,7 @@
                                 <!-- Like and Comment Bar -->
                                 <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
                                     <div class="flex items-center space-x-5">
+                                        {% if user.is_authenticated %}
                                         <button onclick="likePost({{ post.pk }})" 
                                                 class="flex items-center space-x-2 text-gray-600 hover:text-green-600 transition-colors"
                                                 id="likeBtn_{{ post.pk }}">
@@ -232,6 +233,19 @@
                                             <i class="far fa-comment fa-lg"></i>
                                             <span id="commentCount_{{ post.pk }}" class="font-semibold">{{ post.total_comments }}</span>
                                         </button>
+                                        {% else %}
+                                        <div class="flex items-center space-x-2 text-gray-400">
+                                            <i class="far fa-heart fa-lg"></i>
+                                            <span class="font-semibold">{{ post.total_likes }}</span>
+                                        </div>
+                                        <div class="flex items-center space-x-2 text-gray-400">
+                                            <i class="far fa-comment fa-lg"></i>
+                                            <span class="font-semibold">{{ post.total_comments }}</span>
+                                        </div>
+                                        <a href="{% url 'login' %}?next={{ request.path }}" class="text-xs text-blue-600 hover:underline ml-2">
+                                            <i class="fas fa-sign-in-alt mr-1"></i>Sign in to interact
+                                        </a>
+                                        {% endif %}
                                     </div>
                                     <div class="text-sm text-gray-500">
                                         {% if post.minutes_played %}
@@ -339,8 +353,15 @@
                 'Content-Type': 'application/json',
             },
         })
-        .then(response => response.json())
+        .then(response => {
+            if (response.redirected || response.status === 403) {
+                window.location.href = '{% url "login" %}?next=' + window.location.pathname;
+                return null;
+            }
+            return response.json();
+        })
         .then(data => {
+            if (!data) return;
             if (data.success) {
                 const likeIcon = document.getElementById(`likeIcon_${postId}`);
                 const likeCount = document.getElementById(`likeCount_${postId}`);
@@ -380,8 +401,15 @@
             },
             body: formData
         })
-        .then(response => response.json())
+        .then(response => {
+            if (response.redirected || response.status === 403) {
+                window.location.href = '{% url "login" %}?next=' + window.location.pathname;
+                return null;
+            }
+            return response.json();
+        })
         .then(data => {
+            if (!data) return;
             if (data.success) {
                 const list = document.getElementById(`commentsList_${postId}`);
                 const noComments = document.getElementById(`noComments_${postId}`);
