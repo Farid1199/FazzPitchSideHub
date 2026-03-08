@@ -70,6 +70,7 @@ urlpatterns = [
     path('feeds/general/', feeds_view, {'category': 'general'}, name='feeds_general'),
     path('feeds/transfer/', feeds_view, {'category': 'transfer'}, name='feeds_transfer'),
     path('feeds/match/', feeds_view, {'category': 'match'}, name='feeds_match'),
+    path('feeds/signals/', feeds_view, {'category': 'recruitment_signal'}, name='feeds_signals'),
     path('community-hub/', community_hub, name='community_hub'),
     
     # Social Media Posts

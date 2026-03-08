@@ -298,27 +298,26 @@ def home_view(request):
 
 def feeds_view(request, category=None):
     """
-    User Feeds page - Shows ALL content posted BY REGISTERED USERS on the platform.
-    This includes:
-    - Club news and opportunities (NewsItems/Opportunities)
-    - Player/Manager/Scout posts (Posts with achievements, highlights, etc.)
+    Unified Feeds page — Shows ALL content from both RSS sources AND registered users.
     
-    IMPORTANT: Only shows user-generated content, NOT RSS aggregated content.
-    Optionally filters by NewsItem category when a category slug is provided.
+    When no category filter is active ('All Feeds'):
+        Shows social posts + all news items combined chronologically.
+    When a category filter is active:
+        Shows only NewsItems matching that category (no social posts).
+    
+    Categories: trial, general, transfer, match, recruitment_signal
     """
     from .models import Post
     from itertools import chain
-    from operator import attrgetter
     
     # Get filter parameters
     post_type_filter = request.GET.get('type', '')
     role_filter = request.GET.get('role', '')
     page_number = request.GET.get('page', 1)
     
-    # Fetch all registered club profiles
+    # Fetch all registered club profiles for sidebar
     all_clubs = ClubProfile.objects.all().order_by('league_level', 'club_name')
     
-    # Organize registered clubs by league level for pyramid display
     league_pyramid = {}
     for club in all_clubs:
         level = club.get_league_level_display()
@@ -332,47 +331,60 @@ def feeds_view(request, category=None):
             'is_registered': club.is_registered if hasattr(club, 'is_registered') else True
         })
     
-    # Fetch USER-GENERATED opportunities (only from registered clubs, NOT RSS)
+    # Open opportunities sidebar (both RSS and user-posted)
     open_opportunities = Opportunity.objects.filter(
-        club__isnull=False,  # Only user posts
         is_open=True
-    ).select_related('club').order_by('-published_date')
+    ).select_related('source').order_by('-published_date')[:15]
     
-    # Fetch social posts from players/managers/scouts
-    posts = Post.objects.select_related('user').prefetch_related('likes', 'comments', 'comments__user').all()
+    # ── Build the feed based on category ──
+    # Exclude Opportunity subclass IDs so we don't double-show them as plain NewsItems
+    opportunity_ids = Opportunity.objects.values_list('newsitem_ptr_id', flat=True)
     
-    # Apply filters to posts
-    if post_type_filter:
-        posts = posts.filter(post_type=post_type_filter)
-    if role_filter:
-        posts = posts.filter(user__role=role_filter)
-    
-    # Fetch club news items
-    club_news = NewsItem.objects.filter(
-        club__isnull=False  # Only user posts
-    ).select_related('club')
-
-    # Apply category filter if provided
     if category:
-        club_news = club_news.filter(category=category)
-        open_opportunities = open_opportunities.filter(category=category) if category == 'trial' else open_opportunities.none()
+        # Category-filtered view: show only NewsItems (including Opportunities) for that category
+        if category in ('trial', 'recruitment_signal'):
+            # For trial/signal tabs, show Opportunities matching that category
+            feed_items = list(Opportunity.objects.filter(
+                category=category
+            ).select_related('source').order_by('-published_date'))
+        else:
+            # For match/transfer/general, show regular NewsItems only
+            feed_items = list(NewsItem.objects.filter(
+                category=category
+            ).exclude(
+                id__in=opportunity_ids
+            ).select_related('source').order_by('-published_date'))
+    else:
+        # "All Feeds" — combine social posts + all news items
+        posts = Post.objects.select_related('user').prefetch_related(
+            'likes', 'comments', 'comments__user'
+        ).all()
+        
+        if post_type_filter:
+            posts = posts.filter(post_type=post_type_filter)
+        if role_filter:
+            posts = posts.filter(user__role=role_filter)
+        
+        # Get all non-opportunity news items + opportunities separately  
+        news_items = list(NewsItem.objects.exclude(
+            id__in=opportunity_ids
+        ).select_related('source').order_by('-published_date'))
+        
+        opportunities = list(Opportunity.objects.select_related(
+            'source'
+        ).order_by('-published_date'))
+        
+        feed_items = sorted(
+            chain(posts, news_items, opportunities),
+            key=lambda obj: obj.created_at if hasattr(obj, 'created_at') else obj.published_date,
+            reverse=True
+        )
     
-    # Slice opportunities after filtering
-    open_opportunities = open_opportunities[:15]
-    
-    # Combine and sort all content by date (most recent first)
-    # We'll paginate the combined feed
-    combined_feed = sorted(
-        chain(posts, club_news),
-        key=lambda obj: obj.created_at if hasattr(obj, 'created_at') else obj.published_date,
-        reverse=True
-    )
-    
-    # Paginate combined feed (15 items per page)
-    paginator = Paginator(combined_feed, 15)
+    # Paginate
+    paginator = Paginator(feed_items, 15)
     feed_page = paginator.get_page(page_number)
     
-    # Get filter choices
+    # Filter choices
     post_types = Post.POST_TYPE_CHOICES
     user_roles = [
         ('PLAYER', 'Players'),
@@ -381,16 +393,16 @@ def feeds_view(request, category=None):
         ('CLUB', 'Clubs'),
     ]
     
-    # Get registered clubs count
     total_clubs = ClubProfile.objects.count()
     registered_clubs = ClubProfile.objects.filter(user__isnull=False).count()
 
-    # Category counts for secondary nav
+    # Category counts for secondary nav (all sources combined)
     category_counts = {
-        'trial': NewsItem.objects.filter(category='trial').count(),
-        'general': NewsItem.objects.filter(category='general').count(),
-        'transfer': NewsItem.objects.filter(category='transfer').count(),
-        'match': NewsItem.objects.filter(category='match').count(),
+        'trial': Opportunity.objects.filter(category='trial').count(),
+        'general': NewsItem.objects.filter(category='general').exclude(id__in=opportunity_ids).count(),
+        'transfer': NewsItem.objects.filter(category='transfer').exclude(id__in=opportunity_ids).count(),
+        'match': NewsItem.objects.filter(category='match').exclude(id__in=opportunity_ids).count(),
+        'recruitment_signal': Opportunity.objects.filter(category='recruitment_signal').count(),
     }
     
     context = {

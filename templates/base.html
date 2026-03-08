@@ -56,7 +56,7 @@
                     <a href="{% url 'home' %}" class="{% if url_name == 'home' %}text-[#1E5631] border-b-2 border-[#1E5631]{% else %}text-gray-700 hover:text-[#1E5631]{% endif %} transition duration-200 font-medium px-1 py-5">
                         <i class="fas fa-home mr-1"></i> Home
                     </a>
-                    <a href="{% url 'feeds' %}" class="{% if url_name == 'feeds' or url_name == 'feeds_trial' or url_name == 'feeds_general' or url_name == 'feeds_transfer' or url_name == 'feeds_match' %}text-[#1E5631] border-b-2 border-[#1E5631]{% else %}text-gray-700 hover:text-[#1E5631]{% endif %} transition duration-200 font-medium px-1 py-5">
+                    <a href="{% url 'feeds' %}" class="{% if url_name == 'feeds' or url_name == 'feeds_trial' or url_name == 'feeds_general' or url_name == 'feeds_transfer' or url_name == 'feeds_match' or url_name == 'feeds_signals' %}text-[#1E5631] border-b-2 border-[#1E5631]{% else %}text-gray-700 hover:text-[#1E5631]{% endif %} transition duration-200 font-medium px-1 py-5">
                         <i class="fas fa-newspaper mr-1"></i> Feeds
                     </a>
                     <a href="{% url 'community_hub' %}" class="{% if url_name == 'community_hub' %}text-[#1E5631] border-b-2 border-[#1E5631]{% else %}text-gray-700 hover:text-[#1E5631]{% endif %} transition duration-200 font-medium px-1 py-5">
@@ -156,14 +156,17 @@
                     <a href="{% url 'feeds_trial' %}" class="{% if current_category == 'trial' %}text-[#1E5631] border-b-2 border-[#1E5631] font-bold{% else %}text-gray-600 hover:text-[#1E5631]{% endif %} text-sm transition duration-200 py-2">
                         Trial News ({{ category_counts.trial }})
                     </a>
-                    <a href="{% url 'feeds_general' %}" class="{% if current_category == 'general' %}text-[#1E5631] border-b-2 border-[#1E5631] font-bold{% else %}text-gray-600 hover:text-[#1E5631]{% endif %} text-sm transition duration-200 py-2">
-                        General News ({{ category_counts.general }})
+                    <a href="{% url 'feeds_signals' %}" class="{% if current_category == 'recruitment_signal' %}text-[#1E5631] border-b-2 border-[#1E5631] font-bold{% else %}text-gray-600 hover:text-[#1E5631]{% endif %} text-sm transition duration-200 py-2">
+                        <i class="fas fa-brain text-xs mr-1"></i>Recruitment Signals ({{ category_counts.recruitment_signal }})
                     </a>
                     <a href="{% url 'feeds_transfer' %}" class="{% if current_category == 'transfer' %}text-[#1E5631] border-b-2 border-[#1E5631] font-bold{% else %}text-gray-600 hover:text-[#1E5631]{% endif %} text-sm transition duration-200 py-2">
                         Transfer News ({{ category_counts.transfer }})
                     </a>
                     <a href="{% url 'feeds_match' %}" class="{% if current_category == 'match' %}text-[#1E5631] border-b-2 border-[#1E5631] font-bold{% else %}text-gray-600 hover:text-[#1E5631]{% endif %} text-sm transition duration-200 py-2">
                         Match Reports ({{ category_counts.match }})
+                    </a>
+                    <a href="{% url 'feeds_general' %}" class="{% if current_category == 'general' %}text-[#1E5631] border-b-2 border-[#1E5631] font-bold{% else %}text-gray-600 hover:text-[#1E5631]{% endif %} text-sm transition duration-200 py-2">
+                        General News ({{ category_counts.general }})
                     </a>
                 </div>
             </div>

@@ -771,6 +771,7 @@ class NewsItem(models.Model):
         ('general', 'General News'),
         ('transfer', 'Transfer News'),
         ('match', 'Match Reports'),
+        ('recruitment_signal', 'Recruitment Signals'),
     ]
 
     # RSS Source (Admin-managed aggregation)
@@ -818,6 +819,15 @@ class NewsItem(models.Model):
         choices=CATEGORY_CHOICES,
         default='general',
         help_text="Category of the news item."
+    )
+    ai_recruitment_score = models.IntegerField(
+        default=0,
+        help_text="AI-generated recruitment intent score (0-100). Higher = more likely recruiting."
+    )
+    ai_summary = models.TextField(
+        blank=True,
+        default='',
+        help_text="AI-generated explanation of why this article was flagged as a recruitment signal."
     )
 
     class Meta:
