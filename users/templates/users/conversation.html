@@ -16,7 +16,7 @@
                 </div>
                 <div>
                     <h2 class="font-bold text-gray-900">{% if other_user %}{{ other_user.username }}{% else %}Deleted User{% endif %}</h2>
-                    {% if other_user %}<p class="text-xs text-gray-500">{{ other_user.get_role_display|default:"User" }}</p>{% endif %}
+                    {% if other_user %}<p class="text-xs text-gray-500">{{ other_user.get_display_role }}</p>{% endif %}
                 </div>
             </div>
 

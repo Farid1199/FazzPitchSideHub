@@ -26,9 +26,31 @@ class User(AbstractUser):
         default=False,
         help_text="If True, only approved followers can see full profile."
     )
+    is_email_verified = models.BooleanField(
+        default=False,
+        help_text="Whether the user has verified their email address."
+    )
+    email_verification_token = models.CharField(
+        max_length=64, blank=True, default='',
+        help_text="Token for email verification link."
+    )
+    privacy_consent = models.BooleanField(
+        default=False,
+        help_text="User consented to privacy policy and data processing at signup."
+    )
+    privacy_consent_date = models.DateTimeField(
+        null=True, blank=True,
+        help_text="Timestamp when the user gave consent."
+    )
 
     def __str__(self):
         return self.username
+
+    def get_display_role(self):
+        """Return the user's role label, hiding 'Scout' when stealth mode is on."""
+        if self.role == 'SCOUT' and hasattr(self, 'scout_profile') and not self.scout_profile.is_scout_public:
+            return 'User'
+        return self.get_role_display() if self.role else 'User'
 
 
 class PlayerProfile(models.Model):
@@ -73,6 +95,11 @@ class PlayerProfile(models.Model):
     ]
     
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='player_profile')
+    date_of_birth = models.DateField(
+        null=True,
+        blank=True,
+        help_text="Date of birth. Must be at least 18 years old."
+    )
     position = models.CharField(
         max_length=3, 
         choices=POSITION_CHOICES, 
@@ -331,6 +358,11 @@ class ScoutProfile(models.Model):
         blank=True,
         null=True,
         help_text="Verified tier awarded by admin."
+    )
+
+    is_scout_public = models.BooleanField(
+        default=False,
+        help_text="If True, others can see this account is a Scout. If False (default), the role is hidden."
     )
 
     def __str__(self):
@@ -1123,8 +1155,8 @@ class Post(models.Model):
         return self.likes.count()
     
     def get_user_role(self):
-        """Get the role of the user who created the post"""
-        return self.user.get_role_display() if self.user.role else "User"
+        """Get the role of the user who created the post, respecting scout stealth."""
+        return self.user.get_display_role()
     
     def get_profile_info(self):
         """Get profile information based on user role"""

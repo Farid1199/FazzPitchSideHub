@@ -60,7 +60,7 @@
                         <i class="fas fa-newspaper mr-1"></i> Feeds
                     </a>
                     <a href="{% url 'community_hub' %}" class="{% if url_name == 'community_hub' %}text-[#1E5631] border-b-2 border-[#1E5631]{% else %}text-gray-700 hover:text-[#1E5631]{% endif %} transition duration-200 font-medium px-1 py-5">
-                        <i class="fas fa-futbol mr-1"></i> Trials
+                        <i class="fas fa-futbol mr-1"></i> Opportunities
                     </a>
                     <a href="{% url 'search_clubs' %}" class="{% if url_name == 'search_clubs' %}text-[#1E5631] border-b-2 border-[#1E5631]{% else %}text-gray-700 hover:text-[#1E5631]{% endif %} transition duration-200 font-medium px-1 py-5">
                         <i class="fas fa-shield-alt mr-1"></i> Clubs
@@ -82,14 +82,14 @@
                     {% if user.is_authenticated %}
                         <!-- Notification Bell -->
                         <div class="relative" id="notif-container">
-                            <button class="text-gray-700 hover:text-[#1E5631] transition duration-200 font-medium relative" id="notif-button">
+                            <button class="text-gray-700 hover:text-[#1E5631] transition duration-200 font-medium relative" id="notif-button" aria-label="Notifications" aria-haspopup="true" aria-expanded="false">
                                 <i class="fas fa-bell text-lg"></i>
                                 <span id="notif-badge" class="hidden absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">0</span>
                             </button>
                             <div class="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg py-1 hidden z-50" id="notif-dropdown">
                                 <div class="px-4 py-2 border-b flex justify-between items-center">
                                     <span class="font-bold text-gray-800">Notifications</span>
-                                    <button id="mark-all-read-btn" class="text-xs text-[#1E5631] hover:underline">Mark all read</button>
+                                    <button id="mark-all-read-btn" class="text-xs text-[#1E5631] hover:underline" aria-label="Mark all notifications as read">Mark all read</button>
                                 </div>
                                 <div id="notif-list" class="max-h-64 overflow-y-auto">
                                     <p class="px-4 py-3 text-gray-500 text-sm">Loading...</p>
@@ -102,7 +102,7 @@
 
                         <!-- Profile Dropdown -->
                         <div class="relative" id="user-menu-container">
-                            <button class="flex items-center space-x-2 text-gray-700 hover:text-[#1E5631] transition duration-200 font-medium" id="user-menu-button">
+                            <button class="flex items-center space-x-2 text-gray-700 hover:text-[#1E5631] transition duration-200 font-medium" id="user-menu-button" aria-label="User menu" aria-haspopup="true" aria-expanded="false">
                                 <i class="fas fa-user-circle"></i>
                                 <span>{{ user.username }}</span>
                                 <i class="fas fa-chevron-down text-xs"></i>
@@ -138,7 +138,7 @@
 
                 <!-- Mobile Menu Button -->
                 <div class="md:hidden flex items-center">
-                    <button id="mobile-menu-button" class="text-gray-700 hover:text-primary focus:outline-none">
+                    <button id="mobile-menu-button" class="text-gray-700 hover:text-primary focus:outline-none" aria-label="Open navigation menu" aria-expanded="false">
                         <i class="fas fa-bars text-2xl"></i>
                     </button>
                 </div>
@@ -156,9 +156,11 @@
                     <a href="{% url 'feeds_trial' %}" class="{% if current_category == 'trial' %}text-[#1E5631] border-b-2 border-[#1E5631] font-bold{% else %}text-gray-600 hover:text-[#1E5631]{% endif %} text-sm transition duration-200 py-2">
                         Trial News ({{ category_counts.trial }})
                     </a>
+                    {% if category_counts.recruitment_signal > 0 %}
                     <a href="{% url 'feeds_signals' %}" class="{% if current_category == 'recruitment_signal' %}text-[#1E5631] border-b-2 border-[#1E5631] font-bold{% else %}text-gray-600 hover:text-[#1E5631]{% endif %} text-sm transition duration-200 py-2">
                         <i class="fas fa-brain text-xs mr-1"></i>Recruitment Signals ({{ category_counts.recruitment_signal }})
                     </a>
+                    {% endif %}
                     <a href="{% url 'feeds_transfer' %}" class="{% if current_category == 'transfer' %}text-[#1E5631] border-b-2 border-[#1E5631] font-bold{% else %}text-gray-600 hover:text-[#1E5631]{% endif %} text-sm transition duration-200 py-2">
                         Transfer News ({{ category_counts.transfer }})
                     </a>
@@ -191,7 +193,7 @@
                 </div>
                 {% endif %}
                 <a href="{% url 'community_hub' %}" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100 hover:text-primary font-medium">
-                    <i class="fas fa-futbol mr-2"></i> Trials
+                    <i class="fas fa-futbol mr-2"></i> Opportunities
                 </a>
                 <a href="{% url 'search_clubs' %}" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100 hover:text-primary font-medium">
                     <i class="fas fa-shield-alt mr-2"></i> Clubs
@@ -289,14 +291,14 @@
                 <div>
                     <h3 class="text-lg font-bold mb-4">Follow Us</h3>
                     <div class="flex space-x-4">
-                        <a href="#" class="text-gray-400 hover:text-white transition text-2xl">
-                            <i class="fab fa-twitter"></i>
+                        <a href="#" class="text-gray-400 hover:text-white transition text-2xl" aria-label="Follow us on Twitter">
+                            <i class="fab fa-twitter" aria-hidden="true"></i>
                         </a>
-                        <a href="#" class="text-gray-400 hover:text-white transition text-2xl">
-                            <i class="fab fa-facebook"></i>
+                        <a href="#" class="text-gray-400 hover:text-white transition text-2xl" aria-label="Follow us on Facebook">
+                            <i class="fab fa-facebook" aria-hidden="true"></i>
                         </a>
-                        <a href="#" class="text-gray-400 hover:text-white transition text-2xl">
-                            <i class="fab fa-instagram"></i>
+                        <a href="#" class="text-gray-400 hover:text-white transition text-2xl" aria-label="Follow us on Instagram">
+                            <i class="fab fa-instagram" aria-hidden="true"></i>
                         </a>
                     </div>
                 </div>
@@ -313,6 +315,7 @@
         document.getElementById('mobile-menu-button').addEventListener('click', function() {
             const menu = document.getElementById('mobile-menu');
             menu.classList.toggle('hidden');
+            this.setAttribute('aria-expanded', !menu.classList.contains('hidden'));
         });
         
         // User menu dropdown functionality with better hover handling
@@ -326,11 +329,13 @@
             const showMenu = () => {
                 clearTimeout(timeout);
                 userMenuDropdown.classList.remove('hidden');
+                userMenuButton.setAttribute('aria-expanded', 'true');
             };
             
             const hideMenu = () => {
                 timeout = setTimeout(() => {
                     userMenuDropdown.classList.add('hidden');
+                    userMenuButton.setAttribute('aria-expanded', 'false');
                 }, 200);
             };
             
@@ -347,8 +352,8 @@
         const notifContainer = document.getElementById('notif-container');
         if (notifBtn && notifDropdown && notifContainer) {
             let nt;
-            notifBtn.addEventListener('click', () => { clearTimeout(nt); notifDropdown.classList.toggle('hidden'); fetchNotifications(); });
-            notifContainer.addEventListener('mouseleave', () => { nt = setTimeout(() => notifDropdown.classList.add('hidden'), 300); });
+            notifBtn.addEventListener('click', () => { clearTimeout(nt); notifDropdown.classList.toggle('hidden'); notifBtn.setAttribute('aria-expanded', !notifDropdown.classList.contains('hidden')); fetchNotifications(); });
+            notifContainer.addEventListener('mouseleave', () => { nt = setTimeout(() => { notifDropdown.classList.add('hidden'); notifBtn.setAttribute('aria-expanded', 'false'); }, 300); });
             notifDropdown.addEventListener('mouseenter', () => clearTimeout(nt));
         }
 

@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load privacy_filters %}
 
 {% block title %}Search Players - FazzPitchSideHub{% endblock %}
 
@@ -126,25 +127,35 @@
             
             <!-- Position Color Legend -->
             <div class="flex items-center space-x-4 text-sm">
-                <span class="text-gray-600 font-medium">Position Colors:</span>
-                <div class="flex items-center space-x-1">
-                    <div class="w-4 h-4 rounded-full bg-yellow-500" title="Goalkeeper"></div>
+                <span class="text-gray-600 font-medium">Positions:</span>
+                <div class="flex items-center space-x-1.5" title="Goalkeeper">
+                    <div class="w-6 h-6 rounded-full bg-yellow-500 flex items-center justify-center" role="img" aria-label="Goalkeeper">
+                        <i class="fas fa-hands text-white text-xs" aria-hidden="true"></i>
+                    </div>
                     <span class="text-gray-600">GK</span>
                 </div>
-                <div class="flex items-center space-x-1">
-                    <div class="w-4 h-4 rounded-full bg-blue-600" title="Defender"></div>
+                <div class="flex items-center space-x-1.5" title="Defender">
+                    <div class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center" role="img" aria-label="Defender">
+                        <i class="fas fa-shield-halved text-white text-xs" aria-hidden="true"></i>
+                    </div>
                     <span class="text-gray-600">DEF</span>
                 </div>
-                <div class="flex items-center space-x-1">
-                    <div class="w-4 h-4 rounded-full bg-green-600" title="Midfielder"></div>
+                <div class="flex items-center space-x-1.5" title="Midfielder">
+                    <div class="w-6 h-6 rounded-full bg-green-600 flex items-center justify-center" role="img" aria-label="Midfielder">
+                        <i class="fas fa-compass text-white text-xs" aria-hidden="true"></i>
+                    </div>
                     <span class="text-gray-600">MID</span>
                 </div>
-                <div class="flex items-center space-x-1">
-                    <div class="w-4 h-4 rounded-full bg-red-500" title="Winger"></div>
+                <div class="flex items-center space-x-1.5" title="Winger">
+                    <div class="w-6 h-6 rounded-full bg-red-500 flex items-center justify-center" role="img" aria-label="Winger">
+                        <i class="fas fa-bolt text-white text-xs" aria-hidden="true"></i>
+                    </div>
                     <span class="text-gray-600">WING</span>
                 </div>
-                <div class="flex items-center space-x-1">
-                    <div class="w-4 h-4 rounded-full bg-purple-600" title="Forward"></div>
+                <div class="flex items-center space-x-1.5" title="Forward">
+                    <div class="w-6 h-6 rounded-full bg-purple-600 flex items-center justify-center" role="img" aria-label="Forward">
+                        <i class="fas fa-bullseye text-white text-xs" aria-hidden="true"></i>
+                    </div>
                     <span class="text-gray-600">FWD</span>
                 </div>
             </div>
@@ -158,34 +169,24 @@
                         <!-- Position Icon Badge - Top Right -->
                         <div class="absolute top-4 right-4 z-10">
                             {% if player.position == 'GK' %}
-                                <div class="bg-yellow-500 text-white rounded-full p-3 shadow-lg" title="Goalkeeper">
-                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
-                                    </svg>
+                                <div class="bg-yellow-500 text-white rounded-full w-11 h-11 flex items-center justify-center shadow-lg" role="img" aria-label="Goalkeeper">
+                                    <i class="fas fa-hands text-lg" aria-hidden="true"></i>
                                 </div>
                             {% elif player.position == 'LB' or player.position == 'CB' or player.position == 'RB' or player.position == 'LWB' or player.position == 'RWB' %}
-                                <div class="bg-blue-600 text-white rounded-full p-3 shadow-lg" title="Defender">
-                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
-                                    </svg>
+                                <div class="bg-blue-600 text-white rounded-full w-11 h-11 flex items-center justify-center shadow-lg" role="img" aria-label="Defender">
+                                    <i class="fas fa-shield-halved text-lg" aria-hidden="true"></i>
                                 </div>
                             {% elif player.position == 'CDM' or player.position == 'CM' or player.position == 'CAM' or player.position == 'LM' or player.position == 'RM' %}
-                                <div class="bg-green-600 text-white rounded-full p-3 shadow-lg" title="Midfielder">
-                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                                    </svg>
+                                <div class="bg-green-600 text-white rounded-full w-11 h-11 flex items-center justify-center shadow-lg" role="img" aria-label="Midfielder">
+                                    <i class="fas fa-compass text-lg" aria-hidden="true"></i>
                                 </div>
                             {% elif player.position == 'LW' or player.position == 'RW' %}
-                                <div class="bg-red-500 text-white rounded-full p-3 shadow-lg" title="Winger">
-                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M7 2v11h3v9l7-12h-4l4-8z"/>
-                                    </svg>
+                                <div class="bg-red-500 text-white rounded-full w-11 h-11 flex items-center justify-center shadow-lg" role="img" aria-label="Winger">
+                                    <i class="fas fa-bolt text-lg" aria-hidden="true"></i>
                                 </div>
                             {% else %}
-                                <div class="bg-purple-600 text-white rounded-full p-3 shadow-lg" title="Forward">
-                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-                                    </svg>
+                                <div class="bg-purple-600 text-white rounded-full w-11 h-11 flex items-center justify-center shadow-lg" role="img" aria-label="Forward">
+                                    <i class="fas fa-bullseye text-lg" aria-hidden="true"></i>
                                 </div>
                             {% endif %}
                         </div>
@@ -232,7 +233,7 @@
                                 <div class="bg-gray-50 rounded-lg p-3">
                                     <p class="text-xs text-gray-500 mb-1">Location</p>
                                     <p class="text-sm font-semibold text-gray-900">
-                                        {{ player.location_postcode|default:"N/A" }}
+                                        {{ player.location_postcode|postcode_area|default:"N/A" }}
                                     </p>
                                 </div>
 

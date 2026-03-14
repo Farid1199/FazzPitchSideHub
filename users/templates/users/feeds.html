@@ -157,6 +157,8 @@
                                                             • {{ item.user.player_profile.get_position_display }}
                                                         {% elif item.user.role == 'MANAGER' and item.user.manager_profile %}
                                                             • {{ item.user.manager_profile.current_role|default:"Manager" }}
+                                                        {% elif item.user.role == 'SCOUT' and item.user.scout_profile.is_scout_public %}
+                                                            • {{ item.user.scout_profile.organization|default:"Scout" }}
                                                         {% endif %}
                                                     </p>
                                                     <p class="text-xs text-gray-400">{{ item.created_at|timesince }} ago</p>

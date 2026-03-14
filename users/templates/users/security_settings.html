@@ -10,6 +10,24 @@
                 <i class="fas fa-shield-alt mr-2 text-green-600"></i> Security & Privacy Settings
             </h1>
 
+            <!-- Email Verification Status -->
+            <div class="bg-gray-50 rounded-lg p-6 mb-8">
+                <h3 class="font-semibold text-gray-900 mb-2">Email Verification</h3>
+                {% if request.user.is_email_verified %}
+                    <p class="text-sm text-green-700">
+                        <i class="fas fa-check-circle mr-1"></i> Your email address is verified.
+                    </p>
+                {% else %}
+                    <p class="text-sm text-amber-700 mb-3">
+                        <i class="fas fa-exclamation-triangle mr-1"></i> Your email address is not yet verified.
+                    </p>
+                    <a href="{% url 'resend_verification' %}"
+                        class="px-6 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition text-sm">
+                        <i class="fas fa-envelope mr-1"></i> Resend Verification Email
+                    </a>
+                {% endif %}
+            </div>
+
             <!-- Privacy Toggle -->
             <form method="post" class="mb-8">
                 {% csrf_token %}
@@ -27,6 +45,25 @@
                             <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
                         </label>
                     </div>
+
+                    {% if request.user.role == 'SCOUT' %}
+                    <!-- Scout Identity Toggle -->
+                    <div class="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
+                        <div>
+                            <h3 class="font-semibold text-gray-900">Public Scout Identity</h3>
+                            <p class="text-sm text-gray-500 mt-1">
+                                When enabled, other users can see that you are a Scout. Your scouting reports and role label will be visible.
+                                When disabled (default), you appear as a regular user.
+                            </p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" name="is_scout_public" class="sr-only peer"
+                                {% if request.user.scout_profile.is_scout_public %}checked{% endif %}>
+                            <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                        </label>
+                    </div>
+                    {% endif %}
+
                     <button type="submit"
                         class="mt-4 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm">
                         Save Privacy Settings
@@ -41,6 +78,29 @@
                 <a href="{% url 'password_reset' %}"
                     class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm">
                     <i class="fas fa-key mr-1"></i> Reset Password
+                </a>
+            </div>
+
+            <!-- Session Info -->
+            <div class="bg-gray-50 rounded-lg p-6 mb-8">
+                <h3 class="font-semibold text-gray-900 mb-2">Session Security</h3>
+                <p class="text-sm text-gray-500">
+                    Your session automatically expires after <strong>1 hour</strong> of inactivity.
+                    Failed login attempts are rate-limited — after 5 incorrect passwords your account
+                    will be temporarily locked for 30 minutes.
+                </p>
+            </div>
+
+            <!-- Data Export (GDPR) -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+                <h3 class="font-semibold text-blue-900 mb-2">Export Your Data</h3>
+                <p class="text-sm text-blue-700 mb-4">
+                    Download a copy of all personal data we hold about you, in JSON format.
+                    This includes your profile, posts, comments, messages, and follow data.
+                </p>
+                <a href="{% url 'export_data' %}"
+                    class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm">
+                    <i class="fas fa-download mr-1"></i> Download My Data
                 </a>
             </div>
 

@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'axes',
     'users',
 ]
 
@@ -52,8 +53,15 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'axes.middleware.AxesMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+# Authentication backends — axes MUST come first
+AUTHENTICATION_BACKENDS = [
+    'axes.backends.AxesBackend',
+    'django.contrib.auth.backends.ModelBackend',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -161,4 +169,21 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # SECURE_BROWSER_XSS_FILTER = True
 # SECURE_CONTENT_TYPE_NOSNIFF = True
 # X_FRAME_OPTIONS = 'DENY'
+
+# ---------------------------------------------------------------------------
+# Session timeout — auto-logout after 1 hour of inactivity
+# ---------------------------------------------------------------------------
+SESSION_COOKIE_AGE = 3600          # 60 minutes
+SESSION_SAVE_EVERY_REQUEST = True  # Reset timer on every request
+
+# ---------------------------------------------------------------------------
+# django-axes — brute-force login protection
+# ---------------------------------------------------------------------------
+from datetime import timedelta  # noqa: E402
+
+AXES_FAILURE_LIMIT = 5                      # Lock after 5 failed attempts
+AXES_COOLOFF_TIME = timedelta(minutes=30)   # Auto-unlock after 30 min
+AXES_LOCK_OUT_AT_FAILURE = True
+AXES_RESET_ON_SUCCESS = True                # Clear failures on successful login
+AXES_LOCKOUT_CALLABLE = None                # Use default lockout response (403)
 

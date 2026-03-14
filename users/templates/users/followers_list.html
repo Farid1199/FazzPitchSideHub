@@ -52,7 +52,7 @@
                             <a href="{% url 'player_profile' f.follower.username %}" class="font-medium text-gray-900 hover:text-green-600">
                                 {{ f.follower.username }}
                             </a>
-                            <p class="text-xs text-gray-500">{{ f.follower.get_role_display|default:"User" }}</p>
+                            <p class="text-xs text-gray-500">{{ f.follower.get_display_role }}</p>
                         </div>
                     </div>
                 </div>

@@ -1,6 +1,8 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
+from django.utils import timezone
+from datetime import date
 from .models import (
     User, PlayerProfile, ClubProfile, ScoutProfile,
     ManagerProfile, QualificationVerification, ScoutVerification, Opportunity, Post,
@@ -26,8 +28,14 @@ def validate_video_file_extension(file):
 class CustomUserCreationForm(UserCreationForm):
     """
     Form for registering a new user.
-    Only asks for username, email, and password.
+    Requires username, email, password, and privacy consent.
     """
+    privacy_consent = forms.BooleanField(
+        required=True,
+        label='I agree to the Privacy Policy and consent to my data being processed',
+        error_messages={'required': 'You must agree to the Privacy Policy to create an account.'},
+    )
+
     class Meta:
         model = User
         fields = ['username', 'email']
@@ -46,6 +54,7 @@ class PlayerProfileForm(forms.ModelForm):
     class Meta:
         model = PlayerProfile
         fields = [
+            'date_of_birth',
             'position', 
             'current_team',
             'available_for_club',
@@ -60,6 +69,7 @@ class PlayerProfileForm(forms.ModelForm):
             'previous_clubs',
         ]
         widgets = {
+            'date_of_birth': forms.DateInput(attrs={'type': 'date', 'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent'}),
             'previous_clubs': forms.Textarea(attrs={'rows': 3}),
             'bio': forms.Textarea(attrs={'rows': 3, 'placeholder': 'A short professional bio shown on your profile...', 'maxlength': '500'}),
             'availability_status': forms.Select(attrs={
@@ -67,6 +77,7 @@ class PlayerProfileForm(forms.ModelForm):
             }),
         }
         labels = {
+            'date_of_birth': 'Date of Birth',
             'available_for_club': 'Looking for a Club (legacy)',
             'availability_status': 'Availability Status',
             'bio': 'Professional Bio',
@@ -74,11 +85,23 @@ class PlayerProfileForm(forms.ModelForm):
             'youtube_highlight_url': 'YouTube Highlights URL',
         }
         help_texts = {
+            'date_of_birth': 'You must be at least 18 years old to register as a player.',
             'current_team': 'Leave blank if you are currently without a team.',
             'available_for_club': 'Legacy field — use Availability Status instead.',
             'availability_status': 'Set your current availability so scouts and clubs can see your status.',
             'bio': 'Write a short professional bio, or use the AI generator.',
         }
+
+    def clean_date_of_birth(self):
+        dob = self.cleaned_data.get('date_of_birth')
+        if dob:
+            today = date.today()
+            age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+            if age < 18:
+                raise ValidationError('You must be at least 18 years old to register as a player.')
+            if dob > today:
+                raise ValidationError('Date of birth cannot be in the future.')
+        return dob
 
 class ClubProfileForm(forms.ModelForm):
     """

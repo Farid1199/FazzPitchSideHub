@@ -89,6 +89,22 @@
                     {% endif %}
                 </div>
 
+                <!-- Privacy Consent -->
+                <div>
+                    <label class="flex items-start space-x-3 cursor-pointer">
+                        <input type="checkbox" name="privacy_consent" 
+                               class="mt-1 h-4 w-4 rounded border-gray-600 bg-gray-900 text-emerald-500 focus:ring-emerald-500"
+                               required>
+                        <span class="text-sm text-gray-300">
+                            I agree to the <a href="{% url 'privacy_policy' %}" target="_blank" class="text-emerald-400 hover:text-emerald-300 underline">Privacy Policy</a> 
+                            and consent to my personal data being processed as described. I understand I can withdraw consent at any time.
+                        </span>
+                    </label>
+                    {% if form.privacy_consent.errors %}
+                        <p class="mt-2 text-sm text-red-400">{{ form.privacy_consent.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
                 <!-- Submit Button -->
                 <button type="submit" 
                         class="w-full bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-600 text-white font-bold py-3 px-6 rounded-lg transition duration-300 transform hover:scale-105 shadow-lg hover:shadow-emerald-500/50">

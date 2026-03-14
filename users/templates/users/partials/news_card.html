@@ -17,7 +17,12 @@
                 <div>
                     <h3 class="font-bold text-gray-900">{{ news.get_club_name }}</h3>
                     <p class="text-sm text-gray-500">
-                        {% if news.source %}RSS Feed{% else %}Club{% endif %} • {{ news.get_league_display }}
+                        {% if news.source %}
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600"><i class="fas fa-rss text-orange-400 mr-1"></i>RSS Feed</span>
+                        {% else %}
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700"><i class="fas fa-user-check mr-1"></i>Club Post</span>
+                        {% endif %}
+                        • {{ news.get_league_display }}
                     </p>
                     <p class="text-xs text-gray-400">{{ news.published_date|timesince }} ago</p>
                 </div>

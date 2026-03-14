@@ -5,12 +5,17 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
 from django.db.models import Q
 from django.utils import timezone
+from datetime import timedelta
 from django.core.paginator import Paginator
 from django.http import FileResponse, Http404, JsonResponse
 from django.db import transaction
+from django.core.mail import send_mail
+from django.conf import settings as django_settings
 from itertools import chain
 import os
 import json
+import secrets
+import re
 from .forms import (
     CustomUserCreationForm, PlayerProfileForm, ClubProfileForm, 
     ScoutProfileForm, ManagerProfileForm, QualificationVerificationForm,
@@ -25,17 +30,75 @@ from .models import (
 from .utils import get_recommendations
 from .utils_notifications import create_notification
 
+
+def _send_verification_email(request, user):
+    """Send an email verification link to the user."""
+    token = secrets.token_urlsafe(48)
+    user.email_verification_token = token
+    user.save(update_fields=['email_verification_token'])
+    verify_url = request.build_absolute_uri(f'/verify-email/{token}/')
+    send_mail(
+        subject='Verify your email — Fazz PitchSide Hub',
+        message=(
+            f'Hi {user.username},\n\n'
+            f'Please verify your email address by clicking the link below:\n\n'
+            f'{verify_url}\n\n'
+            f'If you did not create an account, please ignore this email.\n\n'
+            f'— Fazz PitchSide Hub'
+        ),
+        from_email=None,  # Uses DEFAULT_FROM_EMAIL
+        recipient_list=[user.email],
+        fail_silently=True,
+    )
+
+
+def verify_email_view(request, token):
+    """Verify a user's email address via the token link."""
+    try:
+        user = User.objects.get(email_verification_token=token)
+    except User.DoesNotExist:
+        messages.error(request, 'Invalid or expired verification link.')
+        return redirect('home')
+
+    if user.is_email_verified:
+        messages.info(request, 'Your email is already verified.')
+    else:
+        user.is_email_verified = True
+        user.email_verification_token = ''
+        user.save(update_fields=['is_email_verified', 'email_verification_token'])
+        messages.success(request, 'Your email has been verified successfully!')
+
+    return redirect('dashboard')
+
+
+@login_required
+def resend_verification_email(request):
+    """Resend the email verification link."""
+    if request.user.is_email_verified:
+        messages.info(request, 'Your email is already verified.')
+    else:
+        _send_verification_email(request, request.user)
+        messages.success(request, 'A new verification email has been sent.')
+    return redirect('security_settings')
+
 def signup_view(request):
     """
     Handles user registration.
     Redirects to role selection after successful signup.
+    Sends email verification link.
     """
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
-            user = form.save()
+            user = form.save(commit=False)
+            user.privacy_consent = True
+            user.privacy_consent_date = timezone.now()
+            user.save()
+            # Send email verification
+            _send_verification_email(request, user)
             login(request, user)
-            return redirect('select_role')  # Redirect to role selection
+            messages.info(request, 'A verification link has been sent to your email address. Please verify your email.')
+            return redirect('select_role')
     else:
         form = CustomUserCreationForm()
     return render(request, 'users/signup.html', {'form': form})
@@ -199,12 +262,17 @@ def login_view(request):
     Handles user login.
     Redirects to dashboard (which checks for role) after login.
     """
+    from axes.exceptions import AxesBackendRequestParameterRequired
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
-        if form.is_valid():
-            user = form.get_user()
-            login(request, user)
-            return redirect('dashboard')
+        try:
+            if form.is_valid():
+                user = form.get_user()
+                login(request, user)
+                return redirect('dashboard')
+        except Exception:
+            # axes may raise on lockout — form will already contain an error
+            pass
     else:
         form = AuthenticationForm()
     return render(request, 'users/login.html', {'form': form})
@@ -282,8 +350,12 @@ def home_view(request):
     """
     Homepage view displaying latest news and opportunities.
     """
-    # Fetch latest 5 news items
-    latest_news = NewsItem.objects.select_related('club').all()[:5]
+    news_cutoff = timezone.now() - timedelta(days=30)
+    
+    # Fetch latest 5 news items (last 30 days only)
+    latest_news = NewsItem.objects.select_related('club').filter(
+        published_date__gte=news_cutoff
+    )[:5]
     
     # Fetch latest 5 opportunities (only open ones)
     latest_opportunities = Opportunity.objects.select_related('club').filter(is_open=True)[:5]
@@ -309,6 +381,11 @@ def feeds_view(request, category=None):
     """
     from .models import Post
     from itertools import chain
+    
+    # Recency cutoffs — keep feeds fresh and relevant
+    now = timezone.now()
+    news_cutoff = now - timedelta(days=30)       # RSS news: last 30 days
+    post_cutoff = now - timedelta(days=90)       # Social posts: last 90 days
     
     # Get filter parameters
     post_type_filter = request.GET.get('type', '')
@@ -343,36 +420,41 @@ def feeds_view(request, category=None):
     if category:
         # Category-filtered view: show only NewsItems (including Opportunities) for that category
         if category in ('trial', 'recruitment_signal'):
-            # For trial/signal tabs, show Opportunities matching that category
+            # For trial/signal tabs, show only OPEN opportunities (hide stale/closed ones)
             feed_items = list(Opportunity.objects.filter(
-                category=category
+                category=category,
+                is_open=True,
             ).select_related('source').order_by('-published_date'))
         else:
-            # For match/transfer/general, show regular NewsItems only
+            # For match/transfer/general, show recent news items only (30-day cutoff)
             feed_items = list(NewsItem.objects.filter(
-                category=category
+                category=category,
+                published_date__gte=news_cutoff,
             ).exclude(
                 id__in=opportunity_ids
             ).select_related('source').order_by('-published_date'))
     else:
-        # "All Feeds" — combine social posts + all news items
+        # "All Feeds" — combine social posts + all news items, with recency filters
         posts = Post.objects.select_related('user').prefetch_related(
             'likes', 'comments', 'comments__user'
-        ).all()
+        ).filter(created_at__gte=post_cutoff)
         
         if post_type_filter:
             posts = posts.filter(post_type=post_type_filter)
         if role_filter:
             posts = posts.filter(user__role=role_filter)
         
-        # Get all non-opportunity news items + opportunities separately  
-        news_items = list(NewsItem.objects.exclude(
+        # Recent news items only (30-day cutoff), excluding opportunities
+        news_items = list(NewsItem.objects.filter(
+            published_date__gte=news_cutoff,
+        ).exclude(
             id__in=opportunity_ids
         ).select_related('source').order_by('-published_date'))
         
-        opportunities = list(Opportunity.objects.select_related(
-            'source'
-        ).order_by('-published_date'))
+        # Opportunities: only show open ones (regardless of age)
+        opportunities = list(Opportunity.objects.filter(
+            is_open=True,
+        ).select_related('source').order_by('-published_date'))
         
         feed_items = sorted(
             chain(posts, news_items, opportunities),
@@ -389,20 +471,19 @@ def feeds_view(request, category=None):
     user_roles = [
         ('PLAYER', 'Players'),
         ('MANAGER', 'Managers'),
-        ('SCOUT', 'Scouts'),
         ('CLUB', 'Clubs'),
     ]
     
     total_clubs = ClubProfile.objects.count()
     registered_clubs = ClubProfile.objects.filter(user__isnull=False).count()
 
-    # Category counts for secondary nav (all sources combined)
+    # Category counts for secondary nav — reflect the same recency filters
     category_counts = {
-        'trial': Opportunity.objects.filter(category='trial').count(),
-        'general': NewsItem.objects.filter(category='general').exclude(id__in=opportunity_ids).count(),
-        'transfer': NewsItem.objects.filter(category='transfer').exclude(id__in=opportunity_ids).count(),
-        'match': NewsItem.objects.filter(category='match').exclude(id__in=opportunity_ids).count(),
-        'recruitment_signal': Opportunity.objects.filter(category='recruitment_signal').count(),
+        'trial': Opportunity.objects.filter(category='trial', is_open=True).count(),
+        'general': NewsItem.objects.filter(category='general', published_date__gte=news_cutoff).exclude(id__in=opportunity_ids).count(),
+        'transfer': NewsItem.objects.filter(category='transfer', published_date__gte=news_cutoff).exclude(id__in=opportunity_ids).count(),
+        'match': NewsItem.objects.filter(category='match', published_date__gte=news_cutoff).exclude(id__in=opportunity_ids).count(),
+        'recruitment_signal': Opportunity.objects.filter(category='recruitment_signal', is_open=True).count(),
     }
     
     context = {
@@ -429,6 +510,8 @@ def search_clubs(request):
     Search view for Players/Managers to find Clubs.
     Accepts GET parameters: name, level, postcode, league
     """
+    import re
+    
     # Get search parameters from GET request
     name = request.GET.get('name', '')
     level = request.GET.get('level', '')
@@ -446,19 +529,63 @@ def search_clubs(request):
     if level:
         clubs = clubs.filter(league_level=level)
     
+    postcode_search_info = ''
+    
     if postcode:
-        # Basic postcode filtering - match clubs whose postcode starts with the search term
-        clubs = clubs.filter(location_postcode__istartswith=postcode.strip())
+        # Smart UK postcode proximity search
+        # UK postcodes: outward code = area letters + district number (e.g. "B63", "SW1A")
+        # Step 1: Extract area (letters) and outward code (letters + digits before space)
+        cleaned = postcode.strip().upper()
+        outward_match = re.match(r'^([A-Z]{1,2})(\d{1,2}[A-Z]?)', cleaned)
+        
+        if outward_match:
+            area = outward_match.group(1)          # e.g. "B", "SW"
+            outward = outward_match.group(0)       # e.g. "B63", "SW1A"
+            
+            # Find clubs with exact outward code match first, then same area
+            exact_district = clubs.filter(location_postcode__istartswith=outward)
+            same_area = clubs.filter(location_postcode__istartswith=area).exclude(
+                pk__in=exact_district.values_list('pk', flat=True)
+            )
+            
+            # Combine: exact matches first, then nearby in the same postcode area
+            club_list = list(exact_district.order_by('club_name')) + list(same_area.order_by('club_name'))
+            
+            # Store info for the template
+            exact_count = exact_district.count()
+            nearby_count = same_area.count()
+            if exact_count > 0 and nearby_count > 0:
+                postcode_search_info = f'{exact_count} club{"s" if exact_count != 1 else ""} in {outward}, plus {nearby_count} nearby in the {area} postcode area'
+            elif exact_count > 0:
+                postcode_search_info = f'{exact_count} club{"s" if exact_count != 1 else ""} in {outward}'
+            elif nearby_count > 0:
+                postcode_search_info = f'No clubs in {outward}, but {nearby_count} found nearby in the {area} postcode area'
+            else:
+                postcode_search_info = f'No clubs found in the {area} postcode area'
+            
+            # We'll use the combined list instead of the queryset
+            clubs = club_list
+        else:
+            # Fallback: user entered just letters or partial — match as prefix
+            clubs = clubs.filter(location_postcode__istartswith=cleaned)
     
     if league:
         # Search by league name (case-insensitive partial match)
-        clubs = clubs.filter(league__icontains=league.strip())
+        if isinstance(clubs, list):
+            # Already converted to list from postcode search — filter in Python
+            league_lower = league.strip().lower()
+            clubs = [c for c in clubs if c.league and league_lower in c.league.lower()]
+        else:
+            clubs = clubs.filter(league__icontains=league.strip())
     
-    # Sort by club name
-    clubs = clubs.order_by('club_name')
+    # Sort by club name (only if still a queryset)
+    if not isinstance(clubs, list):
+        clubs = clubs.order_by('club_name')
     
     # Get choices for the filter form
     level_choices = ClubProfile.LEAGUE_LEVEL_CHOICES
+    
+    total_results = len(clubs) if isinstance(clubs, list) else clubs.count()
     
     context = {
         'clubs': clubs,
@@ -467,7 +594,8 @@ def search_clubs(request):
         'search_level': level,
         'search_postcode': postcode,
         'search_league': league,
-        'total_results': clubs.count(),
+        'total_results': total_results,
+        'postcode_search_info': postcode_search_info,
     }
     
     return render(request, 'users/search_clubs.html', context)
@@ -1355,6 +1483,48 @@ def protected_scout_media(request, path):
             raise Http404
 
     full_path = os.path.join(settings.MEDIA_ROOT, path)
+    # Prevent path traversal
+    real_root = os.path.realpath(str(settings.MEDIA_ROOT))
+    real_path = os.path.realpath(full_path)
+    if not real_path.startswith(real_root):
+        raise Http404
+
+    if not os.path.isfile(full_path):
+        raise Http404
+
+    return FileResponse(open(full_path, 'rb'))
+
+
+@login_required
+def protected_manager_media(request, path):
+    """
+    Serves manager verification documents only to:
+      - The manager who owns the file, or
+      - Staff / superusers
+    """
+    if not (request.user.is_staff or request.user.is_superuser):
+        if not hasattr(request.user, 'manager_profile'):
+            raise Http404
+
+        manager_profile = request.user.manager_profile
+        verifications = QualificationVerification.objects.filter(manager=manager_profile)
+        allowed_paths = set()
+        for v in verifications:
+            for field_name in ('certificate_image', 'dashboard_screenshot'):
+                field_file = getattr(v, field_name)
+                if field_file:
+                    allowed_paths.add(field_file.name)
+
+        if path not in allowed_paths:
+            raise Http404
+
+    full_path = os.path.join(django_settings.MEDIA_ROOT, path)
+    # Prevent path traversal
+    real_root = os.path.realpath(str(django_settings.MEDIA_ROOT))
+    real_path = os.path.realpath(full_path)
+    if not real_path.startswith(real_root):
+        raise Http404
+
     if not os.path.isfile(full_path):
         raise Http404
 
@@ -1810,6 +1980,97 @@ def privacy_policy(request):
     return render(request, 'users/privacy_policy.html')
 
 
+@login_required
+def export_data_view(request):
+    """GDPR data export — download all personal data as JSON."""
+    user = request.user
+    data = {
+        'account': {
+            'username': user.username,
+            'email': user.email,
+            'role': user.role,
+            'date_joined': user.date_joined.isoformat(),
+            'last_login': user.last_login.isoformat() if user.last_login else None,
+            'is_private': user.is_private,
+            'is_email_verified': user.is_email_verified,
+            'privacy_consent': user.privacy_consent,
+            'privacy_consent_date': user.privacy_consent_date.isoformat() if user.privacy_consent_date else None,
+        },
+    }
+
+    # Role-specific profile
+    profile_map = {
+        'PLAYER': ('player_profile', [
+            'position', 'location_postcode', 'playing_level', 'height', 'weight',
+            'preferred_foot', 'bio', 'availability', 'available_for_club',
+            'date_of_birth',
+        ]),
+        'CLUB': ('club_profile', [
+            'club_name', 'location', 'location_postcode', 'league_level',
+            'bio', 'website_url', 'founded_year', 'contact_email',
+        ]),
+        'SCOUT': ('scout_profile', [
+            'location', 'bio', 'scouting_level', 'affiliated_club',
+            'years_experience',
+        ]),
+        'MANAGER': ('manager_profile', [
+            'location', 'bio', 'current_club', 'coaching_level',
+            'years_experience',
+        ]),
+        'FAN': ('fan_profile', [
+            'bio', 'favourite_club',
+        ]),
+    }
+
+    if user.role and user.role in profile_map:
+        attr, fields = profile_map[user.role]
+        if hasattr(user, attr):
+            profile = getattr(user, attr)
+            profile_data = {}
+            for f in fields:
+                val = getattr(profile, f, None)
+                if hasattr(val, 'isoformat'):
+                    val = val.isoformat()
+                elif val is not None:
+                    val = str(val)
+                profile_data[f] = val
+            data['profile'] = profile_data
+
+    # Posts
+    data['posts'] = list(
+        Post.objects.filter(author=user).values('id', 'content', 'created_at')
+    )
+    # Comments
+    data['comments'] = list(
+        Comment.objects.filter(author=user).values('id', 'content', 'created_at', 'post_id')
+    )
+    # Follows
+    data['following'] = list(
+        Follow.objects.filter(follower=user).values_list('following__username', flat=True)
+    )
+    data['followers'] = list(
+        Follow.objects.filter(following=user).values_list('follower__username', flat=True)
+    )
+    # Messages
+    conversations = Conversation.objects.filter(participants=user)
+    msgs = Message.objects.filter(conversation__in=conversations, sender=user)
+    data['messages_sent'] = list(
+        msgs.values('id', 'content', 'created_at', 'conversation_id')
+    )
+    # Watchlist / Shortlist
+    data['watchlist'] = list(
+        Watchlist.objects.filter(scout__user=user).values('player__user__username', 'notes', 'added_at')
+    ) if user.role == 'SCOUT' else []
+    data['shortlist'] = list(
+        ClubShortlist.objects.filter(club__user=user).values('player__user__username', 'notes', 'added_at')
+    ) if user.role == 'CLUB' else []
+
+    # Serialise with date support
+    response = JsonResponse(data, json_dumps_params={'indent': 2, 'default': str})
+    response['Content-Disposition'] = f'attachment; filename="fazz_data_export_{user.username}.json"'
+    return response
+
+
 def about_page(request):
     """About page."""
     return render(request, 'users/about.html')
@@ -1860,7 +2121,14 @@ def security_settings(request):
     if request.method == 'POST':
         is_private = request.POST.get('is_private') == 'on'
         request.user.is_private = is_private
-        request.user.save()
+        request.user.save(update_fields=['is_private'])
+
+        # Scout stealth toggle
+        if request.user.role == 'SCOUT' and hasattr(request.user, 'scout_profile'):
+            is_scout_public = request.POST.get('is_scout_public') == 'on'
+            request.user.scout_profile.is_scout_public = is_scout_public
+            request.user.scout_profile.save(update_fields=['is_scout_public'])
+
         messages.success(request, 'Privacy settings updated.')
         return redirect('security_settings')
 

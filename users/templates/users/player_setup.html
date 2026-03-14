@@ -25,6 +25,18 @@
                     </div>
                 {% endif %}
 
+                <!-- Date of Birth -->
+                <div>
+                    <label for="{{ form.date_of_birth.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        Date of Birth <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.date_of_birth }}
+                    {% if form.date_of_birth.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.date_of_birth.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-xs text-gray-500">{{ form.date_of_birth.help_text }}</p>
+                </div>
+
                 <!-- Position -->
                 <div>
                     <label for="{{ form.position.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">

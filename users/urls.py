@@ -11,6 +11,7 @@ from .views import (
     create_post, social_feed, like_post, delete_post, my_posts,
     add_comment, delete_comment,
     submit_scout_verification, scout_verification_status, protected_scout_media,
+    protected_manager_media,
     # Part 3 – Follow
     follow_user, unfollow_user, accept_follow_request, reject_follow_request,
     followers_list, following_list,
@@ -25,6 +26,7 @@ from .views import (
     generate_bio_view,
     # Part 12 – Security / GDPR
     delete_account_view, privacy_policy, about_page, contact_page, security_settings,
+    verify_email_view, resend_verification_email, export_data_view,
     # Part 13 – Football Pathways
     pathways_home, pathways_player, pathways_manager, pathways_scout,
     pathways_non_league, pathways_qualifications,
@@ -55,6 +57,7 @@ urlpatterns = [
     path('scout-verification/', submit_scout_verification, name='submit_scout_verification'),
     path('scout-verification/status/', scout_verification_status, name='scout_verification_status'),
     path('scout-media/<path:path>', protected_scout_media, name='protected_scout_media'),
+    path('manager-media/<path:path>', protected_manager_media, name='protected_manager_media'),
     
     path('post-opportunity/', post_opportunity, name='post_opportunity'),
     path('opportunity/<int:pk>/', opportunity_detail, name='opportunity_detail'),
@@ -117,7 +120,10 @@ urlpatterns = [
     # Security / GDPR
     path('settings/security/', security_settings, name='security_settings'),
     path('account/delete/', delete_account_view, name='delete_account'),
+    path('account/export/', export_data_view, name='export_data'),
     path('privacy/', privacy_policy, name='privacy_policy'),
+    path('verify-email/<str:token>/', verify_email_view, name='verify_email'),
+    path('resend-verification/', resend_verification_email, name='resend_verification'),
     path('about/', about_page, name='about'),
     path('contact/', contact_page, name='contact'),
     

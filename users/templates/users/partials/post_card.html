@@ -18,6 +18,8 @@
                             • {{ post.user.player_profile.get_position_display }}
                         {% elif post.user.role == 'MANAGER' and post.user.manager_profile %}
                             • {{ post.user.manager_profile.current_role|default:"Manager" }}
+                        {% elif post.user.role == 'SCOUT' and post.user.scout_profile.is_scout_public %}
+                            • {{ post.user.scout_profile.organization|default:"Scout" }}
                         {% endif %}
                     </p>
                     <p class="text-xs text-gray-400">{{ post.created_at|timesince }} ago</p>
@@ -30,8 +32,9 @@
                 {% if post.user == user %}
                     <a href="{% url 'delete_post' post.pk %}" 
                        onclick="return confirm('Are you sure you want to delete this post?')"
-                       class="text-red-500 hover:text-red-700">
-                        <i class="fas fa-trash"></i>
+                       class="text-red-500 hover:text-red-700"
+                       aria-label="Delete post">
+                        <i class="fas fa-trash" aria-hidden="true"></i>
                     </a>
                 {% endif %}
             </div>
@@ -162,8 +165,8 @@
         {% endif %}
     {% endif %}
 
-    <!-- Scout-Specific Content -->
-    {% if post.user.role == 'SCOUT' %}
+    <!-- Scout-Specific Content (only shown if scout has opted in to public identity) -->
+    {% if post.user.role == 'SCOUT' and post.user.scout_profile.is_scout_public %}
         {% if post.player_scouted or post.scouting_report %}
             <div class="px-6 pb-4">
                 <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-4 border border-purple-200">
@@ -253,14 +256,16 @@
             {% if user.is_authenticated %}
             <button onclick="likePost({{ post.pk }})" 
                     class="flex items-center space-x-2 text-gray-600 hover:text-green-600 transition-colors"
-                    id="likeBtn_{{ post.pk }}">
+                    id="likeBtn_{{ post.pk }}"
+                    aria-label="Like this post">
                 <i class="{% if user in post.likes.all %}fas text-green-600{% else %}far{% endif %} fa-heart fa-lg" 
-                   id="likeIcon_{{ post.pk }}"></i>
+                   id="likeIcon_{{ post.pk }}" aria-hidden="true"></i>
                 <span id="likeCount_{{ post.pk }}" class="font-semibold">{{ post.total_likes }}</span>
             </button>
             <button onclick="toggleComments({{ post.pk }})" 
-                    class="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors">
-                <i class="far fa-comment fa-lg"></i>
+                    class="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors"
+                    aria-label="Show comments" aria-expanded="false" aria-controls="commentsSection_{{ post.pk }}">
+                <i class="far fa-comment fa-lg" aria-hidden="true"></i>
                 <span id="commentCount_{{ post.pk }}" class="font-semibold">{{ post.total_comments }}</span>
             </button>
             {% else %}
@@ -300,8 +305,9 @@
                         {% if comment.user == user or post.user == user %}
                         <button onclick="deleteComment({{ comment.id }}, {{ post.pk }})" 
                                 class="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 transition-all ml-auto"
-                                title="Delete comment">
-                            <i class="fas fa-trash-alt text-xs"></i>
+                                title="Delete comment"
+                                aria-label="Delete comment">
+                            <i class="fas fa-trash-alt text-xs" aria-hidden="true"></i>
                         </button>
                         {% endif %}
                     </div>
