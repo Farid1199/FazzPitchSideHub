@@ -22,6 +22,7 @@ from .views import (
     # Part 7 – Watchlist / Shortlist
     add_to_watchlist, remove_from_watchlist, scout_watchlist_view, update_watchlist_notes,
     add_to_shortlist, remove_from_shortlist, club_shortlist_view,
+    compare_players_api,
     # Part 9 – AI Bio
     generate_bio_view,
     # Part 12 – Security / GDPR
@@ -110,6 +111,7 @@ urlpatterns = [
     path('watchlist/remove/<int:player_id>/', remove_from_watchlist, name='remove_from_watchlist'),
     path('watchlist/', scout_watchlist_view, name='scout_watchlist'),
     path('watchlist/<int:watchlist_id>/notes/', update_watchlist_notes, name='update_watchlist_notes'),
+    path('watchlist/compare/', compare_players_api, name='compare_players_api'),
     path('shortlist/add/<int:player_id>/', add_to_shortlist, name='add_to_shortlist'),
     path('shortlist/remove/<int:player_id>/', remove_from_shortlist, name='remove_from_shortlist'),
     path('shortlist/', club_shortlist_view, name='club_shortlist'),

@@ -1,0 +1,18 @@
+{% extends "admin/index.html" %}
+{% load static %}
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'admin/css/custom_admin.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="analytics-banner">
+    <div>
+        <strong style="font-size:1.1rem;">Platform Analytics</strong>
+        <span style="margin-left:8px; opacity:0.9;">View user growth, engagement, recruitment, feedback, and more.</span>
+    </div>
+    <a href="{% url 'admin_analytics' %}">Open Dashboard</a>
+</div>
+{{ block.super }}
+{% endblock %}

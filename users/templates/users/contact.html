@@ -1,43 +1,189 @@
 {% extends 'base.html' %}
 
-{% block title %}Contact Us - FazzPitchSideHub{% endblock %}
+{% block title %}Contact Us - Fazz PitchSide Hub{% endblock %}
 
 {% block content %}
 <div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-3xl mx-auto">
-        <div class="bg-white rounded-lg shadow-xl p-8">
-            <h1 class="text-3xl font-bold text-gray-900 mb-8">Contact Us</h1>
+    <div class="max-w-4xl mx-auto">
 
-            <div class="prose max-w-none text-gray-700 space-y-6">
-                <p>Have a question, suggestion, or need support? We'd love to hear from you.</p>
+        <!-- Page Header -->
+        <div class="text-center mb-10">
+            <h1 class="text-3xl font-bold text-gray-900">Get in Touch</h1>
+            <p class="mt-2 text-gray-600 max-w-2xl mx-auto">
+                Whether you have feedback, a question, or need help with your account,
+                we want to hear from you. Fill out the form below and our team will
+                respond within 48 hours.
+            </p>
+        </div>
 
-                <div class="bg-gray-50 rounded-lg p-6 space-y-4">
-                    <div class="flex items-center space-x-3">
-                        <i class="fas fa-envelope text-green-600 text-xl"></i>
-                        <div>
-                            <p class="font-medium text-gray-900">Email</p>
-                            <a href="mailto:support@fazzpitchsidehub.com" class="text-green-600 hover:text-green-700">
-                                support@fazzpitchsidehub.com
-                            </a>
+        <div class="grid md:grid-cols-3 gap-8">
+
+            <!-- Left Column: Contact Form -->
+            <div class="md:col-span-2">
+                <div class="bg-white rounded-lg shadow-lg p-8">
+
+                    {% if submitted %}
+                    <!-- Success message after form submission -->
+                    <div class="text-center py-8">
+                        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-check text-green-600 text-2xl"></i>
                         </div>
+                        <h2 class="text-2xl font-bold text-gray-900 mb-2">Message Sent</h2>
+                        <p class="text-gray-600 mb-6">
+                            Thank you for reaching out. We have received your message and will
+                            get back to you within 48 hours.
+                        </p>
+                        <a href="{% url 'contact' %}"
+                           class="inline-block bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition">
+                            Send Another Message
+                        </a>
                     </div>
-                    <div class="flex items-center space-x-3">
-                        <i class="fab fa-twitter text-blue-500 text-xl"></i>
-                        <div>
-                            <p class="font-medium text-gray-900">Twitter / X</p>
-                            <a href="https://twitter.com/FazzPitchside" target="_blank" class="text-blue-500 hover:text-blue-600">
-                                @FazzPitchside
-                            </a>
+                    {% else %}
+
+                    <h2 class="text-xl font-semibold text-gray-900 mb-6">Contact Form</h2>
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        <!-- Name -->
+                        <div class="mb-5">
+                            <label for="id_name" class="block text-sm font-medium text-gray-700 mb-1">
+                                {{ form.name.label }}
+                            </label>
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.name.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Email -->
+                        <div class="mb-5">
+                            <label for="id_email" class="block text-sm font-medium text-gray-700 mb-1">
+                                {{ form.email.label }}
+                            </label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.email.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Category -->
+                        <div class="mb-5">
+                            <label for="id_category" class="block text-sm font-medium text-gray-700 mb-1">
+                                {{ form.category.label }}
+                            </label>
+                            {{ form.category }}
+                            {% if form.category.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.category.errors.0 }}</p>
+                            {% endif %}
+                            <p class="mt-1 text-xs text-gray-500">
+                                Choose the option that best describes your reason for getting in touch.
+                            </p>
+                        </div>
+
+                        <!-- Subject -->
+                        <div class="mb-5">
+                            <label for="id_subject" class="block text-sm font-medium text-gray-700 mb-1">
+                                {{ form.subject.label }}
+                            </label>
+                            {{ form.subject }}
+                            {% if form.subject.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.subject.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Message -->
+                        <div class="mb-6">
+                            <label for="id_message" class="block text-sm font-medium text-gray-700 mb-1">
+                                {{ form.message.label }}
+                            </label>
+                            {{ form.message }}
+                            {% if form.message.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.message.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <button type="submit"
+                                class="w-full bg-green-600 text-white py-3 px-6 rounded-lg font-medium
+                                       hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500
+                                       focus:ring-offset-2 transition">
+                            Send Message
+                        </button>
+                    </form>
+
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Right Column: Quick Info Sidebar -->
+            <div class="space-y-6">
+
+                <!-- Direct Contact -->
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Other Ways to Reach Us</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-envelope text-green-600 mt-1"></i>
+                            <div>
+                                <p class="text-sm font-medium text-gray-900">Email</p>
+                                <a href="mailto:fazzpitchsidehubsupport@gmail.com"
+                                   class="text-sm text-green-600 hover:text-green-700">
+                                    fazzpitchsidehubsupport@gmail.com
+                                </a>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <i class="fab fa-x-twitter text-gray-800 mt-1"></i>
+                            <div>
+                                <p class="text-sm font-medium text-gray-900">X (Twitter)</p>
+                                <a href="https://x.com/FazzPitchSide" target="_blank"
+                                   class="text-sm text-blue-500 hover:text-blue-600">
+                                    @FazzPitchSide
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <h2 class="text-xl font-semibold text-gray-900">Report an Issue</h2>
-                <p>If you've found a bug or have a feature request, please email us with details and we'll get back to you within 48 hours.</p>
+                <!-- Category Guide -->
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Which Category?</h3>
+                    <div class="space-y-3 text-sm text-gray-600">
+                        <div>
+                            <p class="font-medium text-gray-800">General Feedback</p>
+                            <p>Ideas, suggestions, or thoughts on how we can improve the platform.</p>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-800">Bug Report</p>
+                            <p>Something broken or not working as expected? Let us know.</p>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-800">Account Support</p>
+                            <p>Help with your profile, settings, login, or verification.</p>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-800">Partnership</p>
+                            <p>Interested in working with Fazz PitchSide Hub? Get in touch.</p>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-800">Data / GDPR</p>
+                            <p>Request access to, export, or deletion of your personal data.</p>
+                        </div>
+                    </div>
+                </div>
 
-                <h2 class="text-xl font-semibold text-gray-900">Data Requests</h2>
-                <p>For GDPR data access, portability, or deletion requests, please email us from the address associated with your account.
-                You can also <a href="{% url 'delete_account' %}" class="text-red-600 hover:text-red-700">delete your account</a> directly from settings.</p>
+                <!-- GDPR Note -->
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-5">
+                    <h3 class="text-sm font-semibold text-yellow-800 mb-2">Data Requests</h3>
+                    <p class="text-sm text-yellow-700">
+                        For GDPR data access, portability, or deletion requests, please use
+                        the "Data / GDPR Request" category above, or email us from the address
+                        linked to your account. You can also
+                        <a href="{% url 'delete_account' %}" class="underline font-medium">delete your account</a>
+                        directly from your settings.
+                    </p>
+                </div>
+
             </div>
         </div>
     </div>

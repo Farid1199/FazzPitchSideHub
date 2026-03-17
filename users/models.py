@@ -179,6 +179,57 @@ class PlayerProfile(models.Model):
         return f"Player: {self.user.username}"
 
 
+class PlayerStats(models.Model):
+    """
+    Season stats for a player, editable from their profile.
+    Scouts use these to compare players on their watchlist.
+    Fields are grouped by position relevance but any field can be filled in.
+    """
+    player = models.OneToOneField(
+        PlayerProfile, on_delete=models.CASCADE, related_name='stats'
+    )
+
+    # Universal stats (all positions)
+    appearances = models.PositiveIntegerField(default=0)
+    minutes_played = models.PositiveIntegerField(default=0)
+
+    # Attacking stats (strikers, forwards, wingers)
+    goals = models.PositiveIntegerField(default=0)
+    assists = models.PositiveIntegerField(default=0)
+    shots_on_target = models.PositiveIntegerField(default=0)
+
+    # Midfield stats
+    key_passes = models.PositiveIntegerField(default=0)
+    chances_created = models.PositiveIntegerField(default=0)
+    pass_accuracy = models.PositiveIntegerField(
+        default=0, help_text="Percentage 0-100"
+    )
+
+    # Defensive stats
+    tackles = models.PositiveIntegerField(default=0)
+    interceptions = models.PositiveIntegerField(default=0)
+    clearances = models.PositiveIntegerField(default=0)
+    aerial_duels_won = models.PositiveIntegerField(default=0)
+
+    # Goalkeeper stats
+    saves = models.PositiveIntegerField(default=0)
+    clean_sheets = models.PositiveIntegerField(default=0)
+    penalties_saved = models.PositiveIntegerField(default=0)
+
+    # Discipline
+    yellow_cards = models.PositiveIntegerField(default=0)
+    red_cards = models.PositiveIntegerField(default=0)
+
+    season = models.CharField(max_length=20, default='2025/26')
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name_plural = "Player stats"
+
+    def __str__(self):
+        return f"Stats: {self.player.user.username} ({self.season})"
+
+
 class ClubSource(models.Model):
     """
     Independent model for RSS feed sources (Admin-managed only).
@@ -1454,3 +1505,47 @@ class ClubShortlist(models.Model):
 
     def __str__(self):
         return f"{self.club.club_name} shortlisted {self.player.user.username}"
+
+
+class ContactSubmission(models.Model):
+    """
+    Stores messages submitted through the Contact Us form.
+    Covers feedback, bug reports, partnership inquiries, support requests, and GDPR.
+    """
+    CATEGORY_CHOICES = [
+        ('FEEDBACK', 'General Feedback or Suggestion'),
+        ('BUG', 'Bug Report'),
+        ('SUPPORT', 'Account or Profile Support'),
+        ('PARTNERSHIP', 'Partnership or Collaboration Inquiry'),
+        ('GDPR', 'Data / GDPR Request'),
+    ]
+
+    STATUS_CHOICES = [
+        ('NEW', 'New'),
+        ('IN_PROGRESS', 'In Progress'),
+        ('RESOLVED', 'Resolved'),
+        ('CLOSED', 'Closed'),
+    ]
+
+    name = models.CharField(max_length=150)
+    email = models.EmailField()
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
+    subject = models.CharField(max_length=200)
+    message = models.TextField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='NEW')
+    admin_notes = models.TextField(blank=True, help_text='Internal notes, not visible to the sender.')
+    user = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='contact_submissions',
+        help_text='Linked automatically when the sender is logged in.',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"[{self.get_category_display()}] {self.subject} - {self.name}"

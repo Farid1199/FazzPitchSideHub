@@ -453,38 +453,243 @@
 
         {% elif user.role == 'SCOUT' %}
         <!-- Scout Dashboard -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-2xl font-bold text-gray-900 mb-4">Scouting Dashboard</h2>
-            {% if user.scout_profile %}
-            <div class="space-y-3">
-                <div class="flex justify-between">
-                    <span class="text-gray-600">Organization:</span>
-                    <span class="font-semibold">{{ user.scout_profile.organization }}</span>
+        {% if user.scout_profile %}
+
+        <!-- Scout Info Bar and Quick Actions -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900">Scouting Dashboard</h2>
+                    <p class="text-gray-500 text-sm mt-1">
+                        {{ user.scout_profile.organization }}
+                        {% if user.scout_profile.region %} &middot; {{ user.scout_profile.region }}{% endif %}
+                    </p>
                 </div>
-                <div class="flex justify-between">
-                    <span class="text-gray-600">Region:</span>
-                    <span class="font-semibold">{{ user.scout_profile.region }}</span>
+                <div class="flex flex-wrap gap-3">
+                    <a href="{% url 'search_players' %}"
+                       class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition text-sm">
+                        <i class="fas fa-search mr-1"></i> Find Players
+                    </a>
+                    <a href="{% url 'scout_watchlist' %}"
+                       class="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold rounded-lg transition text-sm">
+                        <i class="fas fa-binoculars mr-1"></i> Full Watchlist
+                    </a>
+                    <a href="{% url 'create_post' %}"
+                       class="px-4 py-2 bg-gray-700 hover:bg-gray-800 text-white font-semibold rounded-lg transition text-sm">
+                        <i class="fas fa-plus mr-1"></i> Create Post
+                    </a>
                 </div>
             </div>
+        </div>
 
-            <a href="{% url 'search_players' %}"
-                class="mt-6 block w-full bg-purple-600 hover:bg-purple-700 text-white text-center font-semibold py-2 px-4 rounded-lg transition duration-300">
-                Find Players
-            </a>
-            <a href="{% url 'scout_watchlist' %}"
-                class="mt-3 block w-full bg-yellow-500 hover:bg-yellow-600 text-white text-center font-semibold py-2 px-4 rounded-lg transition duration-300">
-                <i class="fas fa-binoculars mr-1"></i> My Watchlist
-            </a>
+        <!-- KPI Summary Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+            <div class="bg-white rounded-lg shadow-md p-4 text-center">
+                <p class="text-gray-500 text-xs uppercase tracking-wide">Watchlist</p>
+                <p class="text-3xl font-bold text-gray-900 mt-1">{{ watchlist_count|default:"0" }}</p>
+            </div>
+            {% for group_name, entries in position_groups.items %}
+            <div class="bg-white rounded-lg shadow-md p-4 text-center">
+                <p class="text-gray-500 text-xs uppercase tracking-wide">{{ group_name }}</p>
+                <p class="text-3xl font-bold text-gray-900 mt-1">{{ entries|length }}</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Player Comparison Section -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h3 class="text-lg font-bold text-gray-900 mb-4">Compare Players</h3>
+
+            {% if watchlist_count %}
+            <!-- Position Filter Tabs -->
+            <div class="flex flex-wrap gap-2 mb-6 border-b border-gray-200 pb-4" id="position-tabs">
+                <button data-filter="all"
+                        class="tab-btn px-4 py-2 rounded-full text-sm font-semibold bg-purple-600 text-white transition">
+                    All
+                </button>
+                <button data-filter="Strikers"
+                        class="tab-btn px-4 py-2 rounded-full text-sm font-semibold bg-gray-100 text-gray-700 hover:bg-purple-100 transition">
+                    Strikers
+                </button>
+                <button data-filter="Midfielders"
+                        class="tab-btn px-4 py-2 rounded-full text-sm font-semibold bg-gray-100 text-gray-700 hover:bg-purple-100 transition">
+                    Midfielders
+                </button>
+                <button data-filter="Wingers"
+                        class="tab-btn px-4 py-2 rounded-full text-sm font-semibold bg-gray-100 text-gray-700 hover:bg-purple-100 transition">
+                    Wingers
+                </button>
+                <button data-filter="Defenders"
+                        class="tab-btn px-4 py-2 rounded-full text-sm font-semibold bg-gray-100 text-gray-700 hover:bg-purple-100 transition">
+                    Defenders
+                </button>
+                <button data-filter="Goalkeepers"
+                        class="tab-btn px-4 py-2 rounded-full text-sm font-semibold bg-gray-100 text-gray-700 hover:bg-purple-100 transition">
+                    Goalkeepers
+                </button>
+            </div>
+
+            <!-- Player Cards Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6" id="player-cards">
+                {% for entry in watchlist %}
+                <div class="player-card border border-gray-200 rounded-lg p-4 hover:shadow-lg transition relative"
+                     data-player-id="{{ entry.player.id }}"
+                     data-position-group="{% if entry.player.position == 'ST' or entry.player.position == 'CF' %}Strikers{% elif entry.player.position == 'GK' %}Goalkeepers{% elif entry.player.position == 'LW' or entry.player.position == 'RW' %}Wingers{% elif entry.player.position == 'LB' or entry.player.position == 'CB' or entry.player.position == 'RB' or entry.player.position == 'LWB' or entry.player.position == 'RWB' %}Defenders{% else %}Midfielders{% endif %}">
+
+                    <!-- Checkbox for selecting -->
+                    <label class="absolute top-3 right-3 cursor-pointer">
+                        <input type="checkbox" class="compare-checkbox w-4 h-4 text-purple-600 rounded border-gray-300 focus:ring-purple-500"
+                               value="{{ entry.player.id }}" />
+                    </label>
+
+                    <!-- Player header -->
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm
+                            {% if entry.player.position == 'GK' %}bg-yellow-500
+                            {% elif entry.player.position == 'LB' or entry.player.position == 'CB' or entry.player.position == 'RB' or entry.player.position == 'LWB' or entry.player.position == 'RWB' %}bg-blue-500
+                            {% elif entry.player.position == 'LW' or entry.player.position == 'RW' %}bg-red-500
+                            {% elif entry.player.position == 'ST' or entry.player.position == 'CF' %}bg-purple-600
+                            {% else %}bg-green-600{% endif %}">
+                            {{ entry.player.position }}
+                        </div>
+                        <div>
+                            <a href="{% url 'player_profile' entry.player.user.username %}"
+                               class="font-semibold text-gray-900 hover:text-purple-600 transition">
+                                {{ entry.player.user.username }}
+                            </a>
+                            <p class="text-xs text-gray-500">{{ entry.player.get_position_display }} &middot; {{ entry.player.get_playing_level_display }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Key stats for this player (position-aware) -->
+                    {% with stats=entry.player.stats %}
+                    <div class="grid grid-cols-3 gap-2 text-center">
+                        {% if entry.player.position == 'GK' %}
+                        <div class="bg-gray-50 rounded p-2">
+                            <p class="text-xs text-gray-500">Saves</p>
+                            <p class="font-bold text-gray-900">{% if stats %}{{ stats.saves }}{% else %}0{% endif %}</p>
+                        </div>
+                        <div class="bg-gray-50 rounded p-2">
+                            <p class="text-xs text-gray-500">Clean Sheets</p>
+                            <p class="font-bold text-gray-900">{% if stats %}{{ stats.clean_sheets }}{% else %}0{% endif %}</p>
+                        </div>
+                        <div class="bg-gray-50 rounded p-2">
+                            <p class="text-xs text-gray-500">Apps</p>
+                            <p class="font-bold text-gray-900">{% if stats %}{{ stats.appearances }}{% else %}0{% endif %}</p>
+                        </div>
+                        {% elif entry.player.position == 'LB' or entry.player.position == 'CB' or entry.player.position == 'RB' or entry.player.position == 'LWB' or entry.player.position == 'RWB' %}
+                        <div class="bg-gray-50 rounded p-2">
+                            <p class="text-xs text-gray-500">Tackles</p>
+                            <p class="font-bold text-gray-900">{% if stats %}{{ stats.tackles }}{% else %}0{% endif %}</p>
+                        </div>
+                        <div class="bg-gray-50 rounded p-2">
+                            <p class="text-xs text-gray-500">Intercep.</p>
+                            <p class="font-bold text-gray-900">{% if stats %}{{ stats.interceptions }}{% else %}0{% endif %}</p>
+                        </div>
+                        <div class="bg-gray-50 rounded p-2">
+                            <p class="text-xs text-gray-500">Apps</p>
+                            <p class="font-bold text-gray-900">{% if stats %}{{ stats.appearances }}{% else %}0{% endif %}</p>
+                        </div>
+                        {% elif entry.player.position == 'ST' or entry.player.position == 'CF' %}
+                        <div class="bg-gray-50 rounded p-2">
+                            <p class="text-xs text-gray-500">Goals</p>
+                            <p class="font-bold text-gray-900">{% if stats %}{{ stats.goals }}{% else %}0{% endif %}</p>
+                        </div>
+                        <div class="bg-gray-50 rounded p-2">
+                            <p class="text-xs text-gray-500">Assists</p>
+                            <p class="font-bold text-gray-900">{% if stats %}{{ stats.assists }}{% else %}0{% endif %}</p>
+                        </div>
+                        <div class="bg-gray-50 rounded p-2">
+                            <p class="text-xs text-gray-500">Shots OT</p>
+                            <p class="font-bold text-gray-900">{% if stats %}{{ stats.shots_on_target }}{% else %}0{% endif %}</p>
+                        </div>
+                        {% elif entry.player.position == 'LW' or entry.player.position == 'RW' %}
+                        <div class="bg-gray-50 rounded p-2">
+                            <p class="text-xs text-gray-500">Goals</p>
+                            <p class="font-bold text-gray-900">{% if stats %}{{ stats.goals }}{% else %}0{% endif %}</p>
+                        </div>
+                        <div class="bg-gray-50 rounded p-2">
+                            <p class="text-xs text-gray-500">Assists</p>
+                            <p class="font-bold text-gray-900">{% if stats %}{{ stats.assists }}{% else %}0{% endif %}</p>
+                        </div>
+                        <div class="bg-gray-50 rounded p-2">
+                            <p class="text-xs text-gray-500">Key Pass</p>
+                            <p class="font-bold text-gray-900">{% if stats %}{{ stats.key_passes }}{% else %}0{% endif %}</p>
+                        </div>
+                        {% else %}
+                        <div class="bg-gray-50 rounded p-2">
+                            <p class="text-xs text-gray-500">Key Pass</p>
+                            <p class="font-bold text-gray-900">{% if stats %}{{ stats.key_passes }}{% else %}0{% endif %}</p>
+                        </div>
+                        <div class="bg-gray-50 rounded p-2">
+                            <p class="text-xs text-gray-500">Goals</p>
+                            <p class="font-bold text-gray-900">{% if stats %}{{ stats.goals }}{% else %}0{% endif %}</p>
+                        </div>
+                        <div class="bg-gray-50 rounded p-2">
+                            <p class="text-xs text-gray-500">Assists</p>
+                            <p class="font-bold text-gray-900">{% if stats %}{{ stats.assists }}{% else %}0{% endif %}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endwith %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Compare Button -->
+            <div class="flex items-center gap-4">
+                <button id="compare-btn" disabled
+                        class="px-6 py-2 bg-purple-600 text-white font-semibold rounded-lg transition disabled:opacity-40 disabled:cursor-not-allowed hover:bg-purple-700">
+                    Compare Selected
+                </button>
+                <span id="compare-hint" class="text-sm text-gray-500">Select 2 or 3 players to compare</span>
+            </div>
+
+            {% else %}
+            <!-- Empty watchlist state -->
+            <div class="text-center py-12">
+                <i class="fas fa-binoculars text-4xl text-gray-300 mb-4"></i>
+                <p class="text-gray-500 text-lg">Your watchlist is empty.</p>
+                <p class="text-gray-400 text-sm mt-1">Search for players and add them to your watchlist to compare their stats here.</p>
+                <a href="{% url 'search_players' %}"
+                   class="mt-4 inline-block px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
+                    Search Players
+                </a>
+            </div>
             {% endif %}
         </div>
 
+        <!-- Comparison Results Panel (hidden until compare is clicked) -->
+        <div id="comparison-panel" class="hidden mb-6">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-bold text-gray-900">Player Comparison</h3>
+                    <button id="close-comparison" class="text-gray-400 hover:text-gray-600 transition">
+                        <i class="fas fa-times text-lg"></i>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Side-by-side stat bars -->
+                    <div id="stat-bars-container">
+                        <!-- Filled by JavaScript -->
+                    </div>
+
+                    <!-- Radar chart -->
+                    <div class="flex items-center justify-center">
+                        <div style="max-width: 420px; width: 100%;">
+                            <canvas id="radar-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Social Posts Section for Scouts -->
-        <div
-            class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl shadow-xl p-8 mb-8 mt-8 border-2 border-purple-200">
-            <div class="flex items-center justify-between mb-6">
+        <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl shadow-xl p-8 mb-8 border-2 border-purple-200">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
                 <div class="flex items-center space-x-3">
-                    <div
-                        class="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                    <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
                         <i class="fas fa-binoculars text-white text-xl"></i>
                     </div>
                     <div>
@@ -494,12 +699,12 @@
                 </div>
                 <div class="flex space-x-3">
                     <a href="{% url 'my_posts' %}"
-                        class="px-4 py-2 bg-white border-2 border-purple-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-all font-semibold shadow-md">
-                        <i class="fas fa-list mr-2"></i>My Posts
+                       class="px-4 py-2 bg-white border-2 border-purple-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-all font-semibold shadow-md text-sm">
+                        <i class="fas fa-list mr-1"></i> My Posts
                     </a>
                     <a href="{% url 'create_post' %}"
-                        class="px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg font-bold shadow-lg transform hover:scale-105 transition-all">
-                        <i class="fas fa-plus-circle mr-2"></i>Create Post
+                       class="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg font-bold shadow-lg transition-all text-sm">
+                        <i class="fas fa-plus-circle mr-1"></i> Create Post
                     </a>
                 </div>
             </div>
@@ -522,15 +727,242 @@
                     <p class="text-sm font-semibold text-gray-700">View Feed</p>
                 </a>
             </div>
-
-            <div class="bg-white rounded-lg p-4 border-2 border-dashed border-purple-300">
-                <p class="text-center text-gray-600">
-                    <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
-                    <strong>Tip:</strong> Share your player assessments, strengths, development areas, and potential
-                    ratings to help clubs discover new talent!
-                </p>
-            </div>
         </div>
+        {% endif %}
+
+        <!-- Scout Dashboard JavaScript -->
+        <script>
+        (function() {
+            // ---------------------------------------------------------------
+            // Position tab filtering
+            // ---------------------------------------------------------------
+            var tabs = document.querySelectorAll('#position-tabs .tab-btn');
+            var cards = document.querySelectorAll('#player-cards .player-card');
+
+            tabs.forEach(function(tab) {
+                tab.addEventListener('click', function() {
+                    var filter = this.getAttribute('data-filter');
+
+                    // Update active tab styling
+                    tabs.forEach(function(t) {
+                        t.classList.remove('bg-purple-600', 'text-white');
+                        t.classList.add('bg-gray-100', 'text-gray-700');
+                    });
+                    this.classList.remove('bg-gray-100', 'text-gray-700');
+                    this.classList.add('bg-purple-600', 'text-white');
+
+                    // Show/hide cards based on filter
+                    cards.forEach(function(card) {
+                        if (filter === 'all' || card.getAttribute('data-position-group') === filter) {
+                            card.classList.remove('hidden');
+                        } else {
+                            card.classList.add('hidden');
+                            // Uncheck hidden cards so you can't accidentally compare across groups
+                            var cb = card.querySelector('.compare-checkbox');
+                            if (cb) cb.checked = false;
+                        }
+                    });
+                    updateCompareButton();
+                });
+            });
+
+            // ---------------------------------------------------------------
+            // Checkbox selection and compare button state
+            // ---------------------------------------------------------------
+            var compareBtn = document.getElementById('compare-btn');
+            var compareHint = document.getElementById('compare-hint');
+
+            document.querySelectorAll('.compare-checkbox').forEach(function(cb) {
+                cb.addEventListener('change', updateCompareButton);
+            });
+
+            function getSelectedIds() {
+                var selected = [];
+                document.querySelectorAll('.compare-checkbox:checked').forEach(function(cb) {
+                    // Only count checkboxes in visible cards
+                    if (!cb.closest('.player-card').classList.contains('hidden')) {
+                        selected.push(cb.value);
+                    }
+                });
+                return selected;
+            }
+
+            function updateCompareButton() {
+                var ids = getSelectedIds();
+                if (ids.length >= 2 && ids.length <= 3) {
+                    compareBtn.disabled = false;
+                    compareHint.textContent = ids.length + ' players selected';
+                } else if (ids.length > 3) {
+                    compareBtn.disabled = true;
+                    compareHint.textContent = 'Select up to 3 players only';
+                } else {
+                    compareBtn.disabled = true;
+                    compareHint.textContent = 'Select 2 or 3 players to compare';
+                }
+            }
+
+            // ---------------------------------------------------------------
+            // Compare button click - fetch data and render
+            // ---------------------------------------------------------------
+            if (compareBtn) {
+                compareBtn.addEventListener('click', function() {
+                    var ids = getSelectedIds();
+                    if (ids.length < 2) return;
+
+                    var params = ids.map(function(id) { return 'players=' + id; }).join('&');
+                    fetch('{% url "compare_players_api" %}?' + params, {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    })
+                    .then(function(res) { return res.json(); })
+                    .then(function(data) {
+                        if (data.players && data.players.length >= 2) {
+                            renderComparison(data.players);
+                        }
+                    });
+                });
+            }
+
+            // Close comparison panel
+            var closeBtn = document.getElementById('close-comparison');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', function() {
+                    document.getElementById('comparison-panel').classList.add('hidden');
+                });
+            }
+
+            // ---------------------------------------------------------------
+            // Stat labels per position group used for the radar chart and bars
+            // ---------------------------------------------------------------
+            var STAT_LABELS = {
+                'Strikers':    { labels: ['Goals','Assists','Shots on Target','Appearances','Minutes Played'], keys: ['goals','assists','shots_on_target','appearances','minutes_played'] },
+                'Midfielders': { labels: ['Key Passes','Chances Created','Pass Accuracy','Goals','Assists'], keys: ['key_passes','chances_created','pass_accuracy','goals','assists'] },
+                'Wingers':     { labels: ['Goals','Assists','Chances Created','Key Passes','Appearances'], keys: ['goals','assists','chances_created','key_passes','appearances'] },
+                'Defenders':   { labels: ['Tackles','Interceptions','Clearances','Aerial Duels','Appearances'], keys: ['tackles','interceptions','clearances','aerial_duels_won','appearances'] },
+                'Goalkeepers': { labels: ['Saves','Clean Sheets','Penalties Saved','Appearances','Minutes Played'], keys: ['saves','clean_sheets','penalties_saved','appearances','minutes_played'] }
+            };
+
+            // Map a position code to its group name (same logic as the view)
+            function positionGroup(code) {
+                var map = {
+                    'ST':'Strikers','CF':'Strikers',
+                    'CDM':'Midfielders','CM':'Midfielders','CAM':'Midfielders','LM':'Midfielders','RM':'Midfielders',
+                    'LW':'Wingers','RW':'Wingers',
+                    'LB':'Defenders','CB':'Defenders','RB':'Defenders','LWB':'Defenders','RWB':'Defenders',
+                    'GK':'Goalkeepers'
+                };
+                return map[code] || 'Midfielders';
+            }
+
+            // Player colors for the chart and bar highlights
+            var COLORS = [
+                { border: 'rgba(124, 58, 237, 1)', bg: 'rgba(124, 58, 237, 0.2)', bar: 'bg-purple-500' },
+                { border: 'rgba(16, 185, 129, 1)', bg: 'rgba(16, 185, 129, 0.2)', bar: 'bg-green-500' },
+                { border: 'rgba(59, 130, 246, 1)', bg: 'rgba(59, 130, 246, 0.2)', bar: 'bg-blue-500' }
+            ];
+
+            var radarChart = null;
+
+            // ---------------------------------------------------------------
+            // Render the full comparison panel (bars + radar)
+            // ---------------------------------------------------------------
+            function renderComparison(players) {
+                var panel = document.getElementById('comparison-panel');
+                panel.classList.remove('hidden');
+                panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                var group = positionGroup(players[0].position);
+                var meta = STAT_LABELS[group] || STAT_LABELS['Midfielders'];
+                var labels = meta.labels;
+                var keys = meta.keys;
+
+                // ---------- Side-by-side stat bars ----------
+                var barsContainer = document.getElementById('stat-bars-container');
+                var html = '';
+
+                // Player name legend
+                html += '<div class="flex flex-wrap gap-3 mb-4">';
+                players.forEach(function(p, i) {
+                    var color = COLORS[i];
+                    html += '<div class="flex items-center gap-2">';
+                    html += '<span class="inline-block w-3 h-3 rounded-full ' + color.bar + '"></span>';
+                    html += '<span class="text-sm font-semibold text-gray-700">' + p.name + ' (' + p.position_display + ')</span>';
+                    html += '</div>';
+                });
+                html += '</div>';
+
+                // Find the max value for each stat across all players so the bars scale correctly
+                keys.forEach(function(key, ki) {
+                    var maxVal = 1; // avoid divide-by-zero
+                    players.forEach(function(p) {
+                        if (p.stats[key] > maxVal) maxVal = p.stats[key];
+                    });
+
+                    html += '<div class="mb-3">';
+                    html += '<p class="text-xs font-semibold text-gray-600 mb-1">' + labels[ki] + '</p>';
+                    players.forEach(function(p, pi) {
+                        var val = p.stats[key];
+                        var pct = Math.round((val / maxVal) * 100);
+                        html += '<div class="flex items-center gap-2 mb-1">';
+                        html += '<span class="text-xs text-gray-500 w-16 truncate">' + p.name + '</span>';
+                        html += '<div class="flex-1 bg-gray-100 rounded-full h-4 overflow-hidden">';
+                        html += '<div class="' + COLORS[pi].bar + ' h-4 rounded-full transition-all" style="width:' + pct + '%"></div>';
+                        html += '</div>';
+                        html += '<span class="text-xs font-bold text-gray-700 w-8 text-right">' + val + '</span>';
+                        html += '</div>';
+                    });
+                    html += '</div>';
+                });
+
+                barsContainer.innerHTML = html;
+
+                // ---------- Radar chart ----------
+                var ctx = document.getElementById('radar-chart').getContext('2d');
+
+                // Destroy old chart if it exists
+                if (radarChart) {
+                    radarChart.destroy();
+                }
+
+                var datasets = players.map(function(p, i) {
+                    return {
+                        label: p.name,
+                        data: keys.map(function(k) { return p.stats[k]; }),
+                        borderColor: COLORS[i].border,
+                        backgroundColor: COLORS[i].bg,
+                        pointBackgroundColor: COLORS[i].border,
+                        pointBorderColor: '#fff',
+                        pointRadius: 4,
+                        borderWidth: 2
+                    };
+                });
+
+                radarChart = new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: labels,
+                        datasets: datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                ticks: { display: true, stepSize: 5 },
+                                pointLabels: { font: { size: 11, weight: 'bold' } }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { font: { size: 12 }, padding: 16 }
+                            }
+                        }
+                    }
+                });
+            }
+        })();
+        </script>
 
         {% elif user.role == 'MANAGER' %}
         <!-- Manager Dashboard -->

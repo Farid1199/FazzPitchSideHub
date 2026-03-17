@@ -22,7 +22,10 @@ from django.views.static import serve as static_serve
 from users import views
 import re as _re
 
+from users.views import admin_analytics_view
+
 urlpatterns = [
+    path('admin/analytics/', admin_analytics_view, name='admin_analytics'),
     path('admin/', admin.site.urls),
     path('', include('users.urls')),
     #path('dashboard/', views.dashboard_view, name='dashboard'),

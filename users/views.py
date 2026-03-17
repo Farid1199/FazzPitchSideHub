@@ -17,15 +17,16 @@ import json
 import secrets
 import re
 from .forms import (
-    CustomUserCreationForm, PlayerProfileForm, ClubProfileForm, 
+    CustomUserCreationForm, PlayerProfileForm, ClubProfileForm,
     ScoutProfileForm, ManagerProfileForm, QualificationVerificationForm,
-    ScoutVerificationForm, OpportunityForm, PostForm, FanProfileForm
+    ScoutVerificationForm, OpportunityForm, PostForm, FanProfileForm,
+    ContactForm
 )
 from .models import (
     User, NewsItem, Opportunity, PlayerProfile, ClubProfile, ClubSource,
     ScoutProfile, ManagerProfile, QualificationVerification, ScoutVerification,
     Notification, Post, Comment, Follow, FollowRequest, Conversation, Message,
-    FanProfile, Watchlist, ClubShortlist
+    FanProfile, Watchlist, ClubShortlist, PlayerStats, ContactSubmission
 )
 from .utils import get_recommendations
 from .utils_notifications import create_notification
@@ -343,7 +344,40 @@ def dashboard_view(request):
                     is_open=True
                 ).order_by('-published_date')
                 context['unverified_opportunities'] = unverified_opportunities
-    
+
+    # --- Scout-specific data for the comparison dashboard ---
+    if request.user.role == 'SCOUT' and hasattr(request.user, 'scout_profile'):
+        scout = request.user.scout_profile
+        watchlist_qs = Watchlist.objects.filter(
+            scout=scout
+        ).select_related('player__user', 'player__stats')
+
+        context['watchlist'] = watchlist_qs
+        context['watchlist_count'] = watchlist_qs.count()
+
+        # Map each position code to a group name so the template can
+        # display players in tabs like "Strikers", "Midfielders", etc.
+        POSITION_MAP = {
+            'ST': 'Strikers', 'CF': 'Strikers',
+            'CDM': 'Midfielders', 'CM': 'Midfielders', 'CAM': 'Midfielders',
+            'LM': 'Midfielders', 'RM': 'Midfielders',
+            'LW': 'Wingers', 'RW': 'Wingers',
+            'LB': 'Defenders', 'CB': 'Defenders', 'RB': 'Defenders',
+            'LWB': 'Defenders', 'RWB': 'Defenders',
+            'GK': 'Goalkeepers',
+        }
+        position_groups = {
+            'Strikers': [],
+            'Midfielders': [],
+            'Wingers': [],
+            'Defenders': [],
+            'Goalkeepers': [],
+        }
+        for entry in watchlist_qs:
+            group = POSITION_MAP.get(entry.player.position, 'Midfielders')
+            position_groups[group].append(entry)
+        context['position_groups'] = position_groups
+
     return render(request, 'users/dashboard.html', context)
 
 def home_view(request):
@@ -1849,6 +1883,57 @@ def scout_watchlist_view(request):
 
 
 @login_required
+def compare_players_api(request):
+    """
+    JSON endpoint used by the scout dashboard to fetch stats for selected
+    players. The front-end calls this via fetch() when the scout clicks
+    "Compare". Only returns players that are on the scout's own watchlist.
+    """
+    if request.user.role != 'SCOUT' or not hasattr(request.user, 'scout_profile'):
+        return JsonResponse({'error': 'Scout access only'}, status=403)
+
+    player_ids = request.GET.getlist('players')
+    if not player_ids:
+        return JsonResponse({'players': []})
+
+    # Only allow comparing players that are on this scout's watchlist
+    players = PlayerProfile.objects.filter(
+        id__in=player_ids,
+        watchlisted_by__scout=request.user.scout_profile,
+    ).select_related('stats', 'user').distinct()
+
+    results = []
+    for p in players:
+        stats = getattr(p, 'stats', None)
+        results.append({
+            'id': p.id,
+            'name': p.user.username,
+            'position': p.position,
+            'position_display': p.get_position_display(),
+            'stats': {
+                'appearances': stats.appearances if stats else 0,
+                'goals': stats.goals if stats else 0,
+                'assists': stats.assists if stats else 0,
+                'shots_on_target': stats.shots_on_target if stats else 0,
+                'key_passes': stats.key_passes if stats else 0,
+                'chances_created': stats.chances_created if stats else 0,
+                'pass_accuracy': stats.pass_accuracy if stats else 0,
+                'tackles': stats.tackles if stats else 0,
+                'interceptions': stats.interceptions if stats else 0,
+                'clearances': stats.clearances if stats else 0,
+                'aerial_duels_won': stats.aerial_duels_won if stats else 0,
+                'saves': stats.saves if stats else 0,
+                'clean_sheets': stats.clean_sheets if stats else 0,
+                'penalties_saved': stats.penalties_saved if stats else 0,
+                'yellow_cards': stats.yellow_cards if stats else 0,
+                'red_cards': stats.red_cards if stats else 0,
+            },
+        })
+
+    return JsonResponse({'players': results})
+
+
+@login_required
 def update_watchlist_notes(request, watchlist_id):
     """Update private notes on a watchlist entry (AJAX)."""
     if request.method != 'POST':
@@ -2077,8 +2162,29 @@ def about_page(request):
 
 
 def contact_page(request):
-    """Contact page."""
-    return render(request, 'users/contact.html')
+    """Contact page with a structured form for feedback, support, and inquiries."""
+    submitted = False
+
+    if request.method == 'POST':
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            submission = form.save(commit=False)
+            if request.user.is_authenticated:
+                submission.user = request.user
+            submission.save()
+            submitted = True
+            form = ContactForm()
+    else:
+        form = ContactForm()
+        # Pre-fill name and email for logged-in users
+        if request.user.is_authenticated:
+            form.fields['name'].initial = request.user.get_full_name() or request.user.username
+            form.fields['email'].initial = request.user.email
+
+    return render(request, 'users/contact.html', {
+        'form': form,
+        'submitted': submitted,
+    })
 
 
 # =========================================================================
@@ -2133,3 +2239,210 @@ def security_settings(request):
         return redirect('security_settings')
 
     return render(request, 'users/security_settings.html')
+
+
+# =========================================================================
+# Admin Analytics Dashboard
+# =========================================================================
+
+def admin_analytics_view(request):
+    """
+    Custom analytics dashboard for staff/admin users.
+    Computes platform-wide metrics and renders them with charts.
+    """
+    from django.contrib.admin.views.decorators import staff_member_required
+    from django.db.models import Count, Q
+    from datetime import timedelta
+    from collections import OrderedDict
+
+    now = timezone.now()
+    today = now.date()
+    start_of_month = today.replace(day=1)
+    if start_of_month.month == 1:
+        start_of_last_month = start_of_month.replace(year=start_of_month.year - 1, month=12)
+    else:
+        start_of_last_month = start_of_month.replace(month=start_of_month.month - 1)
+    thirty_days_ago = today - timedelta(days=30)
+
+    # ------------------------------------------------------------------
+    # 1. User Growth and Registration
+    # ------------------------------------------------------------------
+    total_users = User.objects.count()
+    users_this_month = User.objects.filter(date_joined__date__gte=start_of_month).count()
+    users_last_month = User.objects.filter(
+        date_joined__date__gte=start_of_last_month,
+        date_joined__date__lt=start_of_month
+    ).count()
+
+    role_breakdown = {}
+    for role_code, role_label in User.ROLE_CHOICES:
+        role_breakdown[role_label] = User.objects.filter(role=role_code).count()
+
+    # Signups per day for the last 30 days
+    signup_dates = []
+    signup_counts = []
+    for i in range(30):
+        day = thirty_days_ago + timedelta(days=i)
+        count = User.objects.filter(date_joined__date=day).count()
+        signup_dates.append(day.strftime('%d %b'))
+        signup_counts.append(count)
+
+    # ------------------------------------------------------------------
+    # 2. Engagement and Activity
+    # ------------------------------------------------------------------
+    total_posts = Post.objects.count()
+    posts_this_month = Post.objects.filter(created_at__date__gte=start_of_month).count()
+    total_comments = Comment.objects.count()
+    comments_this_month = Comment.objects.filter(created_at__date__gte=start_of_month).count()
+    total_follows = Follow.objects.count()
+    total_messages = Message.objects.count()
+    messages_this_month = Message.objects.filter(sent_at__date__gte=start_of_month).count()
+
+    # Top 5 posters
+    top_posters = (
+        User.objects.annotate(post_count=Count('posts'))
+        .filter(post_count__gt=0)
+        .order_by('-post_count')[:5]
+    )
+
+    # ------------------------------------------------------------------
+    # 3. Recruitment Pipeline
+    # ------------------------------------------------------------------
+    total_opportunities = Opportunity.objects.count()
+    open_opportunities = Opportunity.objects.filter(is_open=True).count()
+    total_watchlist = Watchlist.objects.count()
+    watchlist_this_month = Watchlist.objects.filter(added_at__date__gte=start_of_month).count()
+    total_shortlist = ClubShortlist.objects.count()
+    shortlist_this_month = ClubShortlist.objects.filter(added_at__date__gte=start_of_month).count()
+    available_players = PlayerProfile.objects.exclude(
+        availability_status='NOT_AVAILABLE'
+    ).exclude(availability_status='').count()
+
+    # Most watched positions
+    watched_positions = {}
+    watchlist_entries = Watchlist.objects.select_related('player').all()
+    for entry in watchlist_entries:
+        pos = entry.player.position or 'Unknown'
+        watched_positions[pos] = watched_positions.get(pos, 0) + 1
+    # Sort by count descending
+    watched_positions = dict(
+        sorted(watched_positions.items(), key=lambda x: x[1], reverse=True)[:10]
+    )
+
+    # ------------------------------------------------------------------
+    # 4. Contact Form and Feedback
+    # ------------------------------------------------------------------
+    total_contacts = ContactSubmission.objects.count()
+    contacts_by_category = {}
+    for code, label in ContactSubmission.CATEGORY_CHOICES:
+        contacts_by_category[label] = ContactSubmission.objects.filter(category=code).count()
+
+    contacts_by_status = {}
+    for code, label in ContactSubmission.STATUS_CHOICES:
+        contacts_by_status[label] = ContactSubmission.objects.filter(status=code).count()
+
+    unresolved_contacts = ContactSubmission.objects.filter(
+        status__in=['NEW', 'IN_PROGRESS']
+    ).count()
+    recent_contacts = ContactSubmission.objects.order_by('-created_at')[:10]
+
+    # ------------------------------------------------------------------
+    # 5. Verification Tracking
+    # ------------------------------------------------------------------
+    scout_verifications = {
+        'Pending': ScoutVerification.objects.filter(status='PENDING').count(),
+        'Approved': ScoutVerification.objects.filter(status='APPROVED').count(),
+        'Rejected': ScoutVerification.objects.filter(status='REJECTED').count(),
+        'Flagged': ScoutVerification.objects.filter(status='FLAGGED').count(),
+    }
+    manager_verifications = {
+        'Pending': QualificationVerification.objects.filter(status='PENDING').count(),
+        'Approved': QualificationVerification.objects.filter(status='APPROVED').count(),
+        'Rejected': QualificationVerification.objects.filter(status='REJECTED').count(),
+        'Flagged': QualificationVerification.objects.filter(status='FLAGGED').count(),
+    }
+    pending_verifications = scout_verifications['Pending'] + manager_verifications['Pending']
+
+    # ------------------------------------------------------------------
+    # 6. Content and Feed Health
+    # ------------------------------------------------------------------
+    total_club_sources = ClubSource.objects.count()
+    sources_with_rss = ClubSource.objects.exclude(rss_url='').exclude(rss_url__isnull=True).count()
+    clubs_with_rss = ClubProfile.objects.exclude(
+        rss_feed_url=''
+    ).exclude(rss_feed_url__isnull=True).count()
+    total_news = NewsItem.objects.count()
+    news_this_month = NewsItem.objects.filter(created_at__date__gte=start_of_month).count()
+
+    posts_by_type = {}
+    for code, label in Post.POST_TYPE_CHOICES:
+        c = Post.objects.filter(post_type=code).count()
+        if c > 0:
+            posts_by_type[label] = c
+
+    most_liked_posts = (
+        Post.objects.annotate(like_count=Count('likes'))
+        .filter(like_count__gt=0)
+        .order_by('-like_count')[:5]
+    )
+
+    context = {
+        'title': 'Platform Analytics',
+        # Section 1
+        'total_users': total_users,
+        'users_this_month': users_this_month,
+        'users_last_month': users_last_month,
+        'role_breakdown': role_breakdown,
+        'signup_dates_json': json.dumps(signup_dates),
+        'signup_counts_json': json.dumps(signup_counts),
+        # Section 2
+        'total_posts': total_posts,
+        'posts_this_month': posts_this_month,
+        'total_comments': total_comments,
+        'comments_this_month': comments_this_month,
+        'total_follows': total_follows,
+        'total_messages': total_messages,
+        'messages_this_month': messages_this_month,
+        'top_posters': top_posters,
+        # Section 3
+        'total_opportunities': total_opportunities,
+        'open_opportunities': open_opportunities,
+        'total_watchlist': total_watchlist,
+        'watchlist_this_month': watchlist_this_month,
+        'total_shortlist': total_shortlist,
+        'shortlist_this_month': shortlist_this_month,
+        'available_players': available_players,
+        'watched_positions_labels_json': json.dumps(list(watched_positions.keys())),
+        'watched_positions_data_json': json.dumps(list(watched_positions.values())),
+        # Section 4
+        'total_contacts': total_contacts,
+        'contacts_by_category': contacts_by_category,
+        'contacts_by_status': contacts_by_status,
+        'unresolved_contacts': unresolved_contacts,
+        'recent_contacts': recent_contacts,
+        'contact_cat_labels_json': json.dumps(list(contacts_by_category.keys())),
+        'contact_cat_data_json': json.dumps(list(contacts_by_category.values())),
+        # Section 5
+        'scout_verifications': scout_verifications,
+        'manager_verifications': manager_verifications,
+        'pending_verifications': pending_verifications,
+        # Section 6
+        'total_club_sources': total_club_sources,
+        'sources_with_rss': sources_with_rss,
+        'clubs_with_rss': clubs_with_rss,
+        'total_news': total_news,
+        'news_this_month': news_this_month,
+        'posts_by_type': posts_by_type,
+        'post_type_labels_json': json.dumps(list(posts_by_type.keys())),
+        'post_type_data_json': json.dumps(list(posts_by_type.values())),
+        'most_liked_posts': most_liked_posts,
+        'role_labels_json': json.dumps(list(role_breakdown.keys())),
+        'role_data_json': json.dumps(list(role_breakdown.values())),
+    }
+
+    return render(request, 'admin/analytics_dashboard.html', context)
+
+
+# Apply the staff_member_required decorator
+from django.contrib.admin.views.decorators import staff_member_required
+admin_analytics_view = staff_member_required(admin_analytics_view)

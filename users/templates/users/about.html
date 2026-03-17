@@ -1,61 +1,136 @@
 {% extends 'base.html' %}
 
-{% block title %}About - FazzPitchSideHub{% endblock %}
+{% block title %}About - Fazz PitchSide Hub{% endblock %}
 
 {% block content %}
 <div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-4xl mx-auto">
-        <div class="bg-white rounded-lg shadow-xl p-8">
-            <h1 class="text-3xl font-bold text-gray-900 mb-8">About Fazz Pitchside Hub</h1>
+    <div class="max-w-5xl mx-auto">
 
-            <div class="prose max-w-none text-gray-700 space-y-6">
-                <p class="text-lg">
-                    Fazz Pitchside Hub is the UK's dedicated platform connecting non-league football players,
-                    clubs, scouts, and managers. We bridge the gap between grassroots talent and opportunity.
-                </p>
+        <!-- Hero Section -->
+        <div class="bg-white rounded-lg shadow-xl p-8 md:p-12 mb-10">
+            <h1 class="text-3xl font-bold text-gray-900 mb-4">About Fazz PitchSide Hub</h1>
+            <p class="text-lg text-gray-700 leading-relaxed">
+                Fazz PitchSide Hub is the UK's dedicated platform connecting non-league football players,
+                clubs, scouts, and managers. We exist to bridge the gap between grassroots talent and
+                real opportunity -- because your next chance should not depend on who you know.
+            </p>
+        </div>
 
-                <div class="grid md:grid-cols-2 gap-6 mt-8">
-                    <div class="bg-green-50 rounded-lg p-6">
-                        <h3 class="text-lg font-semibold text-green-800 mb-2">
-                            <i class="fas fa-running mr-2"></i> For Players
-                        </h3>
-                        <p class="text-green-700 text-sm">Create a professional profile, showcase your highlights, and discover trial opportunities at clubs across the pyramid.</p>
+        <!-- Mission Statement -->
+        <div class="bg-green-700 text-white rounded-lg shadow-lg p-8 md:p-10 mb-10">
+            <h2 class="text-2xl font-bold mb-3">Our Mission</h2>
+            <p class="text-green-100 text-lg leading-relaxed">
+                To democratise access to football opportunities at the non-league level, ensuring that
+                talent is discovered regardless of connections or geography. We believe every player
+                deserves to be seen, every scout deserves reliable tools, and every club deserves
+                access to the right talent.
+            </p>
+        </div>
+
+        <!-- Who It's For -->
+        <div class="mb-10">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6 text-center">Built for Every Role in Non-League Football</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Players -->
+                <div class="bg-white rounded-lg shadow-md p-6 border-t-4 border-green-500">
+                    <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-running text-green-600"></i>
                     </div>
-                    <div class="bg-blue-50 rounded-lg p-6">
-                        <h3 class="text-lg font-semibold text-blue-800 mb-2">
-                            <i class="fas fa-shield-alt mr-2"></i> For Clubs
-                        </h3>
-                        <p class="text-blue-700 text-sm">Post trial opportunities, search for players by position and level, and build shortlists of promising talent.</p>
-                    </div>
-                    <div class="bg-purple-50 rounded-lg p-6">
-                        <h3 class="text-lg font-semibold text-purple-800 mb-2">
-                            <i class="fas fa-search mr-2"></i> For Scouts
-                        </h3>
-                        <p class="text-purple-700 text-sm">Discover and track players with watchlists, verified credentials, and professional scouting tools.</p>
-                    </div>
-                    <div class="bg-yellow-50 rounded-lg p-6">
-                        <h3 class="text-lg font-semibold text-yellow-800 mb-2">
-                            <i class="fas fa-clipboard mr-2"></i> For Managers
-                        </h3>
-                        <p class="text-yellow-700 text-sm">Showcase your coaching qualifications, share tactical insights, and connect with clubs and players.</p>
-                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Players</h3>
+                    <p class="text-sm text-gray-600">
+                        Create a professional profile, upload highlight videos, track your stats,
+                        and discover trial opportunities at clubs across the football pyramid.
+                    </p>
                 </div>
-
-                <h2 class="text-xl font-semibold text-gray-900 mt-8">Our Mission</h2>
-                <p>To democratise access to football opportunities at the non-league level, ensuring that
-                talent is discovered regardless of connections or geography.</p>
-
-                <h2 class="text-xl font-semibold text-gray-900">Key Features</h2>
-                <ul class="list-disc pl-6 space-y-1">
-                    <li>AI-powered player-to-trial matching recommendations</li>
-                    <li>Verified coaching and scouting qualifications</li>
-                    <li>Real-time RSS news aggregation from non-league clubs</li>
-                    <li>Social features: posts, follows, messaging</li>
-                    <li>Scout watchlists and club shortlists</li>
-                    <li>AI-generated player bios</li>
-                </ul>
+                <!-- Clubs -->
+                <div class="bg-white rounded-lg shadow-md p-6 border-t-4 border-blue-500">
+                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-shield-alt text-blue-600"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Clubs</h3>
+                    <p class="text-sm text-gray-600">
+                        Post trial opportunities, search for players by position and playing level,
+                        and build shortlists of promising talent for your squad.
+                    </p>
+                </div>
+                <!-- Scouts -->
+                <div class="bg-white rounded-lg shadow-md p-6 border-t-4 border-purple-500">
+                    <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-binoculars text-purple-600"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Scouts</h3>
+                    <p class="text-sm text-gray-600">
+                        Discover and track players with watchlists, compare stats side by side,
+                        and verify your credentials through our tiered verification system.
+                    </p>
+                </div>
+                <!-- Managers -->
+                <div class="bg-white rounded-lg shadow-md p-6 border-t-4 border-yellow-500">
+                    <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-clipboard text-yellow-600"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Managers</h3>
+                    <p class="text-sm text-gray-600">
+                        Showcase your coaching qualifications, share tactical insights and match reports,
+                        and connect with clubs looking for leadership.
+                    </p>
+                </div>
             </div>
         </div>
+
+        <!-- Key Features -->
+        <div class="bg-white rounded-lg shadow-xl p-8 md:p-10 mb-10">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">What the Platform Offers</h2>
+            <div class="grid md:grid-cols-2 gap-x-10 gap-y-4">
+                <div class="flex items-start space-x-3">
+                    <i class="fas fa-check-circle text-green-500 mt-1"></i>
+                    <p class="text-gray-700">AI-powered player-to-trial matching recommendations</p>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <i class="fas fa-check-circle text-green-500 mt-1"></i>
+                    <p class="text-gray-700">Verified coaching and scouting qualifications</p>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <i class="fas fa-check-circle text-green-500 mt-1"></i>
+                    <p class="text-gray-700">Real-time RSS news feeds from non-league clubs</p>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <i class="fas fa-check-circle text-green-500 mt-1"></i>
+                    <p class="text-gray-700">Social feed with posts, follows, and direct messaging</p>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <i class="fas fa-check-circle text-green-500 mt-1"></i>
+                    <p class="text-gray-700">Scout watchlists with side-by-side stat comparison</p>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <i class="fas fa-check-circle text-green-500 mt-1"></i>
+                    <p class="text-gray-700">Club shortlists and trial opportunity management</p>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <i class="fas fa-check-circle text-green-500 mt-1"></i>
+                    <p class="text-gray-700">Football Pathways educational hub for career development</p>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <i class="fas fa-check-circle text-green-500 mt-1"></i>
+                    <p class="text-gray-700">Video uploads and YouTube highlight integration</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Call to Action -->
+        <div class="text-center bg-white rounded-lg shadow-lg p-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-3">Have Questions or Feedback?</h2>
+            <p class="text-gray-600 mb-6">
+                We are always looking to improve. If you have ideas, run into a problem,
+                or want to partner with us, we would love to hear from you.
+            </p>
+            <a href="{% url 'contact' %}"
+               class="inline-block bg-green-600 text-white px-8 py-3 rounded-lg font-medium
+                      hover:bg-green-700 transition">
+                Contact Us
+            </a>
+        </div>
+
     </div>
 </div>
 {% endblock %}

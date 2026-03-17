@@ -1,0 +1,210 @@
+/* Fazz PitchSide Hub - Admin Dashboard Styles */
+
+.analytics-wrap {
+    padding: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Top summary row */
+.summary-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.summary-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.summary-card .card-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #111827;
+    line-height: 1.2;
+}
+
+.summary-card .card-label {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-top: 4px;
+}
+
+.summary-card .card-sub {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    margin-top: 2px;
+}
+
+/* Accent borders for each section */
+.summary-card.accent-green  { border-top: 3px solid #059669; }
+.summary-card.accent-blue   { border-top: 3px solid #2563eb; }
+.summary-card.accent-purple { border-top: 3px solid #7c3aed; }
+.summary-card.accent-yellow { border-top: 3px solid #d97706; }
+.summary-card.accent-red    { border-top: 3px solid #dc2626; }
+.summary-card.accent-teal   { border-top: 3px solid #0d9488; }
+
+/* Section containers */
+.analytics-section {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.analytics-section h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 16px 0;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #f3f4f6;
+}
+
+/* Two-column layout for charts */
+.chart-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 16px;
+}
+
+.chart-box {
+    position: relative;
+    min-height: 280px;
+}
+
+/* KPI mini cards inside sections */
+.kpi-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.kpi-card {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 14px;
+    text-align: center;
+}
+
+.kpi-card .kpi-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #111827;
+}
+
+.kpi-card .kpi-label {
+    font-size: 0.8rem;
+    color: #6b7280;
+    margin-top: 2px;
+}
+
+/* Data tables */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+    margin-top: 12px;
+}
+
+.data-table th {
+    background: #f9fafb;
+    text-align: left;
+    padding: 10px 12px;
+    font-weight: 600;
+    color: #374151;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.data-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #f3f4f6;
+    color: #4b5563;
+}
+
+.data-table tr:hover td {
+    background: #f9fafb;
+}
+
+/* Status badges */
+.status-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.status-badge.new        { background: #dbeafe; color: #1e40af; }
+.status-badge.in-progress { background: #fef3c7; color: #92400e; }
+.status-badge.resolved   { background: #d1fae5; color: #065f46; }
+.status-badge.closed     { background: #f3f4f6; color: #6b7280; }
+.status-badge.pending    { background: #fef3c7; color: #92400e; }
+.status-badge.approved   { background: #d1fae5; color: #065f46; }
+.status-badge.rejected   { background: #fee2e2; color: #991b1b; }
+.status-badge.flagged    { background: #ede9fe; color: #5b21b6; }
+
+/* Verification grid */
+.verification-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+/* Alert box for pending items */
+.alert-box {
+    background: #fef3c7;
+    border: 1px solid #fbbf24;
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-size: 0.875rem;
+    color: #92400e;
+    margin-bottom: 16px;
+}
+
+/* Link to dashboard from admin index */
+.analytics-banner {
+    background: linear-gradient(135deg, #059669, #047857);
+    color: #fff;
+    padding: 16px 24px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.analytics-banner a {
+    background: #fff;
+    color: #059669;
+    padding: 8px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.analytics-banner a:hover {
+    background: #f0fdf4;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .chart-row, .verification-grid {
+        grid-template-columns: 1fr;
+    }
+    .summary-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

@@ -6,7 +6,7 @@ from datetime import date
 from .models import (
     User, PlayerProfile, ClubProfile, ScoutProfile,
     ManagerProfile, QualificationVerification, ScoutVerification, Opportunity, Post,
-    FanProfile
+    FanProfile, ContactSubmission
 )
 
 def validate_video_file_size(file):
@@ -802,3 +802,48 @@ class FanProfileForm(forms.ModelForm):
             'location': 'Location',
             'bio': 'About You',
         }
+
+
+class ContactForm(forms.ModelForm):
+    """
+    Public contact form for users to reach Fazz PitchSide Hub.
+    Covers feedback, bug reports, partnership inquiries, support, and GDPR requests.
+    """
+    class Meta:
+        model = ContactSubmission
+        fields = ['name', 'email', 'category', 'subject', 'message']
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'placeholder': 'Your full name',
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent',
+            }),
+            'email': forms.EmailInput(attrs={
+                'placeholder': 'you@example.com',
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent',
+            }),
+            'category': forms.Select(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent',
+            }),
+            'subject': forms.TextInput(attrs={
+                'placeholder': 'Brief summary of your message',
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent',
+            }),
+            'message': forms.Textarea(attrs={
+                'rows': 5,
+                'placeholder': 'Tell us more about your question, feedback, or request...',
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent',
+            }),
+        }
+        labels = {
+            'name': 'Full Name',
+            'email': 'Email Address',
+            'category': 'What is this about?',
+            'subject': 'Subject',
+            'message': 'Your Message',
+        }
+
+    def clean_message(self):
+        message = self.cleaned_data.get('message', '')
+        if len(message.strip()) < 20:
+            raise ValidationError('Please provide a bit more detail so we can help you properly (at least 20 characters).')
+        return message

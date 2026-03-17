@@ -1,0 +1,483 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}Platform Analytics{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'admin/css/custom_admin.css' %}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="analytics-wrap">
+
+    <!-- Page Header -->
+    <h1 style="font-size:1.75rem; font-weight:700; color:#111827; margin-bottom:24px;">
+        Platform Analytics
+    </h1>
+
+    <!-- ============================================================= -->
+    <!-- Top Summary Cards                                              -->
+    <!-- ============================================================= -->
+    <div class="summary-row">
+        <div class="summary-card accent-green">
+            <div class="card-value">{{ total_users }}</div>
+            <div class="card-label">Total Users</div>
+            <div class="card-sub">+{{ users_this_month }} this month</div>
+        </div>
+        <div class="summary-card accent-blue">
+            <div class="card-value">{{ posts_this_month }}</div>
+            <div class="card-label">Posts This Month</div>
+            <div class="card-sub">{{ total_posts }} total</div>
+        </div>
+        <div class="summary-card accent-purple">
+            <div class="card-value">{{ open_opportunities }}</div>
+            <div class="card-label">Open Trials</div>
+            <div class="card-sub">{{ total_opportunities }} total</div>
+        </div>
+        <div class="summary-card accent-yellow">
+            <div class="card-value">{{ unresolved_contacts }}</div>
+            <div class="card-label">Unresolved Contacts</div>
+            <div class="card-sub">{{ total_contacts }} total</div>
+        </div>
+        <div class="summary-card accent-red">
+            <div class="card-value">{{ pending_verifications }}</div>
+            <div class="card-label">Pending Verifications</div>
+            <div class="card-sub">Scouts + Managers</div>
+        </div>
+        <div class="summary-card accent-teal">
+            <div class="card-value">{{ news_this_month }}</div>
+            <div class="card-label">News This Month</div>
+            <div class="card-sub">{{ total_news }} total articles</div>
+        </div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- Section 1: User Growth and Registration                        -->
+    <!-- ============================================================= -->
+    <div class="analytics-section">
+        <h2>User Growth and Registration</h2>
+        <div class="kpi-row">
+            {% for role_name, count in role_breakdown.items %}
+            <div class="kpi-card">
+                <div class="kpi-value">{{ count }}</div>
+                <div class="kpi-label">{{ role_name }}s</div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="chart-row">
+            <div class="chart-box">
+                <canvas id="signupChart"></canvas>
+            </div>
+            <div class="chart-box">
+                <canvas id="roleChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- Section 2: Engagement and Activity                             -->
+    <!-- ============================================================= -->
+    <div class="analytics-section">
+        <h2>Engagement and Activity</h2>
+        <div class="kpi-row">
+            <div class="kpi-card">
+                <div class="kpi-value">{{ total_posts }}</div>
+                <div class="kpi-label">Total Posts</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value">{{ total_comments }}</div>
+                <div class="kpi-label">Total Comments</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value">{{ total_follows }}</div>
+                <div class="kpi-label">Follows</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value">{{ total_messages }}</div>
+                <div class="kpi-label">Messages Sent</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value">{{ messages_this_month }}</div>
+                <div class="kpi-label">Messages This Month</div>
+            </div>
+        </div>
+        {% if top_posters %}
+        <h3 style="font-size:1rem; font-weight:600; color:#374151; margin-bottom:8px;">Top Contributors</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Role</th>
+                    <th>Posts</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in top_posters %}
+                <tr>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.get_role_display }}</td>
+                    <td>{{ user.post_count }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- Section 3: Recruitment Pipeline                                -->
+    <!-- ============================================================= -->
+    <div class="analytics-section">
+        <h2>Recruitment Pipeline</h2>
+        <div class="kpi-row">
+            <div class="kpi-card">
+                <div class="kpi-value">{{ open_opportunities }}</div>
+                <div class="kpi-label">Open Trials</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value">{{ total_watchlist }}</div>
+                <div class="kpi-label">Watchlist Entries</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value">{{ watchlist_this_month }}</div>
+                <div class="kpi-label">Watched This Month</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value">{{ total_shortlist }}</div>
+                <div class="kpi-label">Shortlist Entries</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value">{{ available_players }}</div>
+                <div class="kpi-label">Available Players</div>
+            </div>
+        </div>
+        <div class="chart-row">
+            <div class="chart-box">
+                <canvas id="positionsChart"></canvas>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:center; color:#6b7280; font-size:0.9rem;">
+                <div>
+                    <p style="margin-bottom:8px;"><strong>{{ total_opportunities }}</strong> total opportunities posted</p>
+                    <p style="margin-bottom:8px;"><strong>{{ shortlist_this_month }}</strong> shortlisted this month</p>
+                    <p><strong>{{ available_players }}</strong> players currently available</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- Section 4: Contact Form and Feedback                           -->
+    <!-- ============================================================= -->
+    <div class="analytics-section">
+        <h2>Contact Form and Feedback</h2>
+        {% if unresolved_contacts > 0 %}
+        <div class="alert-box">
+            <strong>{{ unresolved_contacts }}</strong> contact submission{{ unresolved_contacts|pluralize }} still need{{ unresolved_contacts|pluralize:"s," }} a response.
+            <a href="/admin/users/contactsubmission/?status__exact=NEW" style="color:#92400e; text-decoration:underline; margin-left:8px;">View queue</a>
+        </div>
+        {% endif %}
+        <div class="chart-row">
+            <div class="chart-box">
+                <canvas id="contactCatChart"></canvas>
+            </div>
+            <div>
+                <h3 style="font-size:1rem; font-weight:600; color:#374151; margin-bottom:8px;">Status Breakdown</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr><th>Status</th><th>Count</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for status_name, count in contacts_by_status.items %}
+                        <tr>
+                            <td>
+                                <span class="status-badge {% if status_name == 'New' %}new{% elif status_name == 'In Progress' %}in-progress{% elif status_name == 'Resolved' %}resolved{% else %}closed{% endif %}">
+                                    {{ status_name }}
+                                </span>
+                            </td>
+                            <td>{{ count }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {% if recent_contacts %}
+        <h3 style="font-size:1rem; font-weight:600; color:#374151; margin:16px 0 8px;">Recent Submissions</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Subject</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in recent_contacts %}
+                <tr>
+                    <td>{{ c.created_at|date:"d M Y" }}</td>
+                    <td>{{ c.name }}</td>
+                    <td>{{ c.get_category_display }}</td>
+                    <td><a href="/admin/users/contactsubmission/{{ c.pk }}/change/" style="color:#2563eb;">{{ c.subject }}</a></td>
+                    <td>
+                        <span class="status-badge {% if c.status == 'NEW' %}new{% elif c.status == 'IN_PROGRESS' %}in-progress{% elif c.status == 'RESOLVED' %}resolved{% else %}closed{% endif %}">
+                            {{ c.get_status_display }}
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- Section 5: Verification Tracking                               -->
+    <!-- ============================================================= -->
+    <div class="analytics-section">
+        <h2>Verification Tracking</h2>
+        {% if pending_verifications > 0 %}
+        <div class="alert-box">
+            <strong>{{ pending_verifications }}</strong> verification{{ pending_verifications|pluralize }} pending admin review.
+        </div>
+        {% endif %}
+        <div class="verification-grid">
+            <div>
+                <h3 style="font-size:1rem; font-weight:600; color:#374151; margin-bottom:8px;">Scout Verifications</h3>
+                <table class="data-table">
+                    <thead><tr><th>Status</th><th>Count</th></tr></thead>
+                    <tbody>
+                        {% for status_name, count in scout_verifications.items %}
+                        <tr>
+                            <td>
+                                <span class="status-badge {% if status_name == 'Pending' %}pending{% elif status_name == 'Approved' %}approved{% elif status_name == 'Rejected' %}rejected{% else %}flagged{% endif %}">
+                                    {{ status_name }}
+                                </span>
+                            </td>
+                            <td>{{ count }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div>
+                <h3 style="font-size:1rem; font-weight:600; color:#374151; margin-bottom:8px;">Manager Verifications</h3>
+                <table class="data-table">
+                    <thead><tr><th>Status</th><th>Count</th></tr></thead>
+                    <tbody>
+                        {% for status_name, count in manager_verifications.items %}
+                        <tr>
+                            <td>
+                                <span class="status-badge {% if status_name == 'Pending' %}pending{% elif status_name == 'Approved' %}approved{% elif status_name == 'Rejected' %}rejected{% else %}flagged{% endif %}">
+                                    {{ status_name }}
+                                </span>
+                            </td>
+                            <td>{{ count }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- Section 6: Content and Feed Health                             -->
+    <!-- ============================================================= -->
+    <div class="analytics-section">
+        <h2>Content and Feed Health</h2>
+        <div class="kpi-row">
+            <div class="kpi-card">
+                <div class="kpi-value">{{ sources_with_rss }} / {{ total_club_sources }}</div>
+                <div class="kpi-label">RSS Sources Active</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value">{{ clubs_with_rss }}</div>
+                <div class="kpi-label">Clubs with RSS</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value">{{ total_news }}</div>
+                <div class="kpi-label">Total News Articles</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value">{{ news_this_month }}</div>
+                <div class="kpi-label">News This Month</div>
+            </div>
+        </div>
+        <div class="chart-row">
+            <div class="chart-box">
+                <canvas id="postTypeChart"></canvas>
+            </div>
+            <div>
+                {% if most_liked_posts %}
+                <h3 style="font-size:1rem; font-weight:600; color:#374151; margin-bottom:8px;">Most Liked Posts</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr><th>User</th><th>Type</th><th>Likes</th><th>Date</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for post in most_liked_posts %}
+                        <tr>
+                            <td>{{ post.user.username }}</td>
+                            <td>{{ post.get_post_type_display }}</td>
+                            <td>{{ post.like_count }}</td>
+                            <td>{{ post.created_at|date:"d M Y" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p style="color:#6b7280; padding:20px; text-align:center;">No liked posts yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ================================================================= -->
+<!-- Chart.js Rendering                                                 -->
+<!-- ================================================================= -->
+<script>
+(function() {
+    var COLORS = {
+        green: 'rgba(5, 150, 105, 0.8)',
+        greenLight: 'rgba(5, 150, 105, 0.15)',
+        blue: 'rgba(37, 99, 235, 0.8)',
+        purple: 'rgba(124, 58, 237, 0.8)',
+        yellow: 'rgba(217, 119, 6, 0.8)',
+        red: 'rgba(220, 38, 38, 0.8)',
+        teal: 'rgba(13, 148, 136, 0.8)',
+        gray: 'rgba(107, 114, 128, 0.8)',
+    };
+
+    var PALETTE = [
+        COLORS.green, COLORS.blue, COLORS.purple,
+        COLORS.yellow, COLORS.red, COLORS.teal, COLORS.gray,
+        'rgba(236, 72, 153, 0.8)', 'rgba(99, 102, 241, 0.8)',
+        'rgba(245, 158, 11, 0.8)', 'rgba(16, 185, 129, 0.8)',
+    ];
+
+    var defaultOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { labels: { font: { size: 12 } } }
+        }
+    };
+
+    // 1. Signup trend (line chart)
+    var signupDates = {{ signup_dates_json|safe }};
+    var signupCounts = {{ signup_counts_json|safe }};
+    new Chart(document.getElementById('signupChart'), {
+        type: 'line',
+        data: {
+            labels: signupDates,
+            datasets: [{
+                label: 'Daily Signups (Last 30 Days)',
+                data: signupCounts,
+                borderColor: COLORS.green,
+                backgroundColor: COLORS.greenLight,
+                fill: true,
+                tension: 0.3,
+                pointRadius: 2,
+            }]
+        },
+        options: Object.assign({}, defaultOptions, {
+            scales: {
+                y: { beginAtZero: true, ticks: { stepSize: 1 } }
+            }
+        })
+    });
+
+    // 2. Role breakdown (horizontal bar)
+    var roleLabels = {{ role_labels_json|safe }};
+    var roleData = {{ role_data_json|safe }};
+    new Chart(document.getElementById('roleChart'), {
+        type: 'bar',
+        data: {
+            labels: roleLabels,
+            datasets: [{
+                label: 'Users by Role',
+                data: roleData,
+                backgroundColor: PALETTE.slice(0, roleLabels.length),
+                borderRadius: 4,
+            }]
+        },
+        options: Object.assign({}, defaultOptions, {
+            indexAxis: 'y',
+            scales: {
+                x: { beginAtZero: true, ticks: { stepSize: 1 } }
+            }
+        })
+    });
+
+    // 3. Watched positions (bar chart)
+    var posLabels = {{ watched_positions_labels_json|safe }};
+    var posData = {{ watched_positions_data_json|safe }};
+    if (posLabels.length > 0) {
+        new Chart(document.getElementById('positionsChart'), {
+            type: 'bar',
+            data: {
+                labels: posLabels,
+                datasets: [{
+                    label: 'Most Watched Positions',
+                    data: posData,
+                    backgroundColor: COLORS.purple,
+                    borderRadius: 4,
+                }]
+            },
+            options: Object.assign({}, defaultOptions, {
+                scales: {
+                    y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                }
+            })
+        });
+    }
+
+    // 4. Contact categories (doughnut)
+    var catLabels = {{ contact_cat_labels_json|safe }};
+    var catData = {{ contact_cat_data_json|safe }};
+    new Chart(document.getElementById('contactCatChart'), {
+        type: 'doughnut',
+        data: {
+            labels: catLabels,
+            datasets: [{
+                data: catData,
+                backgroundColor: PALETTE.slice(0, catLabels.length),
+            }]
+        },
+        options: Object.assign({}, defaultOptions, {
+            plugins: {
+                legend: { position: 'bottom', labels: { font: { size: 12 } } }
+            }
+        })
+    });
+
+    // 5. Post types (doughnut)
+    var ptLabels = {{ post_type_labels_json|safe }};
+    var ptData = {{ post_type_data_json|safe }};
+    if (ptLabels.length > 0) {
+        new Chart(document.getElementById('postTypeChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ptLabels,
+                datasets: [{
+                    data: ptData,
+                    backgroundColor: PALETTE.slice(0, ptLabels.length),
+                }]
+            },
+            options: Object.assign({}, defaultOptions, {
+                plugins: {
+                    legend: { position: 'bottom', labels: { font: { size: 12 } } }
+                }
+            })
+        });
+    }
+})();
+</script>
+{% endblock %}

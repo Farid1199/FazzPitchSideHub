@@ -52,8 +52,8 @@ for username, new_position in position_mapping.items():
         profile = user.player_profile
         profile.position = new_position
         profile.save()
-        print(f"✅ Updated {username} to {new_position}")
+        print(f" Updated {username} to {new_position}")
     except:
-        print(f"❌ Skipped {username} (not found or no profile)")
+        print(f" Skipped {username} (not found or no profile)")
 
 print(f"\nDone! Updated {len(position_mapping)} players")

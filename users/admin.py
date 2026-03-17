@@ -2,10 +2,11 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.utils import timezone
 from .models import (
-    User, PlayerProfile, ClubProfile, ScoutProfile, 
+    User, PlayerProfile, ClubProfile, ScoutProfile,
     ManagerProfile, QualificationVerification, ClubSource, NewsItem, Opportunity, Post,
     Comment, ScoutVerification, Notification,
     Follow, FollowRequest, Conversation, Message, FanProfile, Watchlist, ClubShortlist,
+    PlayerStats, ContactSubmission,
 )
 
 # Register your models here.
@@ -20,6 +21,14 @@ class UserAdmin(admin.ModelAdmin):
 class PlayerProfileAdmin(admin.ModelAdmin):
     list_display = ['user', 'position', 'playing_level']
     search_fields = ['user__username', 'position']
+
+
+@admin.register(PlayerStats)
+class PlayerStatsAdmin(admin.ModelAdmin):
+    list_display = ['player', 'season', 'appearances', 'goals', 'assists', 'updated_at']
+    list_filter = ['season']
+    search_fields = ['player__user__username']
+    raw_id_fields = ['player']
 
 @admin.register(ClubProfile)
 class ClubProfileAdmin(admin.ModelAdmin):
@@ -901,3 +910,28 @@ class ClubShortlistAdmin(admin.ModelAdmin):
     def player_name(self, obj):
         return obj.player.user.username
     player_name.short_description = 'Player'
+
+
+# ===================================================================
+# Contact Submissions Admin
+# ===================================================================
+
+@admin.register(ContactSubmission)
+class ContactSubmissionAdmin(admin.ModelAdmin):
+    list_display = ['subject', 'name', 'category', 'status', 'created_at']
+    list_filter = ['category', 'status', 'created_at']
+    search_fields = ['name', 'email', 'subject', 'message']
+    readonly_fields = ['name', 'email', 'category', 'subject', 'message', 'user', 'created_at']
+    ordering = ['-created_at']
+    date_hierarchy = 'created_at'
+    list_per_page = 30
+
+    fieldsets = (
+        ('Submission Details', {
+            'fields': ('name', 'email', 'user', 'category', 'subject', 'message', 'created_at'),
+        }),
+        ('Admin Response', {
+            'fields': ('status', 'admin_notes'),
+            'description': 'Update the status and add internal notes as you handle this submission.',
+        }),
+    )
