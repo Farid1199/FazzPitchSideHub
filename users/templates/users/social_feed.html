@@ -4,345 +4,211 @@
 {% block title %}Social Feed - FazzPitchSideHub{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gray-50 py-8">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-gray-50 pt-6 pb-20">
+    <div class="max-w-xl mx-auto px-0 sm:px-4">
         
-        <!-- Header -->
-        <div class="mb-8">
-            <div class="flex items-center justify-between flex-wrap gap-4">
-                <div>
-                    <h1 class="text-4xl font-bold text-gray-900 mb-2 flex items-center">
-                        <i class="fas fa-stream text-green-500 mr-3"></i>
-                        Social Feed
-                    </h1>
-                    <p class="text-gray-600">See what players, managers, and scouts are sharing</p>
-                </div>
-                <a href="{% url 'create_post' %}" 
-                   class="px-6 py-3 bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white rounded-lg font-bold shadow-lg transform hover:scale-105 transition-all">
-                    <i class="fas fa-plus-circle mr-2"></i>Create Post
-                </a>
-            </div>
+        <!-- Top header/nav -->
+        <div class="flex items-center justify-between mb-2 px-4 sm:px-0">
+            <h1 class="text-2xl font-bold text-gray-900 font-sans tracking-tight" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">Fazz Feed</h1>
+            <a href="{% url 'create_post' %}" class="text-gray-900 hover:text-green-600 transition-colors">
+                <i class="far fa-plus-square text-2xl"></i>
+            </a>
         </div>
 
-        <!-- Two Column Layout -->
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            
-            <!-- Filters Sidebar -->
-            <div class="lg:col-span-1">
-                <div class="bg-white rounded-lg shadow-md p-6 sticky top-24">
-                    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                        <i class="fas fa-filter text-blue-500 mr-2"></i>Filters
-                    </h3>
-                    
-                    <form method="get" action="{% url 'social_feed' %}">
-                        <!-- Post Type Filter -->
-                        <div class="mb-4">
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Post Type</label>
-                            <select name="type" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" onchange="this.form.submit()">
-                                <option value="">All Types</option>
-                                {% for value, label in post_types %}
-                                    <option value="{{ value }}" {% if selected_type == value %}selected{% endif %}>{{ label }}</option>
-                                {% endfor %}
-                            </select>
+        <!-- Feed Toggle (For You / Following) -->
+        <div class="flex border-b border-gray-200 mb-6 bg-gray-50 px-4 sm:px-0 sticky top-16 z-10 pt-2">
+            <a href="?scope=all{% if selected_type %}&type={{ selected_type }}{% endif %}" class="flex-1 text-center py-3 text-sm font-semibold transition-colors {% if selected_scope == 'all' %}text-gray-900 border-b-[2px] border-gray-900{% else %}text-gray-500 hover:text-gray-700{% endif %}">
+                For You
+            </a>
+            <a href="?scope=following{% if selected_type %}&type={{ selected_type }}{% endif %}" class="flex-1 text-center py-3 text-sm font-semibold transition-colors {% if selected_scope == 'following' %}text-gray-900 border-b-[2px] border-gray-900{% else %}text-gray-500 hover:text-gray-700{% endif %}">
+                Following
+            </a>
+        </div>
+
+        <!-- Main Feed -->
+        <div class="space-y-6 sm:space-y-8">
+            {% if posts %}
+                {% for post in posts %}
+                    <div class="bg-white sm:rounded-lg sm:border sm:border-gray-200 sm:shadow-sm overflow-hidden">
+                        
+                        <!-- Post Header -->
+                        <div class="px-3 sm:px-4 py-3 flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <a href="#" class="w-8 h-8 rounded-full bg-gradient-to-tr from-yellow-400 to-fuchsia-600 p-[2px]">
+                                    <div class="w-full h-full bg-white rounded-full flex items-center justify-center border border-white">
+                                        <span class="text-gray-900 font-bold text-xs">{{ post.user.username|slice:":1"|upper }}</span>
+                                    </div>
+                                </a>
+                                <div>
+                                    <a href="#" class="font-semibold text-sm text-gray-900 hover:underline">{{ post.user.username }}</a>
+                                    <p class="text-[11px] text-gray-500 leading-tight">
+                                        {{ post.get_user_role }}
+                                    </p>
+                                </div>
+                                <span class="text-gray-400 text-xs font-semibold px-1">•</span>
+                                <span class="text-gray-500 text-xs">{{ post.created_at|timesince|truncatechars:9 }}</span>
+                            </div>
+                            <div>
+                                {% if post.user == user %}
+                                    <a href="{% url 'delete_post' post.pk %}" onclick="return confirm('Delete this post?')" class="text-gray-400 hover:text-red-500 px-2 transition-colors">
+                                        <i class="fas fa-trash-alt text-sm"></i>
+                                    </a>
+                                {% else %}
+                                    <!-- Placeholder for future follow/unfollow or options -->
+                                    <button class="text-gray-400 hover:text-gray-800 px-2 transition-colors"><i class="fas fa-ellipsis-h text-sm"></i></button>
+                                {% endif %}
+                            </div>
                         </div>
 
-                        <!-- Role Filter -->
-                        <div class="mb-4">
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">User Role</label>
-                            <select name="role" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" onchange="this.form.submit()">
-                                <option value="">All Roles</option>
-                                {% for value, label in user_roles %}
-                                    <option value="{{ value }}" {% if selected_role == value %}selected{% endif %}>{{ label }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
+                        <!-- Media (Edge to edge) -->
+                        {% if post.image %}
+                            <div class="w-full bg-gray-100 flex items-center justify-center overflow-hidden">
+                                <img src="{{ post.image.url }}" alt="Post image" class="w-full object-cover max-h-[600px]">
+                            </div>
+                        {% endif %}
 
-                        <a href="{% url 'social_feed' %}" class="block w-full text-center px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
-                            <i class="fas fa-redo mr-2"></i>Clear Filters
-                        </a>
-                    </form>
-
-                    <!-- Quick Links -->
-                    <div class="mt-6 pt-6 border-t border-gray-200">
-                        <h4 class="text-sm font-bold text-gray-700 mb-3">Quick Links</h4>
-                        <a href="{% url 'my_posts' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors mb-2">
-                            <i class="fas fa-user-circle mr-2"></i>My Posts
-                        </a>
-                        <a href="{% url 'dashboard' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
-                            <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Main Feed -->
-            <div class="lg:col-span-3">
-                
-                {% if posts %}
-                    <div class="space-y-6">
-                        {% for post in posts %}
-                            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
-                                
-                                <!-- Post Header -->
-                                <div class="p-6 pb-4">
-                                    <div class="flex items-start justify-between">
-                                        <div class="flex items-center space-x-3">
-                                            <div class="w-12 h-12 bg-gradient-to-r from-green-400 to-blue-400 rounded-full flex items-center justify-center">
-                                                <span class="text-white font-bold text-lg">{{ post.user.username|slice:":1"|upper }}</span>
-                                            </div>
-                                            <div>
-                                                <h3 class="font-bold text-gray-900">{{ post.user.username }}</h3>
-                                                <p class="text-sm text-gray-500">
-                                                    {{ post.get_user_role }}
-                                                    {% if post.user.role == 'PLAYER' and post.user.player_profile %}
-                                                        • {{ post.user.player_profile.get_position_display }}
-                                                    {% elif post.user.role == 'MANAGER' and post.user.manager_profile %}
-                                                        • {{ post.user.manager_profile.current_role|default:"Manager" }}
-                                                    {% elif post.user.role == 'SCOUT' and post.user.scout_profile.is_scout_public %}
-                                                        • {{ post.user.scout_profile.organization|default:"Scout" }}
-                                                    {% endif %}
-                                                </p>
-                                                <p class="text-xs text-gray-400">{{ post.created_at|timesince }} ago</p>
-                                            </div>
-                                        </div>
-                                        <div class="flex items-center space-x-2">
-                                            <span class="px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
-                                                {{ post.get_post_type_display }}
-                                            </span>
-                                            {% if post.user == user %}
-                                                <a href="{% url 'delete_post' post.pk %}" 
-                                                   onclick="return confirm('Are you sure you want to delete this post?')"
-                                                   class="text-red-500 hover:text-red-700">
-                                                    <i class="fas fa-trash"></i>
-                                                </a>
-                                            {% endif %}
-                                        </div>
-                                    </div>
+                        {% if post.youtube_url %}
+                            <div class="w-full bg-black">
+                                <div class="aspect-w-16 aspect-h-9">
+                                    {{ post.youtube_url|embed_youtube_video }}
                                 </div>
+                            </div>
+                        {% endif %}
 
-                                <!-- Post Content -->
-                                <div class="px-6 pb-4">
-                                    <p class="text-gray-800 whitespace-pre-line">{{ post.caption }}</p>
-                                </div>
-
-                                <!-- Achievement Stats -->
-                                {% if post.goals or post.assists or post.clean_sheets or post.match_rating %}
-                                    <div class="px-6 pb-4">
-                                        <div class="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-4 border border-green-200">
-                                            <h4 class="text-sm font-bold text-gray-700 mb-3 flex items-center">
-                                                <i class="fas fa-chart-bar text-green-600 mr-2"></i>Match Stats
-                                            </h4>
-                                            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                                {% if post.goals %}
-                                                    <div class="text-center">
-                                                        <div class="text-2xl font-bold text-green-600">{{ post.goals }}</div>
-                                                        <div class="text-xs text-gray-600">Goals</div>
-                                                    </div>
-                                                {% endif %}
-                                                {% if post.assists %}
-                                                    <div class="text-center">
-                                                        <div class="text-2xl font-bold text-blue-600">{{ post.assists }}</div>
-                                                        <div class="text-xs text-gray-600">Assists</div>
-                                                    </div>
-                                                {% endif %}
-                                                {% if post.clean_sheets %}
-                                                    <div class="text-center">
-                                                        <div class="text-2xl font-bold text-yellow-600">{{ post.clean_sheets }}</div>
-                                                        <div class="text-xs text-gray-600">Clean Sheets</div>
-                                                    </div>
-                                                {% endif %}
-                                                {% if post.match_rating %}
-                                                    <div class="text-center">
-                                                        <div class="text-2xl font-bold text-purple-600">{{ post.match_rating }}</div>
-                                                        <div class="text-xs text-gray-600">Rating</div>
-                                                    </div>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                    </div>
-                                {% endif %}
-
-                                <!-- Match Details -->
-                                {% if post.match_opponent or post.match_result %}
-                                    <div class="px-6 pb-4">
-                                        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                                            <h4 class="text-sm font-bold text-gray-700 mb-2 flex items-center">
-                                                <i class="fas fa-futbol text-green-600 mr-2"></i>Match Details
-                                            </h4>
-                                            <div class="text-sm text-gray-700 space-y-1">
-                                                {% if post.match_opponent %}
-                                                    <p><strong>Opponent:</strong> {{ post.match_opponent }}</p>
-                                                {% endif %}
-                                                {% if post.match_result %}
-                                                    <p><strong>Result:</strong> {{ post.match_result }}</p>
-                                                {% endif %}
-                                                {% if post.competition %}
-                                                    <p><strong>Competition:</strong> {{ post.competition }}</p>
-                                                {% endif %}
-                                                {% if post.match_date %}
-                                                    <p><strong>Date:</strong> {{ post.match_date|date:"M d, Y" }}</p>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                    </div>
-                                {% endif %}
-
-                                <!-- Award/Milestone -->
-                                {% if post.award_title %}
-                                    <div class="px-6 pb-4">
-                                        <div class="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg p-4 border border-yellow-200">
-                                            <div class="flex items-start">
-                                                <i class="fas fa-award text-yellow-600 text-2xl mr-3 mt-1"></i>
-                                                <div>
-                                                    <h4 class="font-bold text-gray-900">{{ post.award_title }}</h4>
-                                                    {% if post.award_description %}
-                                                        <p class="text-sm text-gray-600 mt-1">{{ post.award_description }}</p>
-                                                    {% endif %}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                {% endif %}
-
-                                <!-- Media -->
-                                {% if post.image %}
-                                    <div class="px-6 pb-4">
-                                        <img src="{{ post.image.url }}" alt="Post image" class="w-full rounded-lg">
-                                    </div>
-                                {% endif %}
-
-                                {% if post.youtube_url %}
-                                    <div class="px-6 pb-4">
-                                        <div class="aspect-w-16 aspect-h-9 bg-black rounded-lg overflow-hidden">
-                                            {{ post.youtube_url|embed_youtube_video }}
-                                        </div>
-                                    </div>
-                                {% endif %}
-
-                                <!-- Like and Comment Bar -->
-                                <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-                                    <div class="flex items-center space-x-5">
-                                        {% if user.is_authenticated %}
-                                        <button onclick="likePost({{ post.pk }})" 
-                                                class="flex items-center space-x-2 text-gray-600 hover:text-green-600 transition-colors"
-                                                id="likeBtn_{{ post.pk }}">
-                                            <i class="{% if user in post.likes.all %}fas text-green-600{% else %}far{% endif %} fa-heart fa-lg" 
-                                               id="likeIcon_{{ post.pk }}"></i>
-                                            <span id="likeCount_{{ post.pk }}" class="font-semibold">{{ post.total_likes }}</span>
-                                        </button>
-                                        <button onclick="toggleComments({{ post.pk }})" 
-                                                class="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors">
-                                            <i class="far fa-comment fa-lg"></i>
-                                            <span id="commentCount_{{ post.pk }}" class="font-semibold">{{ post.total_comments }}</span>
-                                        </button>
-                                        {% else %}
-                                        <div class="flex items-center space-x-2 text-gray-400">
-                                            <i class="far fa-heart fa-lg"></i>
-                                            <span class="font-semibold">{{ post.total_likes }}</span>
-                                        </div>
-                                        <div class="flex items-center space-x-2 text-gray-400">
-                                            <i class="far fa-comment fa-lg"></i>
-                                            <span class="font-semibold">{{ post.total_comments }}</span>
-                                        </div>
-                                        <a href="{% url 'login' %}?next={{ request.path }}" class="text-xs text-blue-600 hover:underline ml-2">
-                                            <i class="fas fa-sign-in-alt mr-1"></i>Sign in to interact
-                                        </a>
-                                        {% endif %}
-                                    </div>
-                                    <div class="text-sm text-gray-500">
-                                        {% if post.minutes_played %}
-                                            <i class="fas fa-clock mr-1"></i>{{ post.minutes_played }} mins played
-                                        {% endif %}
-                                    </div>
-                                </div>
-
-                                <!-- Comments Section -->
-                                <div id="commentsSection_{{ post.pk }}" class="hidden border-t border-gray-200">
-                                    <div id="commentsList_{{ post.pk }}" class="px-6 py-3 space-y-3 max-h-64 overflow-y-auto">
-                                        {% for comment in post.comments.all %}
-                                        <div class="flex items-start space-x-3 group" id="comment_{{ comment.id }}">
-                                            <div class="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                                                <span class="text-green-700 text-xs font-bold">{{ comment.user.username|make_list|first|upper }}</span>
-                                            </div>
-                                            <div class="flex-1 min-w-0">
-                                                <div class="flex items-center space-x-2">
-                                                    <span class="text-sm font-semibold text-gray-800">{{ comment.user.username }}</span>
-                                                    <span class="text-xs text-gray-400">{{ comment.created_at|timesince }} ago</span>
-                                                    {% if comment.user == user or post.user == user %}
-                                                    <button onclick="deleteComment({{ comment.id }}, {{ post.pk }})" 
-                                                            class="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 transition-all ml-auto"
-                                                            title="Delete comment">
-                                                        <i class="fas fa-trash-alt text-xs"></i>
-                                                    </button>
-                                                    {% endif %}
-                                                </div>
-                                                <p class="text-sm text-gray-700 mt-0.5 break-words">{{ comment.body }}</p>
-                                            </div>
-                                        </div>
-                                        {% empty %}
-                                        <p class="text-sm text-gray-400 italic" id="noComments_{{ post.pk }}">No comments yet. Be the first!</p>
-                                        {% endfor %}
-                                    </div>
+                        <!-- Stats/Details block -->
+                        <div class="px-3 sm:px-4 {% if not post.image and not post.youtube_url %}pt-3{% else %}pt-2{% endif %}">
+                            
+                            <!-- Action Bar -->
+                            <div class="flex items-center justify-between py-1">
+                                <div class="flex items-center space-x-4">
                                     {% if user.is_authenticated %}
-                                    <div class="px-6 py-3 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
-                                        <form onsubmit="addComment(event, {{ post.pk }})" class="flex items-center space-x-3">
-                                            <input type="text" id="commentInput_{{ post.pk }}" 
-                                                   placeholder="Write a comment..." maxlength="500"
-                                                   class="flex-1 text-sm border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                                            <button type="submit" 
-                                                    class="bg-green-600 text-white rounded-full px-4 py-2 text-sm font-semibold hover:bg-green-700 transition-colors">
-                                                Post
-                                            </button>
-                                        </form>
-                                    </div>
+                                        <button onclick="likePost({{ post.pk }})" id="likeBtn_{{ post.pk }}" class="group">
+                                            <i class="{% if user in post.likes.all %}fas text-red-500 scale-110{% else %}far text-gray-900 hover:text-gray-500{% endif %} fa-heart text-2xl transition-transform" id="likeIcon_{{ post.pk }}"></i>
+                                        </button>
+                                        <button onclick="toggleComments({{ post.pk }})" class="group">
+                                            <i class="far fa-comment text-gray-900 text-2xl transition-transform hover:scale-105 hover:text-gray-500"></i>
+                                        </button>
+                                        <button class="group">
+                                            <i class="far fa-paper-plane text-gray-900 text-2xl transition-transform hover:scale-105 hover:text-gray-500"></i>
+                                        </button>
+                                    {% else %}
+                                        <a href="{% url 'login' %}"><i class="far fa-heart text-gray-900 text-2xl hover:text-gray-500 transition-colors"></i></a>
+                                        <a href="{% url 'login' %}"><i class="far fa-comment text-gray-900 text-2xl hover:text-gray-500 transition-colors"></i></a>
                                     {% endif %}
                                 </div>
-
+                                <div class="text-gray-900">
+                                    <i class="far fa-bookmark text-2xl"></i>
+                                </div>
                             </div>
-                        {% endfor %}
-                    </div>
 
-                    <!-- Pagination -->
-                    {% if posts.has_other_pages %}
-                        <div class="mt-8 flex justify-center">
-                            <nav class="flex items-center space-x-2">
-                                {% if posts.has_previous %}
-                                    <a href="?page={{ posts.previous_page_number }}{% if selected_type %}&type={{ selected_type }}{% endif %}{% if selected_role %}&role={{ selected_role }}{% endif %}" 
-                                       class="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                                        <i class="fas fa-chevron-left"></i>
-                                    </a>
-                                {% endif %}
-                                
-                                <span class="px-4 py-2 bg-green-500 text-white rounded-lg font-semibold">
-                                    Page {{ posts.number }} of {{ posts.paginator.num_pages }}
-                                </span>
-                                
-                                {% if posts.has_next %}
-                                    <a href="?page={{ posts.next_page_number }}{% if selected_type %}&type={{ selected_type }}{% endif %}{% if selected_role %}&role={{ selected_role }}{% endif %}" 
-                                       class="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                                        <i class="fas fa-chevron-right"></i>
-                                    </a>
-                                {% endif %}
-                            </nav>
+                            <!-- Likes Count -->
+                            <div class="font-semibold text-sm text-gray-900 mb-1 mt-1">
+                                <span id="likeCount_{{ post.pk }}">{{ post.total_likes }}</span> likes
+                            </div>
+
+                            <!-- Caption -->
+                            <div class="text-sm text-gray-900 mb-1">
+                                <span class="font-semibold mr-1">{{ post.user.username }}</span>
+                                <span class="whitespace-pre-line">{{ post.caption }}</span>
+                            </div>
+
+                            <!-- Match Stats / Specialized Content -->
+                            {% if post.goals or post.assists or post.clean_sheets or post.match_rating or post.match_opponent or post.award_title %}
+                                <div class="bg-gray-50 rounded px-3 py-2 mb-2 mt-2 text-xs text-gray-700 border border-gray-100 shadow-sm inline-block w-auto">
+                                    {% if post.match_opponent %}
+                                        <div class="font-semibold mb-1"><i class="fas fa-futbol text-green-600 mr-1"></i> Vs {{ post.match_opponent }} {% if post.match_result %}({{ post.match_result }}){% endif %}</div>
+                                    {% endif %}
+                                    <div class="flex flex-wrap gap-3">
+                                        {% if post.goals %}<span title="Goals"><i class="fas fa-bullseye text-blue-500"></i> {{ post.goals }} G</span>{% endif %}
+                                        {% if post.assists %}<span title="Assists"><i class="fas fa-hands-helping text-yellow-500"></i> {{ post.assists }} A</span>{% endif %}
+                                        {% if post.clean_sheets %}<span title="Clean Sheets"><i class="fas fa-shield-alt text-gray-500"></i> {{ post.clean_sheets }} CS</span>{% endif %}
+                                        {% if post.match_rating %}<span title="Match Rating"><i class="fas fa-star text-yellow-500"></i> {{ post.match_rating }}</span>{% endif %}
+                                        {% if post.minutes_played %}<span title="Minutes Played"><i class="far fa-clock text-gray-500"></i> {{ post.minutes_played }}'</span>{% endif %}
+                                    </div>
+                                    {% if post.award_title %}
+                                        <div class="mt-1 text-yellow-600 font-semibold"><i class="fas fa-award mr-1"></i> {{ post.award_title }}</div>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                            
+                            <!-- View All Comments -->
+                            {% if post.total_comments > 0 %}
+                                <button onclick="toggleComments({{ post.pk }})" class="text-sm text-gray-500 mb-1 hover:underline text-left cursor-pointer" style="outline:none;">
+                                    View all <span id="commentCount_{{ post.pk }}">{{ post.total_comments }}</span> comments
+                                </button>
+                            {% else %}
+                                <span id="commentCount_{{ post.pk }}" class="hidden">0</span>
+                            {% endif %}
+                            
+                            <!-- Comments Section (Hidden by default) -->
+                            <div id="commentsSection_{{ post.pk }}" class="hidden mb-2 max-h-48 overflow-y-auto pr-1">
+                                <div id="commentsList_{{ post.pk }}" class="space-y-1">
+                                    {% for comment in post.comments.all reversed %}
+                                        <div class="text-sm group flex items-start justify-between" id="comment_{{ comment.id }}">
+                                            <div class="text-gray-900 leading-tight">
+                                                <span class="font-semibold mr-1">{{ comment.user.username }}</span>
+                                                <span class="">{{ comment.body }}</span>
+                                            </div>
+                                            {% if comment.user == user or post.user == user %}
+                                                <button onclick="deleteComment({{ comment.id }}, {{ post.pk }})" class="text-gray-300 hover:text-red-500 ml-2 px-1 flex-shrink-0">
+                                                    <i class="fas fa-times text-xs"></i>
+                                                </button>
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                    <p id="noComments_{{ post.pk }}" class="{% if post.comments.all %}hidden{% endif %} text-sm text-gray-400">No comments yet.</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Time ago -->
+                            <div class="text-[10px] text-gray-500 uppercase tracking-wide mb-3 sm:mb-4">
+                                {{ post.created_at|timesince }} ago
+                            </div>
+
+                            <!-- Add Comment Input -->
+                            {% if user.is_authenticated %}
+                                <div class="border-t border-gray-100 py-3 mx-[-12px] sm:mx-[-16px] px-3 sm:px-4">
+                                    <form onsubmit="addComment(event, {{ post.pk }})" class="flex items-center">
+                                        <i class="far fa-smile text-gray-400 text-xl mr-3 hover:text-gray-600 transition-colors"></i>
+                                        <input type="text" id="commentInput_{{ post.pk }}" placeholder="Add a comment..." class="flex-1 bg-transparent border-none text-sm focus:ring-0 p-0 shadow-none text-gray-900" autocomplete="off" style="box-shadow: none;">
+                                        <button type="submit" class="text-blue-500 text-sm font-semibold opacity-80 hover:opacity-100 ml-2 transition-opacity">Post</button>
+                                    </form>
+                                </div>
+                            {% endif %}
                         </div>
-                    {% endif %}
+                    </div>
+                {% endfor %}
 
-                {% else %}
-                    <div class="bg-white rounded-lg shadow-md p-12 text-center">
-                        <i class="fas fa-comments text-gray-300 text-6xl mb-4"></i>
-                        <h3 class="text-2xl font-bold text-gray-900 mb-2">No Posts Yet</h3>
-                        <p class="text-gray-600 mb-6">Be the first to share your football journey!</p>
-                        <a href="{% url 'create_post' %}" 
-                           class="inline-block px-6 py-3 bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-lg font-bold hover:from-green-600 hover:to-blue-600 transition-all">
-                            <i class="fas fa-plus-circle mr-2"></i>Create Your First Post
-                        </a>
+                <!-- Pagination -->
+                {% if posts.has_other_pages %}
+                    <div class="py-6 flex justify-center">
+                        <nav class="flex space-x-4 border-t border-gray-200 pt-4 w-full">
+                            {% if posts.has_previous %}
+                                <a href="?page={{ posts.previous_page_number }}{% if selected_scope %}&scope={{ selected_scope }}{% endif %}" class="flex-1 text-center font-semibold text-sm text-gray-700 hover:text-gray-900">Prev</a>
+                            {% endif %}
+                            {% if posts.has_next %}
+                                <a href="?page={{ posts.next_page_number }}{% if selected_scope %}&scope={{ selected_scope }}{% endif %}" class="flex-1 text-center font-semibold text-sm text-gray-700 hover:text-gray-900">Next</a>
+                            {% endif %}
+                        </nav>
                     </div>
                 {% endif %}
 
-            </div>
-
+            {% else %}
+                <div class="flex flex-col items-center justify-center py-20 bg-white sm:border border-gray-200 sm:rounded-lg shadow-sm">
+                    <div class="w-24 h-24 border-2 border-gray-900 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-camera text-4xl text-gray-900"></i>
+                    </div>
+                    {% if selected_scope == 'following' %}
+                        <h2 class="text-2xl font-semibold mb-2 text-gray-900">No Posts Yet</h2>
+                        <p class="text-gray-500 mb-6 text-center max-w-xs">Follow more people to see their posts and updates in your feed.</p>
+                    {% else %}
+                        <h2 class="text-2xl font-semibold mb-2 text-gray-900">No Posts Yet</h2>
+                        <p class="text-gray-500 mb-6 text-center max-w-xs">Be the first to share a post with the community.</p>
+                    {% endif %}
+                    <a href="{% url 'create_post' %}" class="text-blue-500 font-semibold text-sm hover:text-blue-700">Share your first post</a>
+                </div>
+            {% endif %}
         </div>
-
     </div>
 </div>
 
@@ -369,14 +235,18 @@
                 const likeCount = document.getElementById(`likeCount_${postId}`);
                 
                 if (data.liked) {
-                    likeIcon.classList.remove('far');
-                    likeIcon.classList.add('fas', 'text-green-600');
+                    likeIcon.classList.remove('far', 'text-gray-900');
+                    likeIcon.classList.add('fas', 'text-red-500');
                 } else {
-                    likeIcon.classList.remove('fas', 'text-green-600');
-                    likeIcon.classList.add('far');
+                    likeIcon.classList.remove('fas', 'text-red-500');
+                    likeIcon.classList.add('far', 'text-gray-900');
                 }
                 
                 likeCount.textContent = data.total_likes;
+                
+                // Add tiny animation class (optional)
+                likeIcon.classList.add('scale-125');
+                setTimeout(() => likeIcon.classList.remove('scale-125'), 150);
             }
         })
         .catch(error => console.error('Error:', error));
@@ -415,33 +285,29 @@
             if (data.success) {
                 const list = document.getElementById(`commentsList_${postId}`);
                 const noComments = document.getElementById(`noComments_${postId}`);
-                if (noComments) noComments.remove();
+                if (noComments) noComments.classList.add('hidden');
 
                 const c = data.comment;
-                const initial = c.username.charAt(0).toUpperCase();
                 const deleteBtn = c.can_delete 
-                    ? `<button onclick="deleteComment(${c.id}, ${postId})" class="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 transition-all ml-auto" title="Delete comment"><i class="fas fa-trash-alt text-xs"></i></button>`
+                    ? `<button type="button" onclick="deleteComment(${c.id}, ${postId})" class="text-gray-300 hover:text-red-500 ml-2 px-1 flex-shrink-0"><i class="fas fa-times text-xs"></i></button>`
                     : '';
 
                 const commentHtml = `
-                    <div class="flex items-start space-x-3 group" id="comment_${c.id}">
-                        <div class="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                            <span class="text-green-700 text-xs font-bold">${initial}</span>
+                    <div class="text-sm group flex items-start justify-between" id="comment_${c.id}">
+                        <div class="text-gray-900 leading-tight">
+                            <span class="font-semibold mr-1">${c.username}</span>
+                            <span>${c.body}</span>
                         </div>
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center space-x-2">
-                                <span class="text-sm font-semibold text-gray-800">${c.username}</span>
-                                <span class="text-xs text-gray-400">${c.created_at}</span>
-                                ${deleteBtn}
-                            </div>
-                            <p class="text-sm text-gray-700 mt-0.5 break-words">${c.body}</p>
-                        </div>
+                        ${deleteBtn}
                     </div>`;
-                list.insertAdjacentHTML('beforeend', commentHtml);
+                list.insertAdjacentHTML('afterbegin', commentHtml);
 
                 document.getElementById(`commentCount_${postId}`).textContent = data.total_comments;
                 input.value = '';
-                list.scrollTop = list.scrollHeight;
+                
+                // Ensure section is visible
+                const section = document.getElementById(`commentsSection_${postId}`);
+                section.classList.remove('hidden');
             } else {
                 alert(data.error || 'Failed to add comment.');
             }
@@ -463,16 +329,18 @@
             if (data.success) {
                 const el = document.getElementById(`comment_${commentId}`);
                 if (el) el.remove();
-                document.getElementById(`commentCount_${postId}`).textContent = data.total_comments;
+                
+                const countEl = document.getElementById(`commentCount_${postId}`);
+                if (countEl) countEl.textContent = data.total_comments;
 
                 const list = document.getElementById(`commentsList_${postId}`);
-                if (list && list.children.length === 0) {
-                    list.innerHTML = '<p class="text-sm text-gray-400 italic" id="noComments_' + postId + '">No comments yet. Be the first!</p>';
+                if (list && list.children.length <= 1) {
+                    const noComments = document.getElementById(`noComments_${postId}`);
+                    if (noComments) noComments.classList.remove('hidden');
                 }
             }
         })
         .catch(error => console.error('Error:', error));
     }
 </script>
-
 {% endblock %}

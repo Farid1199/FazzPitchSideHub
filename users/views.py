@@ -1202,10 +1202,48 @@ def create_post(request):
 @login_required
 def social_feed(request):
     """
-    Redirect to unified user feeds.
-    This view is kept for backwards compatibility.
+    Dedicated in-app social timeline.
+    Shows only posts created by registered application users.
+    Supports filtering by post type, role, and feed scope (all/following).
     """
-    return redirect('feeds')
+    post_type_filter = request.GET.get('type', '')
+    role_filter = request.GET.get('role', '')
+    feed_scope = request.GET.get('scope', 'all')
+    page_number = request.GET.get('page', 1)
+
+    posts = Post.objects.select_related('user').prefetch_related(
+        'likes', 'comments', 'comments__user'
+    )
+
+    if post_type_filter:
+        posts = posts.filter(post_type=post_type_filter)
+
+    if role_filter:
+        posts = posts.filter(user__role=role_filter)
+
+    if feed_scope == 'following':
+        followed_user_ids = list(
+            Follow.objects.filter(follower=request.user).values_list('following_id', flat=True)
+        )
+        visible_user_ids = followed_user_ids + [request.user.id]
+        posts = posts.filter(user_id__in=visible_user_ids)
+
+    paginator = Paginator(posts, 10)
+    posts_page = paginator.get_page(page_number)
+
+    # Keep social filters aligned with available user roles and post types.
+    post_types = Post.POST_TYPE_CHOICES
+    user_roles = User.ROLE_CHOICES
+
+    context = {
+        'posts': posts_page,
+        'post_types': post_types,
+        'user_roles': user_roles,
+        'selected_type': post_type_filter,
+        'selected_role': role_filter,
+        'selected_scope': feed_scope,
+    }
+    return render(request, 'users/social_feed.html', context)
 
 
 @login_required
