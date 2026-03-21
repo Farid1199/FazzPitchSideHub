@@ -496,6 +496,7 @@ class OpportunityAdmin(admin.ModelAdmin):
 class PostAdmin(admin.ModelAdmin):
     list_display = ['user', 'post_type', 'caption_preview', 'total_likes', 'created_at']
     list_filter = ['post_type', 'created_at', 'user__role']
+    date_hierarchy = 'created_at'
     search_fields = ['user__username', 'caption', 'award_title']
     readonly_fields = ['created_at', 'updated_at', 'total_likes']
     filter_horizontal = ['likes']
@@ -543,6 +544,7 @@ class PostAdmin(admin.ModelAdmin):
 class CommentAdmin(admin.ModelAdmin):
     list_display = ['user', 'post', 'body_preview', 'created_at']
     list_filter = ['created_at']
+    date_hierarchy = 'created_at'
     search_fields = ['user__username', 'body', 'post__caption']
     readonly_fields = ['created_at']
     raw_id_fields = ['user', 'post']
@@ -802,7 +804,6 @@ class NotificationAdmin(admin.ModelAdmin):
     search_fields = ['user__username', 'message']
     ordering = ['-created_at']
     readonly_fields = ['created_at']
-
     def short_message(self, obj):
         return obj.message[:80] + '...' if len(obj.message) > 80 else obj.message
     short_message.short_description = 'Message'

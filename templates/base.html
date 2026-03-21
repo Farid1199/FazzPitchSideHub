@@ -59,9 +59,7 @@
 
             <!-- LEFT ZONE: Brand -->
             <a href="{% url 'home' %}" class="fb-nav-brand" aria-label="Fazz PitchSide Hub Home">
-                <div class="fb-nav-brand-icon">
-                    <i class="fas fa-futbol" aria-hidden="true"></i>
-                </div>
+                <img src="{% static 'images/logo.png' %}" alt="Fazz PitchSide Logo" style="height: 40px; width: 40px; border-radius: 50%; object-fit: cover; margin-right: 8px; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
                 <span class="fb-nav-brand-text">FazzPitchSide</span>
             </a>
 
@@ -202,33 +200,47 @@
         {% if is_feeds_page %}
         <div class="bg-gray-50 border-t border-b border-gray-200" style="position:sticky; top:56px; z-index:40;">
             <div style="max-width:1400px; margin:0 auto; padding:0 1rem;">
-                <div class="hidden md:flex md:items-center md:space-x-8 h-10">
+                <div class="hidden md:flex md:items-center md:space-x-6 h-12 overflow-x-auto whitespace-nowrap custom-scrollbar">
                     <a href="{% url 'feeds' %}"
-                        class="{% if not current_category %}text-[#1E5631] border-b-2 border-[#1E5631] font-bold{% else %}text-gray-600 hover:text-[#1E5631]{% endif %} text-sm transition duration-200 py-2">
+                        class="{% if not current_category %}text-[#1E5631] border-b-2 border-[#1E5631] font-bold{% else %}text-gray-600 hover:text-[#1E5631]{% endif %} text-sm transition duration-200 py-2 px-1">
                         All Feeds
                     </a>
+                    
+                    <!-- App user feeds -->
+                    <a href="{% url 'social_feed' %}?scope=all"
+                        class="{% if current_category == 'social_all' %}text-[#1E5631] border-b-2 border-[#1E5631] font-bold{% else %}text-gray-600 hover:text-[#1E5631]{% endif %} text-sm transition duration-200 py-2 px-1">
+                        Community Posts
+                    </a>
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'social_feed' %}?scope=following"
+                        class="{% if current_category == 'social_following' %}text-[#1E5631] border-b-2 border-[#1E5631] font-bold{% else %}text-gray-600 hover:text-[#1E5631]{% endif %} text-sm transition duration-200 py-2 px-1">
+                        Following
+                    </a>
+                    {% endif %}
+                    
+                    <span class="text-gray-300">|</span>
+
                     <a href="{% url 'feeds_trial' %}"
-                        class="{% if current_category == 'trial' %}text-[#1E5631] border-b-2 border-[#1E5631] font-bold{% else %}text-gray-600 hover:text-[#1E5631]{% endif %} text-sm transition duration-200 py-2">
-                        Trial News ({{ category_counts.trial }})
+                        class="{% if current_category == 'trial' %}text-[#1E5631] border-b-2 border-[#1E5631] font-bold{% else %}text-gray-600 hover:text-[#1E5631]{% endif %} text-sm transition duration-200 py-2 px-1">
+                        Trial News ({{ category_counts.trial|default:0 }})
                     </a>
                     {% if category_counts.recruitment_signal > 0 %}
                     <a href="{% url 'feeds_signals' %}"
-                        class="{% if current_category == 'recruitment_signal' %}text-[#1E5631] border-b-2 border-[#1E5631] font-bold{% else %}text-gray-600 hover:text-[#1E5631]{% endif %} text-sm transition duration-200 py-2">
-                        <i class="fas fa-brain text-xs mr-1"></i>Recruitment Signals ({{
-                        category_counts.recruitment_signal }})
+                        class="{% if current_category == 'recruitment_signal' %}text-[#1E5631] border-b-2 border-[#1E5631] font-bold{% else %}text-gray-600 hover:text-[#1E5631]{% endif %} text-sm transition duration-200 py-2 px-1">
+                        <i class="fas fa-brain text-xs mr-1"></i>Signals ({{ category_counts.recruitment_signal|default:0 }})
                     </a>
                     {% endif %}
                     <a href="{% url 'feeds_transfer' %}"
-                        class="{% if current_category == 'transfer' %}text-[#1E5631] border-b-2 border-[#1E5631] font-bold{% else %}text-gray-600 hover:text-[#1E5631]{% endif %} text-sm transition duration-200 py-2">
-                        Transfer News ({{ category_counts.transfer }})
+                        class="{% if current_category == 'transfer' %}text-[#1E5631] border-b-2 border-[#1E5631] font-bold{% else %}text-gray-600 hover:text-[#1E5631]{% endif %} text-sm transition duration-200 py-2 px-1">
+                        Transfer News ({{ category_counts.transfer|default:0 }})
                     </a>
                     <a href="{% url 'feeds_match' %}"
-                        class="{% if current_category == 'match' %}text-[#1E5631] border-b-2 border-[#1E5631] font-bold{% else %}text-gray-600 hover:text-[#1E5631]{% endif %} text-sm transition duration-200 py-2">
-                        Match Reports ({{ category_counts.match }})
+                        class="{% if current_category == 'match' %}text-[#1E5631] border-b-2 border-[#1E5631] font-bold{% else %}text-gray-600 hover:text-[#1E5631]{% endif %} text-sm transition duration-200 py-2 px-1">
+                        Match Reports ({{ category_counts.match|default:0 }})
                     </a>
                     <a href="{% url 'feeds_general' %}"
-                        class="{% if current_category == 'general' %}text-[#1E5631] border-b-2 border-[#1E5631] font-bold{% else %}text-gray-600 hover:text-[#1E5631]{% endif %} text-sm transition duration-200 py-2">
-                        General News ({{ category_counts.general }})
+                        class="{% if current_category == 'general' %}text-[#1E5631] border-b-2 border-[#1E5631] font-bold{% else %}text-gray-600 hover:text-[#1E5631]{% endif %} text-sm transition duration-200 py-2 px-1">
+                        General News ({{ category_counts.general|default:0 }})
                     </a>
                 </div>
             </div>

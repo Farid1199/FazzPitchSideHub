@@ -234,15 +234,29 @@
                         </div>
                     {% endif %}
                 </div>
+                
+                <!-- Timeline Section -->
+                {% if posts %}
+                <div class="mt-8 border-t border-gray-200 pt-8">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center"><i class="fas fa-stream mr-2 text-[#1E5631]"></i> Timeline</h2>
+                    <div class="space-y-6 max-w-2xl">
+                        {% for post in posts %}
+                            {% include 'users/partials/fazz_post_card.html' with post=post %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
 </div>
 
 <style>
-    .aspect-video {
-        aspect-ratio: 16 / 9;
-    }
+    .aspect-video { aspect-ratio: 16 / 9; }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #D1D5DB; border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: #9CA3AF; }
 </style>
 
 {% if user.is_authenticated and user != player_user %}
@@ -320,4 +334,133 @@ function toggleShortlist() {
 }
 </script>
 {% endif %}
+
+<!-- Shared Post Interaction Logic for the Timeline -->
+<script>
+    function likePost(postId) {
+        fetch(`/posts/${postId}/like/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' },
+        })
+        .then(response => {
+            if (response.redirected || response.status === 403) {
+                window.location.href = '{% url "login" %}?next=' + window.location.pathname;
+                return null;
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (!data) return;
+            if (data.success) {
+                const likeIcon = document.getElementById(`likeIcon_${postId}`);
+                const likeCount = document.getElementById(`likeCount_${postId}`);
+                
+                if (data.liked) {
+                    likeIcon.classList.remove('far', 'text-gray-500');
+                    likeIcon.classList.add('fas', 'text-[#1E5631]', 'scale-125');
+                    likeCount.classList.add('text-[#1E5631]');
+                } else {
+                    likeIcon.classList.remove('fas', 'text-[#1E5631]', 'scale-125');
+                    likeIcon.classList.add('far');
+                    likeCount.classList.remove('text-[#1E5631]');
+                }
+                
+                likeCount.textContent = data.total_likes;
+                setTimeout(() => likeIcon.classList.remove('scale-125'), 200);
+            }
+        }).catch(error => console.error('Error:', error));
+    }
+
+    function toggleComments(postId) {
+        const section = document.getElementById(`commentsSection_${postId}`);
+        if(section.classList.contains('hidden')){
+            section.classList.remove('hidden');
+        } else {
+            section.classList.add('hidden');
+        }
+    }
+
+    function addComment(event, postId) {
+        event.preventDefault();
+        const input = document.getElementById(`commentInput_${postId}`);
+        const body = input.value.trim();
+        if (!body) return;
+
+        const formData = new FormData();
+        formData.append('body', body);
+
+        fetch(`/posts/${postId}/comment/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+            body: formData
+        })
+        .then(response => {
+            if (response.redirected || response.status === 403) {
+                window.location.href = '{% url "login" %}?next=' + window.location.pathname;
+                return null;
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (!data) return;
+            if (data.success) {
+                const list = document.getElementById(`commentsList_${postId}`);
+                const noComments = document.getElementById(`noComments_${postId}`);
+                if (noComments) noComments.classList.add('hidden');
+
+                const c = data.comment;
+                const initial = c.username.charAt(0).toUpperCase();
+
+                const deleteBtn = c.can_delete 
+                    ? `<button type="button" onclick="deleteComment(${c.id}, ${postId})" class="text-gray-300 hover:text-red-500 transition-colors"><i class="fas fa-times text-xs"></i></button>`
+                    : '';
+
+                const commentHtml = `
+                    <div class="group flex items-start space-x-2" id="comment_${c.id}">
+                        <a href="javascript:void(0)" class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
+                            ${initial}
+                        </a>
+                        <div class="flex-1 bg-white border border-gray-200 rounded-2xl rounded-tl-sm px-3 py-2 shadow-sm text-sm">
+                            <div class="flex justify-between items-start">
+                                <a href="javascript:void(0)" class="font-bold text-gray-900 hover:underline">${c.username}</a>
+                                ${deleteBtn}
+                            </div>
+                            <div class="text-gray-800 mt-0.5 whitespace-pre-wrap">${c.body}</div>
+                        </div>
+                    </div>`;
+                    
+                list.insertAdjacentHTML('beforeend', commentHtml);
+                document.getElementById(`commentCount_${postId}`).textContent = data.total_comments;
+                input.value = '';
+                list.scrollTop = list.scrollHeight;
+            } else {
+                alert(data.error || 'Failed to add comment.');
+            }
+        }).catch(error => console.error('Error:', error));
+    }
+
+    function deleteComment(commentId, postId) {
+        if (!confirm('Delete this comment?')) return;
+        fetch(`/comments/${commentId}/delete/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const el = document.getElementById(`comment_${commentId}`);
+                if (el) el.remove();
+                
+                const countEl = document.getElementById(`commentCount_${postId}`);
+                if (countEl) countEl.textContent = data.total_comments;
+
+                const list = document.getElementById(`commentsList_${postId}`);
+                if (list && list.children.length <= 1) {
+                    const noComments = document.getElementById(`noComments_${postId}`);
+                    if (noComments) noComments.classList.remove('hidden');
+                }
+            }
+        }).catch(error => console.error('Error:', error));
+    }
+</script>
 {% endblock %}

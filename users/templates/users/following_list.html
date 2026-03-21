@@ -1,44 +1,120 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ profile_user.username }}'s Following - FazzPitchSideHub{% endblock %}
+{% block title %}Following - FazzPitchSideHub{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-3xl mx-auto">
-        <div class="bg-white rounded-lg shadow-xl p-8">
-            <h1 class="text-2xl font-bold text-gray-900 mb-6">
-                <i class="fas fa-user-friends mr-2 text-green-600"></i>
-                {{ profile_user.username }} is Following
-            </h1>
+<div class="min-h-screen bg-gray-100 flex items-start justify-center pt-6 pb-12 px-4 shadow-inner font-sans">
+    <div class="w-full max-w-xl bg-white border border-gray-200 sm:rounded-2xl shadow-sm overflow-hidden flex flex-col" style="max-height: 85vh;">
+        
+        <!-- Fazz-Style Top Header -->
+        <div class="px-5 py-4 border-b border-gray-100 flex items-center shadow-sm sticky top-0 bg-white z-20">
+            <a href="{% url 'player_profile' profile_user.username %}" class="text-gray-400 hover:text-gray-900 transition-colors mr-4">
+                <i class="fas fa-arrow-left text-lg"></i>
+            </a>
+            <div>
+                <h1 class="text-xl font-extrabold text-[#1E5631] tracking-tight">{{ profile_user.username }}</h1>
+                <p class="text-xs font-semibold text-gray-500">{{ following|length }} Following</p>
+            </div>
+        </div>
+        
+        <!-- Twitter-Style Tabs -->
+        <div class="flex border-b border-gray-200 bg-white sticky top-[69px] z-10 px-2">
+            <a href="{% url 'followers_list' profile_user.id %}" class="flex-1 text-center py-3.5 text-sm font-bold text-gray-500 hover:text-gray-800 hover:bg-gray-50 transition-colors cursor-pointer rounded-t-lg">
+                Followers
+            </a>
+            <div class="flex-1 text-center py-3.5 text-sm font-bold text-[#1E5631] cursor-pointer relative">
+                Following
+                <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-[#1E5631] rounded-t-lg"></div>
+            </div>
+        </div>
 
+        <div class="overflow-y-auto flex-1 p-3 space-y-2 bg-white custom-scrollbar">
+            
+            <!-- Following List -->
             {% if following %}
-            <div class="space-y-3">
                 {% for f in following %}
-                <div class="flex items-center justify-between bg-gray-50 rounded-lg p-4">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-blue-200 rounded-full flex items-center justify-center">
-                            <span class="text-blue-700 font-bold">{{ f.following.username|first|upper }}</span>
-                        </div>
-                        <div>
-                            <a href="{% url 'player_profile' f.following.username %}" class="font-medium text-gray-900 hover:text-green-600">
-                                {{ f.following.username }}
-                            </a>
-                            <p class="text-xs text-gray-500">{{ f.following.get_display_role }}</p>
+                <div class="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 border border-transparent hover:border-gray-100 transition-all duration-200 group" id="following-row-{{ f.following.id }}">
+                    <div class="flex items-center space-x-3 overflow-hidden">
+                        <a href="{% url 'player_profile' f.following.username %}" class="w-12 h-12 rounded-full bg-gradient-to-tr from-green-500 to-[#1E5631] p-[2px] flex-shrink-0">
+                            <div class="w-full h-full bg-white rounded-full flex items-center justify-center border-2 border-white">
+                                <span class="text-[#1E5631] font-bold text-sm">{{ f.following.username|slice:":1"|upper }}</span>
+                            </div>
+                        </a>
+                        <div class="truncate">
+                            <div class="flex items-center gap-x-1 border-b border-transparent">
+                                <a href="{% url 'player_profile' f.following.username %}" class="font-bold text-[15px] text-gray-900 group-hover:text-[#1E5631] group-hover:underline truncate block">
+                                    {{ f.following.username }}
+                                </a>
+                            </div>
+                            <p class="text-[13px] text-gray-500 truncate mt-0.5">{{ f.following.get_display_role }}</p>
                         </div>
                     </div>
+                    
+                    <!-- Right Action Button (Twitter/FB rounded pill style) -->
+                    {% if user.is_authenticated and user != f.following %}
+                        {% if f.following.id in my_following_ids %}
+                            <!-- Changes on hover from 'Following' to an optional unfollow state, handled in CSS if we want, but JS handles logic -->
+                            <button class="px-5 py-1.5 bg-white border-2 border-gray-200 text-gray-800 text-sm font-bold rounded-full hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-colors flex-shrink-0 ml-4 shadow-sm" onclick="unfollowUser({{ f.following.id }})" id="followBtn_{{ f.following.id }}">
+                                Following
+                            </button>
+                        {% else %}
+                            <button class="px-5 py-1.5 bg-[#1E5631] border-2 border-[#1E5631] text-white text-sm font-bold rounded-full hover:bg-[#154224] hover:border-[#154224] transition-colors flex-shrink-0 ml-4 shadow-sm" onclick="followUser({{ f.following.id }})" id="followBtn_{{ f.following.id }}">
+                                Follow
+                            </button>
+                        {% endif %}
+                    {% endif %}
                 </div>
                 {% endfor %}
-            </div>
             {% else %}
-            <p class="text-gray-500 text-center py-8">Not following anyone yet.</p>
+                <div class="py-16 text-center flex flex-col items-center">
+                    <div class="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mb-4 text-[#1E5631]">
+                        <i class="fas fa-user-plus text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-extrabold text-[#1E5631] mb-2 tracking-tight">Building a network</h3>
+                    <p class="text-sm text-gray-500 max-w-xs mx-auto">Once you start following people, they'll appear here.</p>
+                </div>
             {% endif %}
-
-            <div class="mt-6 text-center">
-                <a href="{% url 'followers_list' profile_user.id %}" class="text-green-600 hover:text-green-700 font-medium">
-                    &larr; View Followers
-                </a>
-            </div>
         </div>
     </div>
 </div>
+
+<style>
+.custom-scrollbar::-webkit-scrollbar { width: 6px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background-color: #D1D5DB; border-radius: 10px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: #9CA3AF; }
+</style>
+
+<script>
+function followUser(userId) {
+    fetch(`/follow/${userId}/`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+    }).then(r => r.json()).then(data => {
+        if (data.status === 'following' || data.status === 'follow_request_sent') {
+            const btn = document.getElementById(`followBtn_${userId}`);
+            btn.className = 'px-5 py-1.5 bg-white border-2 border-gray-200 text-gray-800 text-sm font-bold rounded-full hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-colors flex-shrink-0 ml-4 shadow-sm';
+            btn.textContent = data.status === 'following' ? 'Following' : 'Requested';
+            
+            btn.onclick = function() { unfollowUser(userId); };
+        }
+    });
+}
+
+function unfollowUser(userId) {
+    if(!confirm('Unfollow this user?')) return;
+    fetch(`/unfollow/${userId}/`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+    }).then(r => r.json()).then(data => {
+        if (data.status === 'unfollowed') {
+            const btn = document.getElementById(`followBtn_${userId}`);
+            btn.className = 'px-5 py-1.5 bg-[#1E5631] border-2 border-[#1E5631] text-white text-sm font-bold rounded-full hover:bg-[#154224] hover:border-[#154224] transition-colors flex-shrink-0 ml-4 shadow-sm';
+            btn.textContent = 'Follow';
+            
+            btn.onclick = function() { followUser(userId); };
+        }
+    });
+}
+</script>
 {% endblock %}

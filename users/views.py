@@ -1103,6 +1103,8 @@ def player_profile(request, username):
         'on_shortlist': False,
         'follower_count': Follow.objects.filter(following=player_user).count(),
         'following_count': Follow.objects.filter(follower=player_user).count(),
+        'posts': Post.objects.filter(user=player_user).order_by('-created_at')[:15],
+        'posts_count': Post.objects.filter(user=player_user).count(),
     }
     
     if request.user.is_authenticated and request.user != player_user:
@@ -1242,6 +1244,8 @@ def social_feed(request):
         'selected_type': post_type_filter,
         'selected_role': role_filter,
         'selected_scope': feed_scope,
+        'is_feeds_page': True,
+        'current_category': f'social_{feed_scope}',
     }
     return render(request, 'users/social_feed.html', context)
 
@@ -1699,10 +1703,16 @@ def followers_list(request, user_id):
     pending_requests = []
     if target == request.user:
         pending_requests = FollowRequest.objects.filter(to_user=request.user, status='PENDING').select_related('from_user')
+        
+    my_following_ids = set()
+    if request.user.is_authenticated:
+        my_following_ids = set(Follow.objects.filter(follower=request.user).values_list('following_id', flat=True))
+        
     return render(request, 'users/followers_list.html', {
         'profile_user': target,
         'followers': followers,
         'pending_requests': pending_requests,
+        'my_following_ids': my_following_ids,
     })
 
 
@@ -1711,9 +1721,15 @@ def following_list(request, user_id):
     """Display users that a user is following."""
     target = get_object_or_404(User, pk=user_id)
     following = Follow.objects.filter(follower=target).select_related('following')
+    
+    my_following_ids = set()
+    if request.user.is_authenticated:
+        my_following_ids = set(Follow.objects.filter(follower=request.user).values_list('following_id', flat=True))
+        
     return render(request, 'users/following_list.html', {
         'profile_user': target,
         'following': following,
+        'my_following_ids': my_following_ids,
     })
 
 
