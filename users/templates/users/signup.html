@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Sign Up - FazzPitchSideHub{% endblock %}
 
@@ -7,8 +8,8 @@
     <div class="max-w-md w-full">
         <!-- Logo & Header -->
         <div class="text-center mb-8">
-            <div class="inline-flex items-center justify-center w-20 h-20 bg-emerald-600 rounded-full mb-4 shadow-lg">
-                <i class="fas fa-futbol text-white text-3xl"></i>
+            <div class="inline-flex items-center justify-center mb-4">
+                <img src="{% static 'images/logo.png' %}" alt="Fazz PitchSide Logo" class="h-24 w-24 object-cover rounded-full shadow-lg border-2 border-emerald-600 bg-white">
             </div>
             <h1 class="text-4xl font-bold text-white mb-2">Join FazzPitchSideHub</h1>
             <p class="text-gray-300 text-lg">Connect with clubs and opportunities</p>
@@ -151,4 +152,23 @@
         animation: fadeIn 0.6s ease-out;
     }
 </style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Prevent copying, cutting, and pasting in password fields
+        const passFields = document.querySelectorAll('input[type="password"]');
+        passFields.forEach(function(field) {
+            field.addEventListener('paste', function(e) {
+                e.preventDefault();
+                alert('Pasting passwords is not allowed for security reasons. Please type it in manually.');
+            });
+            field.addEventListener('copy', function(e) {
+                e.preventDefault();
+            });
+            field.addEventListener('cut', function(e) {
+                e.preventDefault();
+            });
+        });
+    });
+</script>
 {% endblock %}

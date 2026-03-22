@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Verify Email - FazzPitchSideHub{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-emerald-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full">
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center mb-4">
+                <img src="{% static 'images/logo.png' %}" alt="Fazz PitchSide Logo" class="h-24 w-24 object-cover rounded-full shadow-lg border-2 border-emerald-600 bg-white">
+            </div>
+            <h1 class="text-4xl font-bold text-white mb-2">Verify Your Email</h1>
+            <p class="text-gray-300 text-lg">We sent a 6-character code to <strong class="text-white">{{ email }}</strong></p>
+        </div>
+
+        <div class="bg-gray-800 rounded-2xl shadow-2xl p-8 border border-gray-700">
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="{% if message.tags == 'error' %}bg-red-900/50 border border-red-500 text-red-200{% else %}bg-emerald-900/50 border border-emerald-500 text-emerald-200{% endif %} px-4 py-3 rounded-lg text-center font-medium">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <div>
+                    <label for="code" class="block text-sm font-medium text-gray-300 mb-2 text-center">
+                        Enter Verification Code
+                    </label>
+                    <input type="text" 
+                           name="code" 
+                           id="code"
+                           maxlength="6"
+                           class="w-full text-center text-3xl tracking-[0.5em] px-4 py-4 bg-gray-900 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 uppercase transition duration-200"
+                           placeholder="------"
+                           required>
+                </div>
+
+                <button type="submit" 
+                        class="w-full bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-600 text-white font-bold py-3 px-6 rounded-lg transition duration-300 transform hover:scale-105 shadow-lg hover:shadow-emerald-500/50">
+                    <i class="fas fa-check-circle mr-2"></i>Verify Account
+                </button>
+            </form>
+
+            <div class="mt-6 flex items-center">
+                <div class="flex-1 border-t border-gray-600"></div>
+                <span class="px-4 text-gray-400 text-sm">Didn't receive it?</span>
+                <div class="flex-1 border-t border-gray-600"></div>
+            </div>
+
+            <div class="mt-6 text-center">
+                <form method="post" class="inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="resend" value="1">
+                    <button type="submit" class="text-emerald-400 hover:text-emerald-300 font-semibold transition duration-200 bg-transparent border-0 cursor-pointer">
+                        Resend Code <i class="fas fa-redo ml-1"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Footer Note -->
+        <div class="mt-6 text-center">
+            <p class="text-gray-500 text-sm">
+                <i class="fas fa-shield-alt mr-2"></i>
+                Please check your promotions or spam folder
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

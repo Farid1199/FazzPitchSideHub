@@ -27,7 +27,7 @@ from .views import (
     generate_bio_view,
     # Part 12 – Security / GDPR
     delete_account_view, privacy_policy, about_page, contact_page, security_settings,
-    verify_email_view, resend_verification_email, export_data_view,
+    verify_otp_view, resend_verification_email, export_data_view,
     # Part 13 – Football Pathways
     pathways_home, pathways_player, pathways_manager, pathways_scout,
     pathways_non_league, pathways_qualifications,
@@ -124,7 +124,7 @@ urlpatterns = [
     path('account/delete/', delete_account_view, name='delete_account'),
     path('account/export/', export_data_view, name='export_data'),
     path('privacy/', privacy_policy, name='privacy_policy'),
-    path('verify-email/<str:token>/', verify_email_view, name='verify_email'),
+    path('verify-otp/', verify_otp_view, name='verify_otp'),
     path('resend-verification/', resend_verification_email, name='resend_verification'),
     path('about/', about_page, name='about'),
     path('contact/', contact_page, name='contact'),

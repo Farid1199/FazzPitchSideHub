@@ -33,43 +33,71 @@ from .utils_notifications import create_notification
 
 
 def _send_verification_email(request, user):
-    """Send an email verification link to the user."""
-    token = secrets.token_urlsafe(48)
-    user.email_verification_token = token
+    """Send an email verification code to the user."""
+    import random, string
+    code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+    user.email_verification_token = code
     user.save(update_fields=['email_verification_token'])
-    verify_url = request.build_absolute_uri(f'/verify-email/{token}/')
-    send_mail(
-        subject='Verify your email — Fazz PitchSide Hub',
-        message=(
-            f'Hi {user.username},\n\n'
-            f'Please verify your email address by clicking the link below:\n\n'
-            f'{verify_url}\n\n'
-            f'If you did not create an account, please ignore this email.\n\n'
-            f'— Fazz PitchSide Hub'
-        ),
-        from_email=None,  # Uses DEFAULT_FROM_EMAIL
-        recipient_list=[user.email],
-        fail_silently=True,
-    )
-
-
-def verify_email_view(request, token):
-    """Verify a user's email address via the token link."""
+    
     try:
-        user = User.objects.get(email_verification_token=token)
-    except User.DoesNotExist:
-        messages.error(request, 'Invalid or expired verification link.')
-        return redirect('home')
+        send_mail(
+            subject='Your Verification Code — Fazz PitchSide Hub',
+            message=(
+                f'Hi {user.username},\n\n'
+                f'Your 6-character verification code is:\n\n'
+                f'{code}\n\n'
+                f'Please enter this code on the verification page to complete your signup.\n\n'
+                f'— Fazz PitchSide Hub'
+            ),
+            from_email=django_settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+            fail_silently=False,
+        )
+    except Exception as e:
+        # If it fails, we want to know why (e.g. wrong password or rate limit)
+        messages.error(request, f"We couldn't send the email: {str(e)}. Please check your email settings in settings.py.")
+
+
+def verify_otp_view(request):
+    """Verify a user's email address via 6-character code."""
+    # Prioritize logged-in user, fall back to session ID
+    user = None
+    if request.user.is_authenticated:
+        user = request.user
+    else:
+        user_id = request.session.get('verification_user_id')
+        if user_id:
+            user = User.objects.filter(id=user_id).first()
+
+    if not user:
+        messages.error(request, 'Session expired. Please sign up or log in again.')
+        return redirect('login')
 
     if user.is_email_verified:
         messages.info(request, 'Your email is already verified.')
-    else:
-        user.is_email_verified = True
-        user.email_verification_token = ''
-        user.save(update_fields=['is_email_verified', 'email_verification_token'])
-        messages.success(request, 'Your email has been verified successfully!')
+        return redirect('select_role' if not getattr(user, 'role', None) else 'dashboard')
 
-    return redirect('dashboard')
+    if request.method == 'POST':
+        if 'resend' in request.POST:
+            _send_verification_email(request, user)
+            messages.success(request, 'A new verification code has been sent.')
+            return redirect('verify_otp')
+            
+        code = request.POST.get('code', '').strip().upper()
+        if code and user.email_verification_token == code:
+            user.is_email_verified = True
+            user.email_verification_token = ''
+            user.save(update_fields=['is_email_verified', 'email_verification_token'])
+            
+            if 'verification_user_id' in request.session:
+                del request.session['verification_user_id']
+                
+            messages.success(request, 'Your email has been verified successfully!')
+            return redirect('select_role' if not getattr(user, 'role', None) else 'dashboard')
+        else:
+            messages.error(request, 'Invalid verification code. If you signed up multiple times, please use the code from the VERY LATEST email you received.')
+            
+    return render(request, 'users/verify_otp.html', {'email': user.email})
 
 
 @login_required
@@ -89,17 +117,28 @@ def signup_view(request):
     Sends email verification link.
     """
     if request.method == 'POST':
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        
+        # Delete any abandoned, unverified accounts that match this username or email
+        # so the user is not unexpectedly blocked from signing up again.
+        if username:
+            User.objects.filter(username=username, is_email_verified=False).delete()
+        if email:
+            User.objects.filter(email=email, is_email_verified=False).delete()
+
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
             user.privacy_consent = True
             user.privacy_consent_date = timezone.now()
             user.save()
+            # Log the user in immediately (they are still marked as is_email_verified=False)
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             # Send email verification
             _send_verification_email(request, user)
-            login(request, user)
-            messages.info(request, 'A verification link has been sent to your email address. Please verify your email.')
-            return redirect('select_role')
+            messages.info(request, 'A 6-character verification code has been sent to your email address. Please enter it below.')
+            return redirect('verify_otp')
     else:
         form = CustomUserCreationForm()
     return render(request, 'users/signup.html', {'form': form})
@@ -109,8 +148,9 @@ def select_role(request):
     """
     Role selection page - user chooses between Player, Club, Scout, or Manager.
     """
-    # If user already has a role, redirect to appropriate setup or dashboard
     if request.user.is_authenticated:
+        if not request.user.is_email_verified:
+            return redirect('verify_otp')
         if request.user.role:
             # Check if they have completed their profile
             if request.user.role == 'PLAYER' and hasattr(request.user, 'player_profile'):
@@ -312,12 +352,13 @@ def dashboard_view(request):
     For players, includes recommended trials based on their profile.
     For managers, includes verification status and career stats.
     """
+    if not request.user.is_email_verified:
+        return redirect('verify_otp')
+        
     if not request.user.role:
         return redirect('select_role')
     
     context = {'user': request.user}
-    
-    # Add recommendations for players
     if request.user.role == 'PLAYER' and hasattr(request.user, 'player_profile'):
         recommended_trials = get_recommendations(request.user.player_profile)
         context['recommended_trials'] = recommended_trials

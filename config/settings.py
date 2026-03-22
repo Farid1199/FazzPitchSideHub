@@ -156,8 +156,14 @@ LOGOUT_REDIRECT_URL = 'login'
 # Third-Party APIs
 GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
 
-# Email (console backend for development — prints emails to terminal)
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# Email SMTP Configuration for Gmail
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'fazzpitchsidehubsupport@gmail.com')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'iqgipuvozinjrbtn')
+DEFAULT_FROM_EMAIL = f'Fazz PitchSide Hub <{EMAIL_HOST_USER}>'
 
 # --- Production Security (uncomment when deploying) ---
 # SECURE_SSL_REDIRECT = True
