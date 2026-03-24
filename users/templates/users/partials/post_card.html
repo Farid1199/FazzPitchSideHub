@@ -29,13 +29,38 @@
                 <span class="px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
                     {{ post.get_post_type_display }}
                 </span>
-                {% if post.user == user %}
-                    <a href="{% url 'delete_post' post.pk %}" 
-                       onclick="return confirm('Are you sure you want to delete this post?')"
-                       class="text-red-500 hover:text-red-700"
-                       aria-label="Delete post">
-                        <i class="fas fa-trash" aria-hidden="true"></i>
-                    </a>
+                {% if user.is_authenticated %}
+                <!-- 3-Dot Dropdown Menu -->
+                <div class="relative">
+                    <button onclick="togglePostMenu({{ post.pk }})"
+                            class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+                            aria-label="Post options"
+                            id="postMenuBtn_{{ post.pk }}">
+                        <i class="fas fa-ellipsis-v" aria-hidden="true"></i>
+                    </button>
+
+                    <!-- Dropdown Menu -->
+                    <div id="postMenu_{{ post.pk }}"
+                         class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+
+                        {% if post.user == user %}
+                        <!-- Owner options -->
+                        <a href="{% url 'delete_post' post.pk %}"
+                           onclick="return confirm('Are you sure you want to delete this post?')"
+                           class="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                            <i class="fas fa-trash-alt w-5 mr-2" aria-hidden="true"></i>
+                            Delete Post
+                        </a>
+                        {% else %}
+                        <!-- Report option for other users' posts -->
+                        <a href="{% url 'report_post' post.pk %}"
+                           class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
+                            <i class="fas fa-flag w-5 mr-2 text-gray-400" aria-hidden="true"></i>
+                            Report Post
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
                 {% endif %}
             </div>
         </div>
@@ -303,12 +328,19 @@
                         <span class="text-sm font-semibold text-gray-800">{{ comment.user.username }}</span>
                         <span class="text-xs text-gray-400">{{ comment.created_at|timesince }} ago</span>
                         {% if comment.user == user or post.user == user %}
-                        <button onclick="deleteComment({{ comment.id }}, {{ post.pk }})" 
+                        <button onclick="deleteComment({{ comment.id }}, {{ post.pk }})"
                                 class="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 transition-all ml-auto"
                                 title="Delete comment"
                                 aria-label="Delete comment">
                             <i class="fas fa-trash-alt text-xs" aria-hidden="true"></i>
                         </button>
+                        {% elif user.is_authenticated and comment.user != user %}
+                        <a href="{% url 'report_comment' comment.id %}"
+                           class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-all ml-auto"
+                           title="Report comment"
+                           aria-label="Report comment">
+                            <i class="fas fa-flag text-xs" aria-hidden="true"></i>
+                        </a>
                         {% endif %}
                     </div>
                     <p class="text-sm text-gray-700 mt-0.5 break-words">{{ comment.body }}</p>

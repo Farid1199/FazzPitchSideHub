@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+
+{% block title %}Report {{ content_type }} - FazzPitchSideHub{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-2xl mx-auto">
+        <div class="bg-white rounded-lg shadow-xl p-8">
+            <!-- Header -->
+            <div class="flex items-center mb-6">
+                <div class="bg-red-100 rounded-full p-3 mr-4">
+                    <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">Report {{ content_type }}</h1>
+                    <p class="text-gray-600">Help us keep the community safe</p>
+                </div>
+            </div>
+
+            <!-- Content being reported -->
+            <div class="bg-gray-100 border border-gray-200 rounded-lg p-4 mb-6">
+                <h2 class="text-sm font-semibold text-gray-500 uppercase mb-2">Content Being Reported</h2>
+                <p class="text-gray-800">{{ content_preview }}</p>
+                {% if reported_user %}
+                <p class="text-sm text-gray-500 mt-2">
+                    <i class="fas fa-user mr-1"></i> By: {{ reported_user.username }}
+                </p>
+                {% endif %}
+            </div>
+
+            <!-- Important Notice -->
+            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-yellow-700">
+                            <strong>Misuse of reports may result in action against your account.</strong>
+                            Only report content that genuinely violates our
+                            <a href="{% url 'community_guidelines' %}" class="underline" target="_blank">Community Guidelines</a>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Report Form -->
+            <form method="post" enctype="multipart/form-data" class="space-y-6">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                    {{ form.non_field_errors }}
+                </div>
+                {% endif %}
+
+                <!-- Reason -->
+                <div>
+                    <label for="id_reason" class="block text-sm font-medium text-gray-700 mb-2">
+                        Why are you reporting this?
+                    </label>
+                    {{ form.reason }}
+                    {% if form.reason.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.reason.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Description -->
+                <div>
+                    <label for="id_description" class="block text-sm font-medium text-gray-700 mb-2">
+                        Describe the issue
+                    </label>
+                    {{ form.description }}
+                    <p class="mt-1 text-sm text-gray-500">{{ form.fields.description.help_text }}</p>
+                    {% if form.description.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.description.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Screenshot -->
+                <div>
+                    <label for="id_screenshot" class="block text-sm font-medium text-gray-700 mb-2">
+                        Screenshot (optional)
+                    </label>
+                    <div class="flex items-center justify-center w-full">
+                        <label class="flex flex-col w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:bg-gray-50">
+                            <div class="flex flex-col items-center justify-center pt-7">
+                                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                                </svg>
+                                <p class="pt-1 text-sm text-gray-500">Upload a screenshot</p>
+                            </div>
+                            {{ form.screenshot }}
+                        </label>
+                    </div>
+                    <p class="mt-1 text-sm text-gray-500">{{ form.fields.screenshot.help_text }}</p>
+                    {% if form.screenshot.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.screenshot.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Submit -->
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <button type="submit" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200">
+                        <i class="fas fa-flag mr-2"></i>Submit Report
+                    </button>
+                    <a href="{% url 'social_feed' %}" class="flex-1 text-center bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 px-6 rounded-lg transition duration-200">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+
+            <!-- What happens next -->
+            <div class="mt-8 pt-6 border-t border-gray-200">
+                <h3 class="text-sm font-semibold text-gray-900 mb-3">What happens next?</h3>
+                <ul class="text-sm text-gray-600 space-y-2">
+                    <li class="flex items-start">
+                        <svg class="w-4 h-4 text-emerald-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        Our moderation team will review your report
+                    </li>
+                    <li class="flex items-start">
+                        <svg class="w-4 h-4 text-emerald-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        We'll take appropriate action based on our Community Guidelines
+                    </li>
+                    <li class="flex items-start">
+                        <svg class="w-4 h-4 text-emerald-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        Your identity will remain confidential
+                    </li>
+                    <li class="flex items-start">
+                        <svg class="w-4 h-4 text-emerald-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        You can track your report status in <a href="{% url 'my_reports' %}" class="text-emerald-600 hover:underline">My Reports</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

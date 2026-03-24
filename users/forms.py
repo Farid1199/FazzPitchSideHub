@@ -6,7 +6,7 @@ from datetime import date
 from .models import (
     User, PlayerProfile, ClubProfile, ScoutProfile,
     ManagerProfile, QualificationVerification, ScoutVerification, Opportunity, Post,
-    FanProfile, ContactSubmission
+    FanProfile, ContactSubmission, Report
 )
 
 def validate_video_file_size(file):
@@ -28,12 +28,17 @@ def validate_video_file_extension(file):
 class CustomUserCreationForm(UserCreationForm):
     """
     Form for registering a new user.
-    Requires username, email, password, and privacy consent.
+    Requires username, email, password, privacy consent, and community guidelines consent.
     """
     privacy_consent = forms.BooleanField(
         required=True,
         label='I agree to the Privacy Policy and consent to my data being processed',
         error_messages={'required': 'You must agree to the Privacy Policy to create an account.'},
+    )
+    community_guidelines_consent = forms.BooleanField(
+        required=True,
+        label='I agree to follow the Community Guidelines and Code of Conduct',
+        error_messages={'required': 'You must agree to the Community Guidelines to create an account.'},
     )
 
     class Meta:
@@ -847,3 +852,45 @@ class ContactForm(forms.ModelForm):
         if len(message.strip()) < 20:
             raise ValidationError('Please provide a bit more detail so we can help you properly (at least 20 characters).')
         return message
+
+
+class ReportForm(forms.ModelForm):
+    """
+    Form for users to report posts, comments, or other users.
+    Used for community moderation and content safety.
+    """
+    class Meta:
+        model = Report
+        fields = ['reason', 'description', 'screenshot']
+        widgets = {
+            'reason': forms.Select(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent',
+            }),
+            'description': forms.Textarea(attrs={
+                'rows': 5,
+                'placeholder': 'Please describe the issue in detail. What happened? Why do you believe this violates our Community Guidelines?',
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent',
+                'maxlength': '2000',
+            }),
+            'screenshot': forms.FileInput(attrs={
+                'accept': 'image/*',
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent',
+            }),
+        }
+        labels = {
+            'reason': 'Reason for Report',
+            'description': 'Describe the Issue',
+            'screenshot': 'Screenshot (Optional)',
+        }
+        help_texts = {
+            'description': 'The more detail you provide, the faster we can review and act on your report.',
+            'screenshot': 'If you have a screenshot of the issue, it can help us review your report faster.',
+        }
+
+    def clean_description(self):
+        description = self.cleaned_data.get('description', '')
+        if len(description.strip()) < 20:
+            raise ValidationError('Please provide more detail about the issue (at least 20 characters).')
+        if len(description) > 2000:
+            raise ValidationError('Description must be under 2000 characters.')
+        return description

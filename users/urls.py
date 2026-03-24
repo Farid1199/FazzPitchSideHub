@@ -3,12 +3,12 @@ from django.contrib.auth import views as auth_views
 from .views import (
     signup_view, login_view, select_role,
     player_setup, club_setup, scout_setup, manager_setup, fan_setup,
-    role_selection_view, profile_creation_view, 
+    role_selection_view, profile_creation_view,
     dashboard_view, home_view, feeds_view, search_players, search_clubs,
     edit_profile, submit_qualification_verification, post_opportunity,
     opportunity_detail, express_interest, withdraw_interest, verify_opportunity,
     news_detail, player_profile, community_hub,
-    create_post, social_feed, like_post, delete_post, my_posts,
+    create_post, social_feed, like_post, save_post, delete_post, my_posts,
     add_comment, delete_comment,
     submit_scout_verification, scout_verification_status, protected_scout_media,
     protected_manager_media,
@@ -31,6 +31,8 @@ from .views import (
     # Part 13 – Football Pathways
     pathways_home, pathways_player, pathways_manager, pathways_scout,
     pathways_non_league, pathways_qualifications,
+    # Part 14 – Community Guidelines & Reporting
+    community_guidelines, report_post, report_comment, report_user, my_reports,
 )
 
 urlpatterns = [
@@ -82,6 +84,7 @@ urlpatterns = [
     path('posts/feed/', social_feed, name='social_feed'),
     path('posts/my-posts/', my_posts, name='my_posts'),
     path('posts/<int:post_id>/like/', like_post, name='like_post'),
+    path('posts/<int:post_id>/save/', save_post, name='save_post'),
     path('posts/<int:post_id>/comment/', add_comment, name='add_comment'),
     path('posts/<int:post_id>/delete/', delete_post, name='delete_post'),
     path('comments/<int:comment_id>/delete/', delete_comment, name='delete_comment'),
@@ -152,6 +155,13 @@ urlpatterns = [
     path('pathways/become-scout/', pathways_scout, name='pathways_scout'),
     path('pathways/non-league/', pathways_non_league, name='pathways_non_league'),
     path('pathways/qualifications/', pathways_qualifications, name='pathways_qualifications'),
+
+    # Community Guidelines & Report System
+    path('community-guidelines/', community_guidelines, name='community_guidelines'),
+    path('report/post/<int:post_id>/', report_post, name='report_post'),
+    path('report/comment/<int:comment_id>/', report_comment, name='report_comment'),
+    path('report/user/<int:user_id>/', report_user, name='report_user'),
+    path('my-reports/', my_reports, name='my_reports'),
 
     path('', home_view, name='home'),
 ]

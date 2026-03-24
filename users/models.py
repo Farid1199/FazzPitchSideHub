@@ -42,6 +42,31 @@ class User(AbstractUser):
         null=True, blank=True,
         help_text="Timestamp when the user gave consent."
     )
+    community_guidelines_consent = models.BooleanField(
+        default=False,
+        help_text="User agreed to community guidelines and code of conduct at signup."
+    )
+    community_guidelines_consent_date = models.DateTimeField(
+        null=True, blank=True,
+        help_text="Timestamp when the user agreed to community guidelines."
+    )
+    # Moderation fields
+    warning_count = models.PositiveIntegerField(
+        default=0,
+        help_text="Number of warnings issued to this user for guideline violations."
+    )
+    is_suspended = models.BooleanField(
+        default=False,
+        help_text="If True, user is temporarily suspended and cannot post or comment."
+    )
+    suspension_end_date = models.DateTimeField(
+        null=True, blank=True,
+        help_text="When the suspension ends. Null if not suspended."
+    )
+    suspension_reason = models.TextField(
+        blank=True,
+        help_text="Reason for current or most recent suspension."
+    )
 
     def __str__(self):
         return self.username
@@ -1260,6 +1285,37 @@ class Comment(models.Model):
         return f"{self.user.username} on {self.post.pk}: {self.body[:40]}"
 
 
+# ===================================================================
+# Saved Posts (Bookmarks)
+# ===================================================================
+
+class SavedPost(models.Model):
+    """
+    Allows users to bookmark/save posts for later viewing.
+    Similar to Twitter's bookmark or Instagram's save feature.
+    """
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='saved_posts'
+    )
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,
+        related_name='saved_by'
+    )
+    saved_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'post')
+        ordering = ['-saved_at']
+        verbose_name = "Saved Post"
+        verbose_name_plural = "Saved Posts"
+
+    def __str__(self):
+        return f"{self.user.username} saved {self.post.pk}"
+
+
 class TrialView(models.Model):
     """
     Tracks when a player views a trial opportunity detail page.
@@ -1549,3 +1605,186 @@ class ContactSubmission(models.Model):
 
     def __str__(self):
         return f"[{self.get_category_display()}] {self.subject} - {self.name}"
+
+
+class Report(models.Model):
+    """
+    User-generated reports for inappropriate content or behaviour.
+
+    Allows users to report posts, comments, or other users for violations
+    of community guidelines. Designed for single-admin management with
+    clear status tracking and escalation paths.
+    """
+    # What is being reported
+    CONTENT_TYPE_CHOICES = [
+        ('POST', 'Post'),
+        ('COMMENT', 'Comment'),
+        ('USER', 'User Profile'),
+        ('MESSAGE', 'Direct Message'),
+    ]
+
+    # Why it's being reported
+    REASON_CHOICES = [
+        ('HARASSMENT', 'Harassment or Bullying'),
+        ('HATE_SPEECH', 'Hate Speech or Discrimination'),
+        ('SPAM', 'Spam or Misleading Content'),
+        ('INAPPROPRIATE', 'Inappropriate or Offensive Content'),
+        ('FAKE_ACCOUNT', 'Fake Account or Impersonation'),
+        ('SCAM', 'Scam or Fraudulent Activity'),
+        ('VIOLENCE', 'Violence or Threatening Behaviour'),
+        ('PERSONAL_INFO', 'Sharing Personal Information (Doxxing)'),
+        ('COPYRIGHT', 'Copyright or Intellectual Property Violation'),
+        ('OTHER', 'Other Violation'),
+    ]
+
+    # Admin workflow status
+    STATUS_CHOICES = [
+        ('PENDING', 'Pending Review'),
+        ('UNDER_REVIEW', 'Under Review'),
+        ('ACTION_TAKEN', 'Action Taken'),
+        ('DISMISSED', 'Dismissed - No Violation'),
+        ('DUPLICATE', 'Duplicate Report'),
+    ]
+
+    # Action taken by admin
+    ACTION_CHOICES = [
+        ('NONE', 'No Action Required'),
+        ('WARNING', 'Warning Issued'),
+        ('CONTENT_REMOVED', 'Content Removed'),
+        ('SUSPENDED_24H', 'User Suspended (24 Hours)'),
+        ('SUSPENDED_7D', 'User Suspended (7 Days)'),
+        ('SUSPENDED_30D', 'User Suspended (30 Days)'),
+        ('BANNED', 'User Permanently Banned'),
+    ]
+
+    # Who submitted the report
+    reporter = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='reports_submitted',
+        help_text='User who submitted this report.'
+    )
+
+    # What type of content is being reported
+    content_type = models.CharField(
+        max_length=20,
+        choices=CONTENT_TYPE_CHOICES,
+        help_text='Type of content being reported.'
+    )
+
+    # Links to specific content (nullable based on content_type)
+    reported_user = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='reports_received',
+        help_text='The user being reported (for USER reports or content owner).'
+    )
+    reported_post = models.ForeignKey(
+        'Post',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='reports',
+        help_text='The post being reported (if applicable).'
+    )
+    reported_comment = models.ForeignKey(
+        'Comment',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='reports',
+        help_text='The comment being reported (if applicable).'
+    )
+
+    # Report details
+    reason = models.CharField(
+        max_length=30,
+        choices=REASON_CHOICES,
+        help_text='Category of the violation.'
+    )
+    description = models.TextField(
+        help_text='Detailed description of the issue from the reporter.',
+        max_length=2000
+    )
+    screenshot = models.ImageField(
+        upload_to='reports/screenshots/',
+        blank=True,
+        null=True,
+        help_text='Optional screenshot as evidence.'
+    )
+
+    # Status and workflow
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='PENDING'
+    )
+    priority = models.PositiveIntegerField(
+        default=1,
+        help_text='Priority level (1=Low, 2=Medium, 3=High, 4=Critical)'
+    )
+
+    # Admin response
+    action_taken = models.CharField(
+        max_length=20,
+        choices=ACTION_CHOICES,
+        default='NONE',
+        help_text='Action taken by admin in response to this report.'
+    )
+    admin_notes = models.TextField(
+        blank=True,
+        help_text='Internal notes for admin reference. Not visible to reporter.'
+    )
+    resolution_notes = models.TextField(
+        blank=True,
+        help_text='Notes sent to reporter about the resolution (optional).'
+    )
+    reviewed_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='reports_reviewed',
+        help_text='Admin who reviewed this report.'
+    )
+
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['status', 'created_at']),
+            models.Index(fields=['reported_user', 'status']),
+        ]
+
+    def __str__(self):
+        reporter_name = self.reporter.username if self.reporter else 'Anonymous'
+        return f"Report #{self.pk} - {self.get_reason_display()} ({self.get_status_display()})"
+
+    def get_reported_content_preview(self):
+        """Return a preview of the reported content."""
+        if self.content_type == 'POST' and self.reported_post:
+            return self.reported_post.caption[:100] + '...' if len(self.reported_post.caption) > 100 else self.reported_post.caption
+        elif self.content_type == 'COMMENT' and self.reported_comment:
+            return self.reported_comment.body[:100] + '...' if len(self.reported_comment.body) > 100 else self.reported_comment.body
+        elif self.content_type == 'USER' and self.reported_user:
+            return f"User: {self.reported_user.username}"
+        return "Content unavailable"
+
+    def auto_set_priority(self):
+        """Automatically set priority based on reason severity."""
+        high_priority = ['HATE_SPEECH', 'VIOLENCE', 'SCAM', 'PERSONAL_INFO']
+        medium_priority = ['HARASSMENT', 'FAKE_ACCOUNT', 'INAPPROPRIATE']
+
+        if self.reason in high_priority:
+            self.priority = 3
+        elif self.reason in medium_priority:
+            self.priority = 2
+        else:
+            self.priority = 1

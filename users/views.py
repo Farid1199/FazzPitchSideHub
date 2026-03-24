@@ -20,13 +20,13 @@ from .forms import (
     CustomUserCreationForm, PlayerProfileForm, ClubProfileForm,
     ScoutProfileForm, ManagerProfileForm, QualificationVerificationForm,
     ScoutVerificationForm, OpportunityForm, PostForm, FanProfileForm,
-    ContactForm
+    ContactForm, ReportForm
 )
 from .models import (
     User, NewsItem, Opportunity, PlayerProfile, ClubProfile, ClubSource,
     ScoutProfile, ManagerProfile, QualificationVerification, ScoutVerification,
     Notification, Post, Comment, Follow, FollowRequest, Conversation, Message,
-    FanProfile, Watchlist, ClubShortlist, PlayerStats, ContactSubmission
+    FanProfile, Watchlist, ClubShortlist, PlayerStats, ContactSubmission, Report
 )
 from .utils import get_recommendations
 from .utils_notifications import create_notification
@@ -132,6 +132,8 @@ def signup_view(request):
             user = form.save(commit=False)
             user.privacy_consent = True
             user.privacy_consent_date = timezone.now()
+            user.community_guidelines_consent = True
+            user.community_guidelines_consent_date = timezone.now()
             user.save()
             # Log the user in immediately (they are still marked as is_email_verified=False)
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
@@ -149,8 +151,7 @@ def select_role(request):
     Role selection page - user chooses between Player, Club, Scout, or Manager.
     """
     if request.user.is_authenticated:
-        if not request.user.is_email_verified:
-            return redirect('verify_otp')
+        # Email verification is only required during signup, not for role selection
         if request.user.role:
             # Check if they have completed their profile
             if request.user.role == 'PLAYER' and hasattr(request.user, 'player_profile'):
@@ -352,9 +353,9 @@ def dashboard_view(request):
     For players, includes recommended trials based on their profile.
     For managers, includes verification status and career stats.
     """
-    if not request.user.is_email_verified:
-        return redirect('verify_otp')
-        
+    # Email verification is only required during signup, not on subsequent logins
+    # Users can access the dashboard even if email is not yet verified
+
     if not request.user.role:
         return redirect('select_role')
     
@@ -1278,6 +1279,14 @@ def social_feed(request):
     post_types = Post.POST_TYPE_CHOICES
     user_roles = User.ROLE_CHOICES
 
+    # Get saved post IDs for the current user
+    saved_post_ids = []
+    if request.user.is_authenticated:
+        from .models import SavedPost
+        saved_post_ids = list(
+            SavedPost.objects.filter(user=request.user).values_list('post_id', flat=True)
+        )
+
     context = {
         'posts': posts_page,
         'post_types': post_types,
@@ -1287,6 +1296,7 @@ def social_feed(request):
         'selected_scope': feed_scope,
         'is_feeds_page': True,
         'current_category': f'social_{feed_scope}',
+        'saved_post_ids': saved_post_ids,
     }
     return render(request, 'users/social_feed.html', context)
 
@@ -1327,6 +1337,39 @@ def like_post(request, post_id):
         except Post.DoesNotExist:
             return JsonResponse({'success': False, 'error': 'Post not found'}, status=404)
     
+    return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=400)
+
+
+@login_required
+def save_post(request, post_id):
+    """
+    AJAX view for saving/unsaving (bookmarking) a post.
+    """
+    from .models import Post, SavedPost
+    from django.http import JsonResponse
+
+    if request.method == 'POST':
+        try:
+            post = Post.objects.get(pk=post_id)
+            saved_post, created = SavedPost.objects.get_or_create(
+                user=request.user,
+                post=post
+            )
+
+            if not created:
+                # Already saved, so unsave it
+                saved_post.delete()
+                saved = False
+            else:
+                saved = True
+
+            return JsonResponse({
+                'success': True,
+                'saved': saved
+            })
+        except Post.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Post not found'}, status=404)
+
     return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=400)
 
 
@@ -2541,3 +2584,177 @@ def admin_analytics_view(request):
 # Apply the staff_member_required decorator
 from django.contrib.admin.views.decorators import staff_member_required
 admin_analytics_view = staff_member_required(admin_analytics_view)
+
+
+# ===================================================================
+# Community Guidelines and Report System
+# ===================================================================
+
+def community_guidelines(request):
+    """
+    Display the community guidelines / code of conduct page.
+    This should be read before registration.
+    """
+    return render(request, 'users/community_guidelines.html')
+
+
+@login_required
+def report_post(request, post_id):
+    """
+    Report a post for violating community guidelines.
+    """
+    post = get_object_or_404(Post, id=post_id)
+
+    # Can't report your own post
+    if post.user == request.user:
+        messages.error(request, "You cannot report your own post.")
+        return redirect('social_feed')
+
+    # Check if user has already reported this post
+    existing_report = Report.objects.filter(
+        reporter=request.user,
+        reported_post=post,
+        status__in=['PENDING', 'UNDER_REVIEW']
+    ).exists()
+
+    if existing_report:
+        messages.info(request, "You have already reported this post. It is currently under review.")
+        return redirect('social_feed')
+
+    if request.method == 'POST':
+        form = ReportForm(request.POST, request.FILES)
+        if form.is_valid():
+            report = form.save(commit=False)
+            report.reporter = request.user
+            report.content_type = 'POST'
+            report.reported_post = post
+            report.reported_user = post.user
+            report.auto_set_priority()
+            report.save()
+
+            messages.success(
+                request,
+                "Thank you for your report. Our team will review it and take appropriate action."
+            )
+            return redirect('social_feed')
+    else:
+        form = ReportForm()
+
+    return render(request, 'users/report_form.html', {
+        'form': form,
+        'content_type': 'Post',
+        'content_preview': post.caption[:100] + '...' if len(post.caption) > 100 else post.caption,
+        'reported_user': post.user,
+    })
+
+
+@login_required
+def report_comment(request, comment_id):
+    """
+    Report a comment for violating community guidelines.
+    """
+    comment = get_object_or_404(Comment, id=comment_id)
+
+    # Can't report your own comment
+    if comment.user == request.user:
+        messages.error(request, "You cannot report your own comment.")
+        return redirect('social_feed')
+
+    # Check if user has already reported this comment
+    existing_report = Report.objects.filter(
+        reporter=request.user,
+        reported_comment=comment,
+        status__in=['PENDING', 'UNDER_REVIEW']
+    ).exists()
+
+    if existing_report:
+        messages.info(request, "You have already reported this comment. It is currently under review.")
+        return redirect('social_feed')
+
+    if request.method == 'POST':
+        form = ReportForm(request.POST, request.FILES)
+        if form.is_valid():
+            report = form.save(commit=False)
+            report.reporter = request.user
+            report.content_type = 'COMMENT'
+            report.reported_comment = comment
+            report.reported_user = comment.user
+            report.auto_set_priority()
+            report.save()
+
+            messages.success(
+                request,
+                "Thank you for your report. Our team will review it and take appropriate action."
+            )
+            return redirect('social_feed')
+    else:
+        form = ReportForm()
+
+    return render(request, 'users/report_form.html', {
+        'form': form,
+        'content_type': 'Comment',
+        'content_preview': comment.body[:100] + '...' if len(comment.body) > 100 else comment.body,
+        'reported_user': comment.user,
+    })
+
+
+@login_required
+def report_user(request, user_id):
+    """
+    Report a user for violating community guidelines.
+    """
+    reported_user = get_object_or_404(User, id=user_id)
+
+    # Can't report yourself
+    if reported_user == request.user:
+        messages.error(request, "You cannot report yourself.")
+        return redirect('dashboard')
+
+    # Check if user has already reported this user recently
+    existing_report = Report.objects.filter(
+        reporter=request.user,
+        reported_user=reported_user,
+        content_type='USER',
+        status__in=['PENDING', 'UNDER_REVIEW']
+    ).exists()
+
+    if existing_report:
+        messages.info(request, "You have already reported this user. It is currently under review.")
+        return redirect('dashboard')
+
+    if request.method == 'POST':
+        form = ReportForm(request.POST, request.FILES)
+        if form.is_valid():
+            report = form.save(commit=False)
+            report.reporter = request.user
+            report.content_type = 'USER'
+            report.reported_user = reported_user
+            report.auto_set_priority()
+            report.save()
+
+            messages.success(
+                request,
+                "Thank you for your report. Our team will review it and take appropriate action."
+            )
+            return redirect('dashboard')
+    else:
+        form = ReportForm()
+
+    return render(request, 'users/report_form.html', {
+        'form': form,
+        'content_type': 'User',
+        'content_preview': f"User: {reported_user.username}",
+        'reported_user': reported_user,
+    })
+
+
+@login_required
+def my_reports(request):
+    """
+    View a user's submitted reports and their status.
+    """
+    reports = Report.objects.filter(reporter=request.user).order_by('-created_at')
+
+    return render(request, 'users/my_reports.html', {
+        'reports': reports,
+    })

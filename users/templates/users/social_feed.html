@@ -82,6 +82,34 @@
 </style>
 
 <script>
+    // Post menu dropdown toggle
+    function togglePostMenu(postId) {
+        const menu = document.getElementById(`postMenu_${postId}`);
+        const allMenus = document.querySelectorAll('[id^="postMenu_"]');
+
+        // Close all other menus first
+        allMenus.forEach(m => {
+            if (m.id !== `postMenu_${postId}`) {
+                m.classList.add('hidden');
+            }
+        });
+
+        // Toggle the clicked menu
+        menu.classList.toggle('hidden');
+    }
+
+    // Close menus when clicking outside
+    document.addEventListener('click', function(event) {
+        const isMenuButton = event.target.closest('[id^="postMenuBtn_"]');
+        const isMenu = event.target.closest('[id^="postMenu_"]');
+
+        if (!isMenuButton && !isMenu) {
+            document.querySelectorAll('[id^="postMenu_"]').forEach(menu => {
+                menu.classList.add('hidden');
+            });
+        }
+    });
+
     function likePost(postId) {
         fetch(`/posts/${postId}/like/`, {
             method: 'POST',
@@ -209,7 +237,7 @@
             if (data.success) {
                 const el = document.getElementById(`comment_${commentId}`);
                 if (el) el.remove();
-                
+
                 const countEl = document.getElementById(`commentCount_${postId}`);
                 if (countEl) countEl.textContent = data.total_comments;
 
@@ -217,6 +245,41 @@
                 if (list && list.children.length <= 1) {
                     const noComments = document.getElementById(`noComments_${postId}`);
                     if (noComments) noComments.classList.remove('hidden');
+                }
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function savePost(postId) {
+        fetch(`/posts/${postId}/save/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => {
+            if (response.redirected || response.status === 403) {
+                window.location.href = '{% url "login" %}?next=' + window.location.pathname;
+                return null;
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (!data) return;
+            if (data.success) {
+                const saveIcon = document.getElementById(`saveIcon_${postId}`);
+                const saveBtn = document.getElementById(`saveBtn_${postId}`);
+
+                if (data.saved) {
+                    saveIcon.classList.remove('far');
+                    saveIcon.classList.add('fas', 'text-[#1E5631]');
+                    saveBtn.classList.add('text-[#1E5631]');
+                } else {
+                    saveIcon.classList.remove('fas', 'text-[#1E5631]');
+                    saveIcon.classList.add('far');
+                    saveBtn.classList.remove('text-[#1E5631]');
                 }
             }
         })

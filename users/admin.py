@@ -6,7 +6,7 @@ from .models import (
     ManagerProfile, QualificationVerification, ClubSource, NewsItem, Opportunity, Post,
     Comment, ScoutVerification, Notification,
     Follow, FollowRequest, Conversation, Message, FanProfile, Watchlist, ClubShortlist,
-    PlayerStats, ContactSubmission,
+    PlayerStats, ContactSubmission, Report,
 )
 
 # Register your models here.
@@ -936,3 +936,348 @@ class ContactSubmissionAdmin(admin.ModelAdmin):
             'description': 'Update the status and add internal notes as you handle this submission.',
         }),
     )
+
+
+# ===================================================================
+# Report System Admin (Community Moderation)
+# ===================================================================
+
+@admin.register(Report)
+class ReportAdmin(admin.ModelAdmin):
+    """
+    Admin interface for managing user reports and community moderation.
+
+    SINGLE-ADMIN WORKFLOW:
+    1. Reports appear in 'Pending Review' status
+    2. Review the reported content using preview links
+    3. Take appropriate action (warning, removal, suspension)
+    4. Update status to 'Action Taken' or 'Dismissed'
+
+    PRIORITY LEVELS:
+    - Critical (4): Violence, hate speech - requires immediate attention
+    - High (3): Harassment, scams, doxxing
+    - Medium (2): Inappropriate content, fake accounts
+    - Low (1): Spam, minor violations
+    """
+    list_display = [
+        'id', 'status_badge', 'priority_badge', 'reason_display',
+        'content_type', 'reporter_name', 'reported_user_name',
+        'created_at', 'action_taken_badge'
+    ]
+    list_filter = ['status', 'priority', 'reason', 'content_type', 'action_taken', 'created_at']
+    search_fields = [
+        'reporter__username', 'reported_user__username',
+        'description', 'admin_notes'
+    ]
+    ordering = ['-priority', '-created_at']
+    date_hierarchy = 'created_at'
+    list_per_page = 25
+    readonly_fields = [
+        'reporter', 'content_type', 'reported_user', 'reported_post', 'reported_comment',
+        'reason', 'description', 'screenshot', 'created_at', 'updated_at',
+        'content_preview_display', 'reporter_history_display', 'reported_user_history_display'
+    ]
+
+    actions = [
+        'mark_under_review', 'dismiss_no_violation', 'dismiss_duplicate',
+        'issue_warning', 'remove_content',
+        'suspend_24h', 'suspend_7d', 'suspend_30d', 'ban_user'
+    ]
+
+    fieldsets = (
+        ('Quick Actions Guide', {
+            'fields': (),
+            'description': '<div style="background:#f0fdf4;border:2px solid #22c55e;padding:16px;border-radius:8px;margin-bottom:12px;">'
+                          '<strong style="color:#166534;font-size:14px;">SINGLE-ADMIN MODERATION WORKFLOW</strong><br><br>'
+                          '<strong>Step 1:</strong> Review the reported content below<br>'
+                          '<strong>Step 2:</strong> Check user history (warnings, previous reports)<br>'
+                          '<strong>Step 3:</strong> Decide on action using bulk actions or manual selection<br>'
+                          '<strong>Step 4:</strong> Add notes and update status<br><br>'
+                          '<strong style="color:#dc2626;">Priority Guide:</strong> Critical/High = same-day response, Medium = 48 hours, Low = 1 week'
+                          '</div>'
+        }),
+        ('Report Details', {
+            'fields': ('reporter', 'content_type', 'reason', 'description', 'screenshot', 'created_at'),
+        }),
+        ('Reported Content', {
+            'fields': ('reported_user', 'reported_post', 'reported_comment', 'content_preview_display'),
+            'description': 'View the specific content that was reported.'
+        }),
+        ('User History (Important)', {
+            'fields': ('reporter_history_display', 'reported_user_history_display'),
+            'description': 'Check if these users have a history of reports.'
+        }),
+        ('Admin Decision', {
+            'fields': ('status', 'priority', 'action_taken', 'admin_notes', 'resolution_notes', 'reviewed_by', 'reviewed_at'),
+            'description': '<strong>admin_notes</strong> = Internal only (reporter cannot see)<br>'
+                          '<strong>resolution_notes</strong> = Summary sent to reporter (optional)'
+        }),
+    )
+
+    # ----------------------------------------------------------------
+    # Display helpers
+    # ----------------------------------------------------------------
+
+    def reporter_name(self, obj):
+        if obj.reporter:
+            return obj.reporter.username
+        return 'Deleted User'
+    reporter_name.short_description = 'Reporter'
+
+    def reported_user_name(self, obj):
+        if obj.reported_user:
+            return format_html(
+                '<a href="/admin/users/user/{}/change/" style="color:#2563eb;">{}</a>',
+                obj.reported_user.id, obj.reported_user.username
+            )
+        return '-'
+    reported_user_name.short_description = 'Reported User'
+
+    def status_badge(self, obj):
+        colours = {
+            'PENDING': ('#f59e0b', '#fffbeb', '⏳'),
+            'UNDER_REVIEW': ('#3b82f6', '#eff6ff', '🔍'),
+            'ACTION_TAKEN': ('#059669', '#ecfdf5', '✅'),
+            'DISMISSED': ('#6b7280', '#f9fafb', '✗'),
+            'DUPLICATE': ('#8b5cf6', '#f5f3ff', '📋'),
+        }
+        bg, bg_light, icon = colours.get(obj.status, ('#6b7280', '#f9fafb', '❓'))
+        return format_html(
+            '<span style="background:{};color:{};padding:4px 10px;border-radius:12px;font-size:11px;font-weight:bold;">'
+            '{} {}</span>',
+            bg_light, bg, icon, obj.get_status_display()
+        )
+    status_badge.short_description = 'Status'
+    status_badge.admin_order_field = 'status'
+
+    def priority_badge(self, obj):
+        colours = {
+            1: ('#22c55e', 'Low'),
+            2: ('#f59e0b', 'Med'),
+            3: ('#ef4444', 'High'),
+            4: ('#7c2d12', 'CRIT'),
+        }
+        bg, label = colours.get(obj.priority, ('#6b7280', '?'))
+        return format_html(
+            '<span style="background:{};color:white;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:bold;">{}</span>',
+            bg, label
+        )
+    priority_badge.short_description = 'Priority'
+    priority_badge.admin_order_field = 'priority'
+
+    def reason_display(self, obj):
+        return obj.get_reason_display()
+    reason_display.short_description = 'Reason'
+
+    def action_taken_badge(self, obj):
+        if obj.action_taken == 'NONE':
+            return '-'
+        colours = {
+            'WARNING': '#f59e0b',
+            'CONTENT_REMOVED': '#3b82f6',
+            'SUSPENDED_24H': '#f97316',
+            'SUSPENDED_7D': '#ef4444',
+            'SUSPENDED_30D': '#dc2626',
+            'BANNED': '#7c2d12',
+        }
+        bg = colours.get(obj.action_taken, '#6b7280')
+        return format_html(
+            '<span style="background:{};color:white;padding:2px 8px;border-radius:4px;font-size:10px;">{}</span>',
+            bg, obj.get_action_taken_display()
+        )
+    action_taken_badge.short_description = 'Action'
+
+    def content_preview_display(self, obj):
+        preview = obj.get_reported_content_preview()
+        if obj.content_type == 'POST' and obj.reported_post:
+            return format_html(
+                '<div style="background:#f9fafb;padding:12px;border-radius:8px;border:1px solid #e5e7eb;">'
+                '<strong>Post Content:</strong><br>{}<br><br>'
+                '<a href="/admin/users/post/{}/change/" target="_blank" style="color:#2563eb;">View Full Post in Admin</a>'
+                '</div>',
+                preview, obj.reported_post.id
+            )
+        elif obj.content_type == 'COMMENT' and obj.reported_comment:
+            return format_html(
+                '<div style="background:#f9fafb;padding:12px;border-radius:8px;border:1px solid #e5e7eb;">'
+                '<strong>Comment:</strong><br>{}<br><br>'
+                '<a href="/admin/users/comment/{}/change/" target="_blank" style="color:#2563eb;">View Comment in Admin</a>'
+                '</div>',
+                preview, obj.reported_comment.id
+            )
+        return format_html(
+            '<div style="background:#f9fafb;padding:12px;border-radius:8px;border:1px solid #e5e7eb;">{}</div>',
+            preview
+        )
+    content_preview_display.short_description = 'Content Preview'
+
+    def reporter_history_display(self, obj):
+        if not obj.reporter:
+            return 'Reporter account deleted'
+        reports_made = Report.objects.filter(reporter=obj.reporter).count()
+        false_reports = Report.objects.filter(reporter=obj.reporter, status='DISMISSED').count()
+        return format_html(
+            '<div style="font-size:12px;">'
+            '<strong>Total reports submitted:</strong> {}<br>'
+            '<strong>Dismissed (false reports):</strong> {}<br>'
+            '{}'
+            '</div>',
+            reports_made,
+            false_reports,
+            '<span style="color:#dc2626;">⚠️ Frequent false reporter</span>' if false_reports >= 3 else ''
+        )
+    reporter_history_display.short_description = 'Reporter History'
+
+    def reported_user_history_display(self, obj):
+        if not obj.reported_user:
+            return 'No user specified or account deleted'
+        reports_against = Report.objects.filter(reported_user=obj.reported_user).count()
+        action_reports = Report.objects.filter(
+            reported_user=obj.reported_user,
+            status='ACTION_TAKEN'
+        ).count()
+        warnings = obj.reported_user.warning_count
+        is_suspended = obj.reported_user.is_suspended
+
+        status_html = ''
+        if is_suspended:
+            status_html = '<span style="color:#dc2626;font-weight:bold;">🚫 CURRENTLY SUSPENDED</span><br>'
+
+        return format_html(
+            '<div style="font-size:12px;">'
+            '{}'
+            '<strong>Total reports against:</strong> {}<br>'
+            '<strong>Reports with action taken:</strong> {}<br>'
+            '<strong>Warning count:</strong> {}<br>'
+            '</div>',
+            status_html,
+            reports_against,
+            action_reports,
+            warnings
+        )
+    reported_user_history_display.short_description = 'Reported User History'
+
+    # ----------------------------------------------------------------
+    # Bulk Actions
+    # ----------------------------------------------------------------
+
+    def mark_under_review(self, request, queryset):
+        queryset.update(
+            status='UNDER_REVIEW',
+            reviewed_by=request.user,
+            reviewed_at=timezone.now()
+        )
+        self.message_user(request, f'🔍 {queryset.count()} report(s) marked as Under Review.')
+    mark_under_review.short_description = '🔍 Mark as Under Review'
+
+    def dismiss_no_violation(self, request, queryset):
+        queryset.update(
+            status='DISMISSED',
+            action_taken='NONE',
+            reviewed_by=request.user,
+            reviewed_at=timezone.now()
+        )
+        self.message_user(request, f'✗ {queryset.count()} report(s) dismissed - no violation found.')
+    dismiss_no_violation.short_description = '✗ Dismiss - No Violation'
+
+    def dismiss_duplicate(self, request, queryset):
+        queryset.update(
+            status='DUPLICATE',
+            action_taken='NONE',
+            reviewed_by=request.user,
+            reviewed_at=timezone.now()
+        )
+        self.message_user(request, f'📋 {queryset.count()} report(s) marked as duplicates.')
+    dismiss_duplicate.short_description = '📋 Dismiss - Duplicate'
+
+    def issue_warning(self, request, queryset):
+        count = 0
+        for report in queryset.select_related('reported_user'):
+            if report.reported_user:
+                report.reported_user.warning_count += 1
+                report.reported_user.save(update_fields=['warning_count'])
+                # Create notification for the warned user
+                Notification.objects.create(
+                    user=report.reported_user,
+                    message=f'You have received a warning for violating our Community Guidelines. '
+                            f'Reason: {report.get_reason_display()}. '
+                            f'Further violations may result in account suspension.'
+                )
+            report.status = 'ACTION_TAKEN'
+            report.action_taken = 'WARNING'
+            report.reviewed_by = request.user
+            report.reviewed_at = timezone.now()
+            report.save()
+            count += 1
+        self.message_user(request, f'⚠️ {count} warning(s) issued to users.')
+    issue_warning.short_description = '⚠️ Issue Warning'
+
+    def remove_content(self, request, queryset):
+        count = 0
+        for report in queryset:
+            if report.reported_post:
+                report.reported_post.delete()
+            elif report.reported_comment:
+                report.reported_comment.delete()
+            report.status = 'ACTION_TAKEN'
+            report.action_taken = 'CONTENT_REMOVED'
+            report.reviewed_by = request.user
+            report.reviewed_at = timezone.now()
+            report.save()
+            count += 1
+        self.message_user(request, f'🗑️ Content removed for {count} report(s).')
+    remove_content.short_description = '🗑️ Remove Reported Content'
+
+    def _suspend_user(self, request, queryset, days, action_code):
+        from datetime import timedelta
+        count = 0
+        for report in queryset.select_related('reported_user'):
+            if report.reported_user:
+                report.reported_user.is_suspended = True
+                report.reported_user.suspension_end_date = timezone.now() + timedelta(days=days)
+                report.reported_user.suspension_reason = f'Suspended for {report.get_reason_display()}'
+                report.reported_user.save(update_fields=['is_suspended', 'suspension_end_date', 'suspension_reason'])
+                Notification.objects.create(
+                    user=report.reported_user,
+                    message=f'Your account has been suspended for {days} days due to a violation of our '
+                            f'Community Guidelines. Reason: {report.get_reason_display()}.'
+                )
+            report.status = 'ACTION_TAKEN'
+            report.action_taken = action_code
+            report.reviewed_by = request.user
+            report.reviewed_at = timezone.now()
+            report.save()
+            count += 1
+        return count
+
+    def suspend_24h(self, request, queryset):
+        count = self._suspend_user(request, queryset, 1, 'SUSPENDED_24H')
+        self.message_user(request, f'🚫 {count} user(s) suspended for 24 hours.')
+    suspend_24h.short_description = '🚫 Suspend User (24 Hours)'
+
+    def suspend_7d(self, request, queryset):
+        count = self._suspend_user(request, queryset, 7, 'SUSPENDED_7D')
+        self.message_user(request, f'🚫 {count} user(s) suspended for 7 days.')
+    suspend_7d.short_description = '🚫 Suspend User (7 Days)'
+
+    def suspend_30d(self, request, queryset):
+        count = self._suspend_user(request, queryset, 30, 'SUSPENDED_30D')
+        self.message_user(request, f'🚫 {count} user(s) suspended for 30 days.')
+    suspend_30d.short_description = '🚫 Suspend User (30 Days)'
+
+    def ban_user(self, request, queryset):
+        count = 0
+        for report in queryset.select_related('reported_user'):
+            if report.reported_user:
+                report.reported_user.is_active = False
+                report.reported_user.is_suspended = True
+                report.reported_user.suspension_reason = f'Permanently banned for {report.get_reason_display()}'
+                report.reported_user.save(update_fields=['is_active', 'is_suspended', 'suspension_reason'])
+            report.status = 'ACTION_TAKEN'
+            report.action_taken = 'BANNED'
+            report.reviewed_by = request.user
+            report.reviewed_at = timezone.now()
+            report.save()
+            count += 1
+        self.message_user(request, f'⛔ {count} user(s) permanently banned.')
+    ban_user.short_description = '⛔ Permanently Ban User'

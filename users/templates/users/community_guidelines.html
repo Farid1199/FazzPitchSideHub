@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+
+{% block title %}Community Guidelines - FazzPitchSideHub{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="bg-white rounded-lg shadow-xl p-8">
+            <div class="flex items-center mb-8">
+                <div class="bg-emerald-100 rounded-full p-3 mr-4">
+                    <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Community Guidelines</h1>
+                    <p class="text-gray-600">Code of Conduct for Fazz PitchSide Hub</p>
+                </div>
+            </div>
+            <p class="text-sm text-gray-500 mb-6">Last updated: {{ "now"|date:"d F Y" }}</p>
+
+            <div class="bg-emerald-50 border-l-4 border-emerald-500 p-4 mb-8">
+                <p class="text-emerald-800">
+                    <strong>Our Mission:</strong> Fazz PitchSide Hub connects grassroots football players, clubs, scouts, and managers
+                    in a professional and supportive environment. These guidelines help maintain a safe space where everyone can pursue
+                    their football career goals.
+                </p>
+            </div>
+
+            <div class="prose max-w-none text-gray-700 space-y-6">
+
+                <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+                    <span class="bg-emerald-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm mr-3">1</span>
+                    Respect and Professionalism
+                </h2>
+                <p>Fazz PitchSide Hub is a professional networking platform. All users must:</p>
+                <ul class="list-disc pl-6 space-y-1">
+                    <li>Treat every member with respect, regardless of their role, playing level, or background.</li>
+                    <li>Use appropriate and professional language in all communications.</li>
+                    <li>Provide constructive feedback rather than personal attacks.</li>
+                    <li>Respect differing opinions on football tactics, training methods, and career decisions.</li>
+                </ul>
+
+                <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+                    <span class="bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm mr-3">2</span>
+                    Prohibited Behaviour
+                </h2>
+                <p>The following behaviours will result in immediate action, including warnings, suspensions, or permanent bans:</p>
+
+                <div class="bg-red-50 border border-red-200 rounded-lg p-4 my-4">
+                    <h3 class="font-semibold text-red-800 mb-2">Harassment and Bullying</h3>
+                    <ul class="list-disc pl-6 space-y-1 text-red-700">
+                        <li>Targeting, intimidating, or repeatedly contacting someone who has asked to be left alone.</li>
+                        <li>Posting content intended to humiliate or embarrass another user.</li>
+                        <li>Coordinating with others to harass a user (pile-ons).</li>
+                    </ul>
+                </div>
+
+                <div class="bg-red-50 border border-red-200 rounded-lg p-4 my-4">
+                    <h3 class="font-semibold text-red-800 mb-2">Hate Speech and Discrimination</h3>
+                    <ul class="list-disc pl-6 space-y-1 text-red-700">
+                        <li>Content that promotes hatred or discrimination based on race, ethnicity, nationality, religion, gender, sexual orientation, disability, or age.</li>
+                        <li>Racist, sexist, homophobic, or otherwise discriminatory language.</li>
+                        <li>Content that dehumanises individuals or groups.</li>
+                    </ul>
+                </div>
+
+                <div class="bg-red-50 border border-red-200 rounded-lg p-4 my-4">
+                    <h3 class="font-semibold text-red-800 mb-2">Scams and Fraud</h3>
+                    <ul class="list-disc pl-6 space-y-1 text-red-700">
+                        <li>Fake trial opportunities or job postings.</li>
+                        <li>Requesting money or payment from other users.</li>
+                        <li>Phishing attempts or links to malicious websites.</li>
+                        <li>Pyramid schemes, multi-level marketing, or fraudulent investment opportunities.</li>
+                    </ul>
+                </div>
+
+                <div class="bg-red-50 border border-red-200 rounded-lg p-4 my-4">
+                    <h3 class="font-semibold text-red-800 mb-2">Impersonation and Fake Accounts</h3>
+                    <ul class="list-disc pl-6 space-y-1 text-red-700">
+                        <li>Pretending to be another person, club, or organisation.</li>
+                        <li>Creating fake accounts to evade bans or manipulate the platform.</li>
+                        <li>Falsely claiming qualifications, affiliations, or playing history.</li>
+                    </ul>
+                </div>
+
+                <div class="bg-red-50 border border-red-200 rounded-lg p-4 my-4">
+                    <h3 class="font-semibold text-red-800 mb-2">Violence and Threats</h3>
+                    <ul class="list-disc pl-6 space-y-1 text-red-700">
+                        <li>Threatening physical harm to any individual.</li>
+                        <li>Encouraging violence or self-harm.</li>
+                        <li>Sharing content that glorifies violence.</li>
+                    </ul>
+                </div>
+
+                <div class="bg-red-50 border border-red-200 rounded-lg p-4 my-4">
+                    <h3 class="font-semibold text-red-800 mb-2">Inappropriate Content</h3>
+                    <ul class="list-disc pl-6 space-y-1 text-red-700">
+                        <li>Sexually explicit or pornographic content.</li>
+                        <li>Graphic violence or gore.</li>
+                        <li>Content involving illegal activities.</li>
+                    </ul>
+                </div>
+
+                <div class="bg-red-50 border border-red-200 rounded-lg p-4 my-4">
+                    <h3 class="font-semibold text-red-800 mb-2">Doxxing and Privacy Violations</h3>
+                    <ul class="list-disc pl-6 space-y-1 text-red-700">
+                        <li>Sharing personal information about others without consent (addresses, phone numbers, private photos).</li>
+                        <li>Posting screenshots of private messages without permission.</li>
+                        <li>Collecting or trading personal data of platform users.</li>
+                    </ul>
+                </div>
+
+                <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+                    <span class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm mr-3">3</span>
+                    Content Standards
+                </h2>
+                <p>When posting content on the platform:</p>
+                <ul class="list-disc pl-6 space-y-1">
+                    <li>Only post content you have the right to share (own photos, videos, or content with permission).</li>
+                    <li>Be accurate and honest in your profile information and claims.</li>
+                    <li>Do not spam or post repetitive, irrelevant content.</li>
+                    <li>Give credit when sharing others' content where appropriate.</li>
+                </ul>
+
+                <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+                    <span class="bg-purple-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm mr-3">4</span>
+                    Reporting Violations
+                </h2>
+                <p>If you encounter content or behaviour that violates these guidelines:</p>
+                <ul class="list-disc pl-6 space-y-1">
+                    <li>Use the <strong>Report</strong> button on posts, comments, or profiles.</li>
+                    <li>Provide a clear description of the issue.</li>
+                    <li>Include any relevant evidence (screenshots are helpful).</li>
+                    <li>Do not engage or retaliate - let our team handle it.</li>
+                </ul>
+                <p class="mt-4">Reports are reviewed confidentially. We will never reveal your identity to the reported user.</p>
+
+                <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+                    <span class="bg-orange-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm mr-3">5</span>
+                    Consequences
+                </h2>
+                <p>Violations of these guidelines will result in the following actions, depending on severity:</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <h3 class="font-semibold text-yellow-800">Warning</h3>
+                        <p class="text-sm text-yellow-700">First-time or minor violations. A notification will be sent explaining the issue.</p>
+                    </div>
+                    <div class="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                        <h3 class="font-semibold text-orange-800">Content Removal</h3>
+                        <p class="text-sm text-orange-700">Violating content will be removed from the platform.</p>
+                    </div>
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                        <h3 class="font-semibold text-red-800">Temporary Suspension</h3>
+                        <p class="text-sm text-red-700">24 hours to 30 days depending on severity. You cannot post or message during this time.</p>
+                    </div>
+                    <div class="bg-gray-800 rounded-lg p-4">
+                        <h3 class="font-semibold text-white">Permanent Ban</h3>
+                        <p class="text-sm text-gray-300">Severe violations result in permanent account termination with no appeal.</p>
+                    </div>
+                </div>
+
+                <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+                    <span class="bg-gray-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm mr-3">6</span>
+                    Appeals
+                </h2>
+                <p>If you believe a moderation decision was made in error:</p>
+                <ul class="list-disc pl-6 space-y-1">
+                    <li>Contact us via the <a href="{% url 'contact' %}" class="text-emerald-600 hover:underline">Contact page</a>.</li>
+                    <li>Include your username and details of the incident.</li>
+                    <li>Appeals are reviewed within 7 days.</li>
+                    <li>Decisions on permanent bans for hate speech, violence, or illegal activity are final.</li>
+                </ul>
+
+                <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+                    <span class="bg-emerald-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm mr-3">7</span>
+                    Building a Positive Community
+                </h2>
+                <p>We encourage all members to:</p>
+                <ul class="list-disc pl-6 space-y-1">
+                    <li>Support fellow players, coaches, and scouts on their football journeys.</li>
+                    <li>Share knowledge, experiences, and opportunities generously.</li>
+                    <li>Celebrate achievements and provide encouragement.</li>
+                    <li>Report violations to help keep our community safe.</li>
+                    <li>Lead by example with professional, respectful behaviour.</li>
+                </ul>
+
+                <div class="bg-gray-100 border border-gray-200 rounded-lg p-6 mt-8">
+                    <h3 class="font-bold text-gray-900 mb-2">Agreement</h3>
+                    <p class="text-gray-700">By using Fazz PitchSide Hub, you agree to follow these Community Guidelines.
+                    We reserve the right to update these guidelines at any time. Continued use of the platform after
+                    changes constitutes acceptance of the revised guidelines.</p>
+                </div>
+
+            </div>
+
+            <div class="mt-8 pt-6 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <a href="{% url 'home' %}" class="text-emerald-600 hover:text-emerald-700 font-medium">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Home
+                </a>
+                <div class="flex gap-4">
+                    <a href="{% url 'privacy_policy' %}" class="text-gray-600 hover:text-gray-700">
+                        Privacy Policy
+                    </a>
+                    <a href="{% url 'contact' %}" class="text-gray-600 hover:text-gray-700">
+                        Contact Us
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,10 @@
+<!-- Report User Button Partial -->
+<!-- Include with: {% include 'users/partials/report_user_button.html' with reported_user=user_to_report %} -->
+
+{% if user.is_authenticated and reported_user != user %}
+<a href="{% url 'report_user' reported_user.id %}"
+   class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-colors"
+   title="Report this user">
+    <i class="fas fa-flag mr-1.5 text-xs"></i>Report
+</a>
+{% endif %}
