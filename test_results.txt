@@ -1,0 +1,130 @@
+Creating test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...
+Found 29 test(s).
+Operations to perform:
+  Synchronize unmigrated apps: messages, staticfiles
+  Apply all migrations: admin, auth, axes, contenttypes, sessions, users
+Synchronizing apps without migrations:
+  Creating tables...
+    Running deferred SQL...
+Running migrations:
+  Applying contenttypes.0001_initial... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0001_initial... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying auth.0007_alter_validators_add_error_messages... OK
+  Applying auth.0008_alter_user_username_max_length... OK
+  Applying auth.0009_alter_user_last_name_max_length... OK
+  Applying auth.0010_alter_group_name_max_length... OK
+  Applying auth.0011_update_proxy_permissions... OK
+  Applying auth.0012_alter_user_first_name_max_length... OK
+  Applying users.0001_initial... OK
+  Applying admin.0001_initial... OK
+  Applying admin.0002_logentry_remove_auto_add... OK
+  Applying admin.0003_logentry_add_action_flag_choices... OK
+  Applying axes.0001_initial... OK
+  Applying axes.0002_auto_20151217_2044... OK
+  Applying axes.0003_auto_20160322_0929... OK
+  Applying axes.0004_auto_20181024_1538... OK
+  Applying axes.0005_remove_accessattempt_trusted... OK
+  Applying axes.0006_remove_accesslog_trusted... OK
+  Applying axes.0007_alter_accessattempt_unique_together... OK
+  Applying axes.0008_accessfailurelog... OK
+  Applying axes.0009_add_session_hash... OK
+  Applying axes.0010_accessattemptexpiration... OK
+  Applying sessions.0001_initial... OK
+  Applying users.0002_clubprofile_league_level_and_more... OK
+  Applying users.0003_newsitem_opportunity... OK
+  Applying users.0004_clubprofile_is_registered_and_more... OK
+  Applying users.0005_alter_user_role_managerprofile... OK
+  Applying users.0006_playerprofile_available_for_club_and_more... OK
+  Applying users.0007_playerprofile_video_file... OK
+  Applying users.0008_remove_managerprofile_coaching_qualifications_and_more... OK
+  Applying users.0009_clubprofile_logo_url_clubprofile_website_url... OK
+  Applying users.0010_clubsource_alter_newsitem_unique_together_and_more... OK
+  Applying users.0011_post... OK
+  Applying users.0012_post_areas_for_improvement_post_coaching_methodology_and_more... OK
+  Applying users.0013_trialapplication_trialview... OK
+  Applying users.0014_opportunity_is_verified_opportunity_verified_by... OK
+  Applying users.0015_alter_qualificationverification_options_and_more... OK
+  Applying users.0016_alter_qualificationverification_certificate_image... OK
+  Applying users.0017_scoutprofile_scout_verified_and_more... OK
+  Applying users.0018_newsitem_category_notification_action_url_and_more... OK
+  Applying users.0019_migrate_availability_status... OK
+  Applying users.0020_comment... OK
+  Applying users.0021_add_comment_notification_type... OK
+  Applying users.0022_newsitem_ai_recruitment_score_newsitem_ai_summary_and_more... OK
+  Applying users.0023_playerprofile_date_of_birth_and_more... OK
+  Applying users.0024_scoutprofile_is_scout_public_and_more... OK
+  Applying users.0025_playerstats... OK
+  Applying users.0026_contactsubmission... OK
+  Applying users.0027_add_report_system... OK
+  Applying users.0028_add_saved_post_model... OK
+System check identified no issues (0 silenced).
+test_already_applied_suppressed (users.tests.AIRecommendationTests.test_already_applied_suppressed)
+Test Layer 5: trials the player already applied to are suppressed. ... ok
+test_closed_trials_excluded (users.tests.AIRecommendationTests.test_closed_trials_excluded)
+Test Layer 1: closed trials are never recommended. ... ok
+test_matching_trial_high_score (users.tests.AIRecommendationTests.test_matching_trial_high_score)
+Test that position + level + location match produces a high score. ... ok
+test_matching_trial_ranked_first (users.tests.AIRecommendationTests.test_matching_trial_ranked_first)
+Test that the scoring logic correctly ranks relevant trials higher. ... ok
+test_club_registration_creates_profile (users.tests.AuthenticationTests.test_club_registration_creates_profile)
+Test that registering as a CLUB automatically creates a ClubProfile. ... ok
+test_manager_registration_creates_profile (users.tests.AuthenticationTests.test_manager_registration_creates_profile)
+Test that registering as a MANAGER automatically creates a ManagerProfile. ... ok
+test_player_registration_creates_profile (users.tests.AuthenticationTests.test_player_registration_creates_profile)
+Test that registering as a PLAYER automatically creates a PlayerProfile. ... ok
+test_scout_registration_creates_profile (users.tests.AuthenticationTests.test_scout_registration_creates_profile)
+Test that registering as a SCOUT automatically creates a ScoutProfile. ... ok
+test_club_can_access_post_trial (users.tests.RBACTests.test_club_can_access_post_trial)
+Verify clubs can access the trial posting page. ... ok
+test_player_cannot_access_post_trial (users.tests.RBACTests.test_player_cannot_access_post_trial)
+Verify players are redirected away from the trial posting page (RBAC). ... ok
+test_player_cannot_access_shortlist (users.tests.RBACTests.test_player_cannot_access_shortlist)
+Verify players cannot access the club shortlist page. ... ok
+test_unauthenticated_user_redirected_from_dashboard (users.tests.RBACTests.test_unauthenticated_user_redirected_from_dashboard)
+Integration test: visiting /dashboard/ while logged out redirects to login. ... ok
+test_exclusion_allows_mens_content (users.tests.RSSEngineTests.test_exclusion_allows_mens_content)
+Test that Layer 1 allows legitimate men's first-team content. ... ok
+test_exclusion_filters_womens_content (users.tests.RSSEngineTests.test_exclusion_filters_womens_content)
+Test that Layer 1 correctly filters out women's content. ... ok
+test_exclusion_filters_youth_content (users.tests.RSSEngineTests.test_exclusion_filters_youth_content)
+Test that Layer 1 correctly filters out U18/academy content. ... ok
+test_match_report_explicit_phrase (users.tests.RSSEngineTests.test_match_report_explicit_phrase)
+Test that explicit match report phrases trigger detection. ... ok
+test_match_report_scoreline_in_title (users.tests.RSSEngineTests.test_match_report_scoreline_in_title)
+Test that a scoreline in the title triggers match report detection. ... ok
+test_transfer_strong_phrase (users.tests.RSSEngineTests.test_transfer_strong_phrase)
+Test that strong transfer phrases are correctly detected. ... ok
+test_transfer_weak_word_no_scoreline (users.tests.RSSEngineTests.test_transfer_weak_word_no_scoreline)
+Test that weak transfer words trigger when no scoreline is present. ... ok
+test_transfer_weak_word_with_scoreline_ignored (users.tests.RSSEngineTests.test_transfer_weak_word_with_scoreline_ignored)
+Test that weak transfer words are ignored when a scoreline is present ... ok
+test_trial_keyword_detection_negative (users.tests.RSSEngineTests.test_trial_keyword_detection_negative)
+Test that non-trial content is not flagged as a trial. ... ok
+test_trial_keyword_detection_positive (users.tests.RSSEngineTests.test_trial_keyword_detection_positive)
+Test that confirmed trial language is correctly detected. ... ok
+test_trial_with_signing_language_rejected (users.tests.RSSEngineTests.test_trial_with_signing_language_rejected)
+Test that a trial keyword + announcement language is NOT flagged as trial. ... ok
+test_home_page_loads (users.tests.SignupIntegrationTests.test_home_page_loads)
+Test that the home page renders successfully. ... ok
+test_login_page_loads (users.tests.SignupIntegrationTests.test_login_page_loads)
+Test that the login page renders successfully. ... ok
+test_signup_page_loads (users.tests.SignupIntegrationTests.test_signup_page_loads)
+Test that the signup page renders successfully. ... ok
+test_duplicate_application_prevented (users.tests.TrialApplicationTests.test_duplicate_application_prevented)
+Integration test: applying twice does not create a duplicate record. ... ok
+test_express_interest_creates_record (users.tests.TrialApplicationTests.test_express_interest_creates_record)
+Integration test: POSTing to express interest creates a database record. ... ok
+test_withdraw_interest_removes_record (users.tests.TrialApplicationTests.test_withdraw_interest_removes_record)
+Integration test: withdrawing interest removes the application record. ... ok
+
+----------------------------------------------------------------------
+Ran 29 tests in 11.344s
+
+OK
+Destroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...
