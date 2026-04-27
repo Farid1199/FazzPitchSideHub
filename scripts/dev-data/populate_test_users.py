@@ -1,6 +1,6 @@
 """
 Script to create test players and managers for all positions.
-Run this script with: python populate_test_users.py
+Run this script with: python scripts/dev-data/populate_test_users.py
 """
 
 import os

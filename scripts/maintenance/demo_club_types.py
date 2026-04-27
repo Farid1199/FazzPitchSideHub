@@ -64,7 +64,7 @@ print("=" * 70)
 
 print("\n1️⃣ Add clubs for RSS tracking (no user account):")
 print('   python manage.py add_club "Club Name" "https://club.com/feed"')
-print("   OR edit and run: python bulk_add_clubs.py")
+print("   OR edit and run: python scripts/dev-data/bulk_add_clubs.py")
 print("   OR use Django Admin interface")
 
 print("\n2️⃣ Clubs sign up themselves (creates user account):")

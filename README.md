@@ -74,11 +74,35 @@ Run tests:
 python manage.py test
 ```
 
+Run utility scripts (now organized under scripts/):
+
+```powershell
+# Dev data setup
+python scripts/dev-data/populate_test_users.py
+python scripts/dev-data/populate_test_clubs.py
+
+# Maintenance helpers
+python scripts/maintenance/demo_club_types.py
+python scripts/maintenance/check_users.py
+
+# Manual script-based checks
+python scripts/manual-tests/test_search.py
+```
+
 Open the Django admin:
 
 ```text
 http://127.0.0.1:8000/admin/
 ```
+
+## Project structure
+
+The repository root now keeps only core app files. Utility scripts are grouped by purpose:
+
+- scripts/dev-data/: test data generation and local seed helpers
+- scripts/maintenance/: maintenance and data-fix scripts
+- scripts/manual-tests/: script-style checks (separate from Django test suite)
+- scripts/debug/: temporary debugging scripts
 
 ## Common problem
 

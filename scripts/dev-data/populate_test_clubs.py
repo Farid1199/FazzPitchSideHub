@@ -1,6 +1,6 @@
 """
 Script to create 15 test clubs for the Find Clubs feature.
-Run this script with: python populate_test_clubs.py
+Run this script with: python scripts/dev-data/populate_test_clubs.py
 """
 
 import os
