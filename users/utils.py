@@ -258,7 +258,11 @@ def get_recommendations(player_profile):
     # out expired job listings before any scoring.
     # ============================================================
     opportunities = list(
-        Opportunity.objects.select_related('club', 'source').filter(is_open=True)
+        Opportunity.objects.select_related('club', 'source').filter(
+            is_open=True,
+            category='trial',
+            target_position__isnull=False,
+        ).exclude(target_position__exact='')
     )
 
     if not opportunities:
@@ -385,15 +389,24 @@ def get_recommendations(player_profile):
         else:
             match_quality = 'none'
 
+        # Prevent weak suggestions caused only by freshness. A trial must have
+        # at least one real matching signal to be shown as a recommendation.
+        core_match_signals = {'position', 'level', 'location', 'nlp', 'collaborative', 'viewed'}
+        has_core_match = bool(core_match_signals.intersection(match_reasons))
+
         scored_opportunities.append({
             'opportunity': opportunity,
             'score': score,
             'match_quality': match_quality,
             'match_reasons': match_reasons,
+            'has_core_match': has_core_match,
         })
 
     # Filter out score <= 0 (unmatched or suppressed)
-    matched = [item for item in scored_opportunities if item['score'] > 0]
+    matched = [
+        item for item in scored_opportunities
+        if item['score'] > 0 and item['has_core_match']
+    ]
 
     # Sort by score (highest first), then by freshness
     matched.sort(

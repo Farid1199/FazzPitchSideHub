@@ -938,6 +938,7 @@ def post_opportunity(request):
         if form.is_valid():
             opportunity = form.save(commit=False)
             opportunity.club = request.user.club_profile
+            opportunity.category = 'trial'
             # If no link provided, use a UUID placeholder so the unique constraint
             # is satisfied; we'll update it to the canonical URL after the pk is known.
             if not opportunity.link:

@@ -110,6 +110,7 @@ class AIRecommendationTests(TestCase):
             description='Looking for a clinical finisher to join our Step 3 side.',
             target_position='Striker',
             club=self.club_profile,
+            category='trial',
             is_open=True,
             link=f'http://test.com/{uuid.uuid4()}',
             published_date=timezone.now()
@@ -120,6 +121,7 @@ class AIRecommendationTests(TestCase):
             title='Goalkeeper Needed',
             description='Searching for a goalie for a London-based Step 6 squad.',
             target_position='Goalkeeper',
+            category='trial',
             is_open=True,
             link=f'http://test.com/{uuid.uuid4()}',
             published_date=timezone.now()
@@ -160,6 +162,52 @@ class AIRecommendationTests(TestCase):
         recommendations = get_recommendations(self.profile)
         recommended_ids = [r['opportunity'].pk for r in recommendations]
         self.assertNotIn(self.match_trial.pk, recommended_ids)
+
+    def test_no_core_match_returns_no_recommendations(self):
+        """Trials should not be recommended when only freshness contributes to score."""
+        self.match_trial.delete()
+        self.no_match_trial.delete()
+
+        Opportunity.objects.create(
+            title='Recent Trial With No Match Signals',
+            description='Open session this week for local squad.',
+            target_position='Goalkeeper',
+            category='trial',
+            is_open=True,
+            link=f'http://test.com/{uuid.uuid4()}',
+            published_date=timezone.now()
+        )
+
+        recommendations = get_recommendations(self.profile)
+        self.assertEqual(recommendations, [])
+
+    def test_non_trial_or_staff_role_excluded(self):
+        """Player recommendations should ignore recruitment signals and staff roles."""
+        self.match_trial.delete()
+        self.no_match_trial.delete()
+
+        Opportunity.objects.create(
+            title='Away kit sponsor announcement',
+            description='Club update with no player trial details.',
+            target_position='Striker',
+            category='recruitment_signal',
+            is_open=True,
+            link=f'http://test.com/{uuid.uuid4()}',
+            published_date=timezone.now()
+        )
+
+        Opportunity.objects.create(
+            title='Goalkeeper Coach Vacancy',
+            description='We are recruiting a goalkeeper coach for first team staff.',
+            target_position='',
+            category='trial',
+            is_open=True,
+            link=f'http://test.com/{uuid.uuid4()}',
+            published_date=timezone.now()
+        )
+
+        recommendations = get_recommendations(self.profile)
+        self.assertEqual(recommendations, [])
 
 
 # ============================================================
