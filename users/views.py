@@ -306,7 +306,15 @@ def login_view(request):
     """
     from axes.exceptions import AxesBackendRequestParameterRequired
     if request.method == 'POST':
-        form = AuthenticationForm(request, data=request.POST)
+        # Allow login using either username or email.
+        post_data = request.POST.copy()
+        submitted_identifier = (post_data.get('username') or '').strip()
+        if '@' in submitted_identifier:
+            matched_user = User.objects.filter(email__iexact=submitted_identifier).first()
+            if matched_user:
+                post_data['username'] = matched_user.username
+
+        form = AuthenticationForm(request, data=post_data)
         try:
             if form.is_valid():
                 user = form.get_user()

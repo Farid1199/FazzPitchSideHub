@@ -233,6 +233,17 @@ def _get_location_match(player_postcode, opportunity):
     return False
 
 
+def _is_staff_role_opportunity(opportunity):
+    """Return True when content indicates a non-player/staff vacancy."""
+    staff_keywords = {
+        'coach', 'coaching', 'manager', 'assistant manager', 'head coach',
+        'physio', 'physiotherapist', 'kitman', 'kit man', 'analyst',
+        'volunteer', 'administrator', 'secretary', 'treasurer', 'staff'
+    }
+    combined = f"{opportunity.title or ''} {opportunity.description or ''}".lower()
+    return any(keyword in combined for keyword in staff_keywords)
+
+
 def get_recommendations(player_profile):
     """
     Hybrid Recommendation Engine — 6-layer scoring system.
@@ -264,6 +275,7 @@ def get_recommendations(player_profile):
             target_position__isnull=False,
         ).exclude(target_position__exact='')
     )
+    opportunities = [opp for opp in opportunities if not _is_staff_role_opportunity(opp)]
 
     if not opportunities:
         return []

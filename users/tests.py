@@ -199,7 +199,7 @@ class AIRecommendationTests(TestCase):
         Opportunity.objects.create(
             title='Goalkeeper Coach Vacancy',
             description='We are recruiting a goalkeeper coach for first team staff.',
-            target_position='',
+            target_position='Goalkeeper',
             category='trial',
             is_open=True,
             link=f'http://test.com/{uuid.uuid4()}',
@@ -435,3 +435,37 @@ class SignupIntegrationTests(TestCase):
         """Test that the home page renders successfully."""
         response = self.client.get(reverse('home'))
         self.assertEqual(response.status_code, 200)
+
+    def test_login_with_username_succeeds(self):
+        """Users can log in with their username and password."""
+        username = f'user_{uuid.uuid4().hex[:8]}'
+        password = 'TestPass123!'
+        user = _create_user_with_role(username, 'PLAYER', password=password)
+        user.email = f'{username}@example.com'
+        user.save(update_fields=['email'])
+
+        response = self.client.post(reverse('login'), {
+            'username': username,
+            'password': password,
+        })
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse('dashboard'))
+
+    def test_login_with_email_succeeds(self):
+        """Users can log in with their email and password."""
+        username = f'user_{uuid.uuid4().hex[:8]}'
+        password = 'TestPass123!'
+        email = f'{username}@example.com'
+
+        user = _create_user_with_role(username, 'PLAYER', password=password)
+        user.email = email
+        user.save(update_fields=['email'])
+
+        response = self.client.post(reverse('login'), {
+            'username': email,
+            'password': password,
+        })
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse('dashboard'))
