@@ -111,6 +111,12 @@ If PowerShell blocks the activate script, run this once in PowerShell:
 ```powershell
 Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 ```
+Then activate the environment again:
+
+```powershell
+\env\Scripts\Activate.ps1
+```
+
 
 ## Login Credentials for the different Stakeholders
 
@@ -148,8 +154,4 @@ Username: scout
 Password: Scoutscout
 
 
-Then activate the environment again:
 
-```powershell
-\env\Scripts\Activate.ps1
-```
