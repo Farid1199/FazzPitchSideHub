@@ -112,6 +112,42 @@ If PowerShell blocks the activate script, run this once in PowerShell:
 Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 ```
 
+## Login Credentials for the different Stakeholders
+
+
+
+Super User:
+
+Email: admin@test.com
+Username: admin
+Password: Adminadmin
+
+
+Player User:
+
+Email: player@gmail.com
+Username: player
+Password: Playerplayer
+
+Club User:
+
+Email: club@gmail.com
+Username: club
+Password: Clubclub
+
+Manager User:
+
+Email: manager@gmail.com
+Username: manager
+Password: Managermanager
+
+Scout User:
+
+Email: scout@gmail.com
+Username: scout
+Password: Scoutscout
+
+
 Then activate the environment again:
 
 ```powershell
