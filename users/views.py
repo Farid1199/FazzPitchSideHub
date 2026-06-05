@@ -428,6 +428,12 @@ def dashboard_view(request):
             position_groups[group].append(entry)
         context['position_groups'] = position_groups
 
+        # Fetch scout verification status so the dashboard CTA can react
+        try:
+            context['scout_verification'] = ScoutVerification.objects.get(scout=scout)
+        except ScoutVerification.DoesNotExist:
+            context['scout_verification'] = None
+
     return render(request, 'users/dashboard.html', context)
 
 def home_view(request):
@@ -697,6 +703,7 @@ def search_players(request):
     postcode = request.GET.get('postcode', '')
     name = request.GET.get('name', '')
     availability = request.GET.get('availability', '')
+    manager_name = request.GET.get('manager_name', '')
     
     # Start with all player profiles that are available
     players = PlayerProfile.objects.select_related('user').filter(
@@ -739,8 +746,20 @@ def search_players(request):
         if c[0] in SEARCHABLE_STATUSES
     ]
     
+    # Manager search
+    managers = ManagerProfile.objects.select_related('user').all()
+    if manager_name:
+        managers = managers.filter(
+            Q(user__username__icontains=manager_name.strip()) |
+            Q(user__first_name__icontains=manager_name.strip()) |
+            Q(user__last_name__icontains=manager_name.strip())
+        )
+    else:
+        managers = managers.none()
+
     context = {
         'players': players,
+        'managers': managers,
         'position_choices': position_choices,
         'level_choices': level_choices,
         'availability_choices': availability_choices,
@@ -749,6 +768,7 @@ def search_players(request):
         'search_postcode': postcode,
         'search_name': name,
         'search_availability': availability,
+        'search_manager_name': manager_name,
         'total_results': players.count(),
     }
     
@@ -1175,6 +1195,32 @@ def player_profile(request, username):
             ).exists()
     
     return render(request, 'users/player_profile.html', context)
+
+
+def manager_profile(request, username):
+    """
+    Display a manager's public profile including verification status.
+    """
+    manager_user = get_object_or_404(User, username=username, role='MANAGER')
+    manager = get_object_or_404(ManagerProfile, user=manager_user)
+
+    # Get their most recent APPROVED verification (if any)
+    approved_verification = QualificationVerification.objects.filter(
+        manager=manager, status='APPROVED'
+    ).order_by('-reviewed_at').first()
+
+    # All verification requests (to show history of what's been verified)
+    all_verifications = QualificationVerification.objects.filter(
+        manager=manager, status='APPROVED'
+    ).order_by('-reviewed_at')
+
+    context = {
+        'manager': manager,
+        'manager_user': manager_user,
+        'approved_verification': approved_verification,
+        'all_verifications': all_verifications,
+    }
+    return render(request, 'users/manager_profile.html', context)
 
 
 def community_hub(request):

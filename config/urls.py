@@ -37,11 +37,15 @@ _PROTECTED_MEDIA_DIRS = {'scout_certificates', 'coaching_certificates', 'coachin
 
 if settings.DEBUG:
     def _safe_media_serve(request, path, document_root=None):
-        """Serve media files but block direct access to protected directories."""
+        """Serve media files but block direct access to protected directories.
+        Staff and superusers are allowed through so the Django admin can
+        preview coaching/scout certificates.
+        """
         from django.http import Http404
         top_dir = path.split('/')[0] if '/' in path else path
         if top_dir in _PROTECTED_MEDIA_DIRS:
-            raise Http404
+            if not (request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser)):
+                raise Http404
         return static_serve(request, path, document_root=document_root)
 
     urlpatterns += [

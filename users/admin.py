@@ -281,12 +281,22 @@ class QualificationVerificationAdmin(admin.ModelAdmin):
     
     def certificate_preview(self, obj):
         if obj.certificate_image:
+            url = obj.certificate_image.url
+            name = obj.certificate_image.name.lower()
+            if name.endswith('.pdf'):
+                return format_html(
+                    '<div style="border:2px solid #d1d5db;border-radius:8px;padding:8px;display:inline-block;">'
+                    '<embed src="{}" type="application/pdf" width="500" height="400" style="border-radius:4px;"/>'
+                    '<br><a href="{}" target="_blank" style="color:#2563eb;font-weight:bold;">'
+                    '&#128196; Open PDF in New Tab</a></div>',
+                    url, url
+                )
             return format_html(
                 '<div style="border:2px solid #d1d5db;border-radius:8px;padding:8px;display:inline-block;">'
                 '<img src="{}" style="max-width:500px;max-height:400px;border-radius:4px;"/>'
                 '<br><a href="{}" target="_blank" style="color:#2563eb;font-weight:bold;">'
-                '📥 Open Full Size in New Tab</a></div>',
-                obj.certificate_image.url, obj.certificate_image.url
+                '&#128196; Open Full Size in New Tab</a></div>',
+                url, url
             )
         return "No certificate uploaded"
     certificate_preview.short_description = 'Certificate Preview'
@@ -323,7 +333,14 @@ class QualificationVerificationAdmin(admin.ModelAdmin):
             '✅ Yes' if obj.certificate_image else '❌ No',
         )
     verification_checklist_display.short_description = 'Quick Summary'
-    
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == 'verified_by':
+            from django.contrib.auth import get_user_model
+            User = get_user_model()
+            kwargs['queryset'] = User.objects.filter(is_staff=True)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
     def action_buttons(self, obj):
         if obj.status == 'PENDING':
             return format_html(
@@ -715,6 +732,13 @@ class ScoutVerificationAdmin(admin.ModelAdmin):
         )
         return format_html('<table style="font-size:13px;">{}</table>', rows)
     verification_checklist_display.short_description = 'Verification Checklist'
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == 'verified_by':
+            from django.contrib.auth import get_user_model
+            User = get_user_model()
+            kwargs['queryset'] = User.objects.filter(is_staff=True)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     # ------------------------------------------------------------------
     # Bulk actions

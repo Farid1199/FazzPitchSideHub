@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ manager_user.username }} - Manager Profile{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <!-- Back Button -->
+        <div class="mb-6">
+            <a href="{% url 'search_players' %}" class="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Back to Search
+            </a>
+        </div>
+
+        <!-- Profile Card -->
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+
+            <!-- Header -->
+            <div class="relative bg-gradient-to-r from-blue-700 to-blue-500 px-8 py-12">
+                <div class="flex items-center space-x-6">
+                    <div class="w-32 h-32 bg-white rounded-full flex items-center justify-center shadow-xl flex-shrink-0">
+                        <svg class="w-20 h-20 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center flex-wrap gap-3 mb-2">
+                            <h1 class="text-4xl font-bold text-white">{{ manager_user.username }}</h1>
+                            {% if approved_verification %}
+                                <span class="inline-flex items-center bg-green-400 text-green-900 px-3 py-1 rounded-full text-sm font-bold">
+                                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                    </svg>
+                                    Fazz Verified
+                                </span>
+                            {% endif %}
+                        </div>
+                        {% if manager.current_role %}
+                            <p class="text-blue-100 text-xl">{{ manager.current_role }}</p>
+                        {% endif %}
+                        {% if manager.club_name %}
+                            <p class="text-blue-200 text-lg mt-1">{{ manager.club_name }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Content -->
+            <div class="p-8">
+
+                <!-- Key Info Grid -->
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">Manager Information</h2>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {% if manager.current_role %}
+                            <div class="bg-gray-50 rounded-lg p-4 text-center">
+                                <p class="text-sm text-gray-500 mb-1">Current Role</p>
+                                <p class="text-base font-bold text-gray-900">{{ manager.current_role }}</p>
+                            </div>
+                        {% endif %}
+                        {% if manager.club_name %}
+                            <div class="bg-gray-50 rounded-lg p-4 text-center">
+                                <p class="text-sm text-gray-500 mb-1">Club</p>
+                                <p class="text-base font-bold text-gray-900">{{ manager.club_name }}</p>
+                            </div>
+                        {% endif %}
+                        {% if manager.years_of_experience %}
+                            <div class="bg-gray-50 rounded-lg p-4 text-center">
+                                <p class="text-sm text-gray-500 mb-1">Experience</p>
+                                <p class="text-base font-bold text-gray-900">{{ manager.years_of_experience }} years</p>
+                            </div>
+                        {% endif %}
+                        {% if manager.location_postcode %}
+                            <div class="bg-gray-50 rounded-lg p-4 text-center">
+                                <p class="text-sm text-gray-500 mb-1">Location</p>
+                                <p class="text-base font-bold text-gray-900">{{ manager.location_postcode }}</p>
+                            </div>
+                        {% endif %}
+                        {% if manager.preferred_formation %}
+                            <div class="bg-gray-50 rounded-lg p-4 text-center">
+                                <p class="text-sm text-gray-500 mb-1">Preferred Formation</p>
+                                <p class="text-base font-bold text-gray-900">{{ manager.preferred_formation }}</p>
+                            </div>
+                        {% endif %}
+                        <div class="bg-gray-50 rounded-lg p-4 text-center">
+                            <p class="text-sm text-gray-500 mb-1">Availability</p>
+                            <p class="text-base font-bold
+                                {% if manager.availability_status == 'OPEN' %}text-green-600
+                                {% else %}text-gray-900{% endif %}">
+                                {{ manager.get_availability_status_display|default:"Not set" }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Verification Section -->
+                {% if all_verifications %}
+                    <div class="mb-8">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-4">Verified Qualifications</h2>
+                        <div class="space-y-3">
+                            {% for v in all_verifications %}
+                                <div class="flex items-center bg-green-50 border border-green-200 rounded-lg p-4">
+                                    <svg class="w-6 h-6 text-green-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                    </svg>
+                                    <div>
+                                        <p class="font-semibold text-green-900">{{ v.get_qualification_type_display }}</p>
+                                        <p class="text-sm text-green-700">Verified by Fazz Pitchside{% if v.reviewed_at %} on {{ v.reviewed_at|date:"d M Y" }}{% endif %}</p>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2">
+                            <svg class="w-3 h-3 inline mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
+                            Verification is by Fazz Pitchside only and is not an official FA endorsement.
+                        </p>
+                    </div>
+                {% endif %}
+
+                <!-- Coaching Philosophy -->
+                {% if manager.coaching_philosophy %}
+                    <div class="mb-8">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-4">Coaching Philosophy</h2>
+                        <div class="bg-blue-50 rounded-lg p-6">
+                            <p class="text-gray-700 leading-relaxed">{{ manager.coaching_philosophy }}</p>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- Career History -->
+                {% if manager.career_history %}
+                    <div class="mb-8">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-4">Career History</h2>
+                        <div class="bg-gray-50 rounded-lg p-6">
+                            <p class="text-gray-700 leading-relaxed whitespace-pre-line">{{ manager.career_history }}</p>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- Achievements -->
+                {% if manager.achievements %}
+                    <div class="mb-8">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-4">Achievements</h2>
+                        <div class="bg-yellow-50 rounded-lg p-6">
+                            <p class="text-gray-700 leading-relaxed whitespace-pre-line">{{ manager.achievements }}</p>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- No info fallback -->
+                {% if not manager.coaching_philosophy and not manager.career_history and not manager.achievements %}
+                    <div class="text-center py-8 text-gray-400">
+                        <svg class="w-12 h-12 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <p>This manager hasn't filled in their full profile yet.</p>
+                    </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
