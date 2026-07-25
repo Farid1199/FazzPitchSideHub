@@ -68,7 +68,7 @@
                 <div class="hidden md:flex flex-1 justify-center items-center h-full space-x-2 lg:space-x-8 ml-6" role="tablist" aria-label="Primary navigation">
                     <a href="{% url 'home' %}" class="relative flex items-center h-full px-4 text-gray-500 hover:text-primary transition-colors duration-200 group focus:outline-none" aria-label="Home">
                         <div class="flex items-center gap-2 px-3 py-2 rounded-xl group-hover:bg-green-50 transition-colors {% if url_name == 'home' %}text-primary{% endif %}">
-                            <i class="fa{% if url_name == 'home' %}s{% else %}l{% endif %} fa-house text-xl"></i>
+                            <i class="fas fa-home text-xl"></i>
                             <span class="font-medium text-sm hidden lg:block">Home</span>
                         </div>
                         {% if url_name == 'home' %}<span class="absolute bottom-0 left-0 right-0 h-1 bg-primary rounded-t-lg"></span>{% endif %}
@@ -76,7 +76,7 @@
                     
                     <a href="{% url 'social_feed' %}" class="relative flex items-center h-full px-4 text-gray-500 hover:text-primary transition-colors duration-200 group focus:outline-none" aria-label="Social Feed">
                         <div class="flex items-center gap-2 px-3 py-2 rounded-xl group-hover:bg-green-50 transition-colors {% if url_name == 'social_feed' %}text-primary{% endif %}">
-                            <i class="fa{% if url_name == 'social_feed' %}s{% else %}l{% endif %} fa-users text-xl"></i>
+                            <i class="fas fa-users text-xl"></i>
                             <span class="font-medium text-sm hidden lg:block">Community</span>
                         </div>
                         {% if url_name == 'social_feed' %}<span class="absolute bottom-0 left-0 right-0 h-1 bg-primary rounded-t-lg"></span>{% endif %}
@@ -84,7 +84,7 @@
 
                     <a href="{% url 'feeds' %}" class="relative flex items-center h-full px-4 text-gray-500 hover:text-primary transition-colors duration-200 group focus:outline-none" aria-label="Feeds">
                         <div class="flex items-center gap-2 px-3 py-2 rounded-xl group-hover:bg-green-50 transition-colors {% if url_name == 'feeds' or url_name == 'feeds_trial' or url_name == 'feeds_general' or url_name == 'feeds_transfer' or url_name == 'feeds_match' or url_name == 'feeds_signals' %}text-primary{% endif %}">
-                            <i class="fa{% if url_name == 'feeds' or url_name == 'feeds_trial' or url_name == 'feeds_general' or url_name == 'feeds_transfer' or url_name == 'feeds_match' or url_name == 'feeds_signals' %}s{% else %}l{% endif %} fa-newspaper text-xl"></i>
+                            <i class="fas fa-newspaper text-xl"></i>
                             <span class="font-medium text-sm hidden lg:block">News Feeds</span>
                         </div>
                         {% if url_name == 'feeds' or url_name == 'feeds_trial' or url_name == 'feeds_general' or url_name == 'feeds_transfer' or url_name == 'feeds_match' or url_name == 'feeds_signals' %}<span class="absolute bottom-0 left-0 right-0 h-1 bg-primary rounded-t-lg"></span>{% endif %}
@@ -92,7 +92,7 @@
 
                     <a href="{% url 'pathways_home' %}" class="relative flex items-center h-full px-4 text-gray-500 hover:text-primary transition-colors duration-200 group focus:outline-none" aria-label="Football Pathways">
                         <div class="flex items-center gap-2 px-3 py-2 rounded-xl group-hover:bg-green-50 transition-colors {% if 'pathways' in url_name %}text-primary{% endif %}">
-                            <i class="fa{% if 'pathways' in url_name %}s{% else %}l{% endif %} fa-compass text-xl"></i>
+                            <i class="fas fa-compass text-xl"></i>
                             <span class="font-medium text-sm hidden lg:block">Pathways</span>
                         </div>
                         {% if 'pathways' in url_name %}<span class="absolute bottom-0 left-0 right-0 h-1 bg-primary rounded-t-lg"></span>{% endif %}
@@ -100,7 +100,7 @@
                     
                     <a href="{% url 'search_players' %}" class="relative flex items-center h-full px-4 text-gray-500 hover:text-primary transition-colors duration-200 group focus:outline-none" aria-label="Find People">
                         <div class="flex items-center gap-2 px-3 py-2 rounded-xl group-hover:bg-green-50 transition-colors {% if url_name == 'search_players' or url_name == 'search_clubs' %}text-primary{% endif %}">
-                            <i class="fa{% if url_name == 'search_players' or url_name == 'search_clubs' %}s{% else %}l{% endif %} fa-magnifying-glass text-xl"></i>
+                            <i class="fas fa-search text-xl"></i>
                             <span class="font-medium text-sm hidden lg:block">Search</span>
                         </div>
                         {% if url_name == 'search_players' or url_name == 'search_clubs' %}<span class="absolute bottom-0 left-0 right-0 h-1 bg-primary rounded-t-lg"></span>{% endif %}
@@ -113,19 +113,19 @@
                     
                     <!-- Search Icon (Mobile Only) -->
                     <a href="{% url 'search_players' %}" class="md:hidden p-2 text-gray-900 hover:bg-gray-100 rounded-full transition-colors">
-                        <i class="fal fa-magnifying-glass text-xl"></i>
+                        <i class="fas fa-search text-xl"></i>
                     </a>
 
                     <!-- Messages -->
                     <a href="{% url 'inbox' %}" class="relative p-2 text-gray-900 hover:bg-gray-100 rounded-full transition-colors focus:ring-2 focus:ring-primary outline-none" aria-label="Messages">
-                        <i class="{% if url_name == 'inbox' %}fas{% else %}fal{% endif %} fa-paper-plane text-xl"></i>
+                        <i class="fas fa-paper-plane text-xl"></i>
                         <span id="nav-msg-badge" class="hidden absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-sm ring-2 ring-white">0</span>
                     </a>
 
                     <!-- Notifications Dropdown (Alpine.js handled) -->
                     <div x-data="{ open: false }" class="relative flex items-center h-full">
                         <button @click="open = !open; if(open) setTimeout(() => document.getElementById('mark-all-read-btn')?.focus(), 100);" @keydown.escape="open = false" class="relative p-2 text-gray-900 hover:bg-gray-100 rounded-full transition-colors focus:ring-2 focus:ring-primary outline-none" id="notif-button" aria-label="Notifications" aria-haspopup="true" :aria-expanded="open">
-                            <i class="{% if url_name == 'notifications' %}fas{% else %}fal{% endif %} fa-heart text-xl"></i>
+                            <i class="fas fa-bell text-xl"></i>
                             <span id="notif-badge" class="hidden absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-sm ring-2 ring-white">0</span>
                         </button>
                         
@@ -200,52 +200,34 @@
         {% endwith %}
     </nav>
 
-        <!-- SECONDARY Navigation Bar (Feeds page only) -->
-        {% if is_feeds_page %}
+        <!-- SECONDARY Navigation Bar (Only for specific pages if needed) -->
+        {% if is_community_page or request.resolver_match.url_name == 'social_feed' or request.resolver_match.url_name == 'my_posts' or request.resolver_match.url_name == 'create_post' %}
         <div class="bg-gray-50 border-t border-b border-gray-200" style="position:sticky; top:56px; z-index:40;">
             <div style="max-width:1400px; margin:0 auto; padding:0 1rem;">
                 <div class="hidden md:flex md:items-center md:space-x-6 h-12 overflow-x-auto whitespace-nowrap custom-scrollbar">
-                    <a href="{% url 'feeds' %}"
-                        class="{% if not current_category %}text-[#1E5631] border-b-2 border-[#1E5631] font-bold{% else %}text-gray-600 hover:text-[#1E5631]{% endif %} text-sm transition duration-200 py-2 px-1">
-                        All Feeds
-                    </a>
                     
                     <!-- App user feeds -->
                     <a href="{% url 'social_feed' %}?scope=all"
-                        class="{% if current_category == 'social_all' %}text-[#1E5631] border-b-2 border-[#1E5631] font-bold{% else %}text-gray-600 hover:text-[#1E5631]{% endif %} text-sm transition duration-200 py-2 px-1">
+                        class="{% if current_category == 'social_all' or request.resolver_match.url_name == 'social_feed' and not request.GET.scope == 'following' %}text-[#1E5631] border-b-2 border-[#1E5631] font-bold{% else %}text-gray-600 hover:text-[#1E5631]{% endif %} text-sm transition duration-200 py-2 px-1">
                         Community Posts
                     </a>
                     {% if user.is_authenticated %}
                     <a href="{% url 'social_feed' %}?scope=following"
-                        class="{% if current_category == 'social_following' %}text-[#1E5631] border-b-2 border-[#1E5631] font-bold{% else %}text-gray-600 hover:text-[#1E5631]{% endif %} text-sm transition duration-200 py-2 px-1">
+                        class="{% if current_category == 'social_following' or request.resolver_match.url_name == 'social_feed' and request.GET.scope == 'following' %}text-[#1E5631] border-b-2 border-[#1E5631] font-bold{% else %}text-gray-600 hover:text-[#1E5631]{% endif %} text-sm transition duration-200 py-2 px-1">
                         Following
                     </a>
-                    {% endif %}
                     
                     <span class="text-gray-300">|</span>
 
-                    <a href="{% url 'feeds_trial' %}"
-                        class="{% if current_category == 'trial' %}text-[#1E5631] border-b-2 border-[#1E5631] font-bold{% else %}text-gray-600 hover:text-[#1E5631]{% endif %} text-sm transition duration-200 py-2 px-1">
-                        Trial News ({{ category_counts.trial|default:0 }})
+                    <a href="{% url 'my_posts' %}"
+                        class="{% if request.resolver_match.url_name == 'my_posts' %}text-[#1E5631] border-b-2 border-[#1E5631] font-bold{% else %}text-gray-600 hover:text-[#1E5631]{% endif %} text-sm transition duration-200 py-2 px-1">
+                        <i class="fas fa-list mr-1"></i> My Posts
                     </a>
-                    {% if category_counts.recruitment_signal > 0 %}
-                    <a href="{% url 'feeds_signals' %}"
-                        class="{% if current_category == 'recruitment_signal' %}text-[#1E5631] border-b-2 border-[#1E5631] font-bold{% else %}text-gray-600 hover:text-[#1E5631]{% endif %} text-sm transition duration-200 py-2 px-1">
-                        <i class="fas fa-brain text-xs mr-1"></i>Signals ({{ category_counts.recruitment_signal|default:0 }})
+                    <a href="{% url 'create_post' %}"
+                        class="{% if request.resolver_match.url_name == 'create_post' %}text-[#1E5631] border-b-2 border-[#1E5631] font-bold{% else %}text-gray-600 hover:text-[#1E5631]{% endif %} text-sm transition duration-200 py-2 px-1">
+                        <i class="fas fa-edit mr-1"></i> Create Post
                     </a>
                     {% endif %}
-                    <a href="{% url 'feeds_transfer' %}"
-                        class="{% if current_category == 'transfer' %}text-[#1E5631] border-b-2 border-[#1E5631] font-bold{% else %}text-gray-600 hover:text-[#1E5631]{% endif %} text-sm transition duration-200 py-2 px-1">
-                        Transfer News ({{ category_counts.transfer|default:0 }})
-                    </a>
-                    <a href="{% url 'feeds_match' %}"
-                        class="{% if current_category == 'match' %}text-[#1E5631] border-b-2 border-[#1E5631] font-bold{% else %}text-gray-600 hover:text-[#1E5631]{% endif %} text-sm transition duration-200 py-2 px-1">
-                        Match Reports ({{ category_counts.match|default:0 }})
-                    </a>
-                    <a href="{% url 'feeds_general' %}"
-                        class="{% if current_category == 'general' %}text-[#1E5631] border-b-2 border-[#1E5631] font-bold{% else %}text-gray-600 hover:text-[#1E5631]{% endif %} text-sm transition duration-200 py-2 px-1">
-                        General News ({{ category_counts.general|default:0 }})
-                    </a>
                 </div>
             </div>
         </div>

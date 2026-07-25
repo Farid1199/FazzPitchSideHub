@@ -1,35 +1,43 @@
 {% load youtube_filters %}
 
 <!-- Post Card for Player/Manager/Scout Posts -->
-<div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-6">
     
     <!-- Post Header -->
-    <div class="p-6 pb-4">
-        <div class="flex items-start justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-12 h-12 bg-gradient-to-r from-green-400 to-blue-400 rounded-full flex items-center justify-center">
-                    <span class="text-white font-bold text-lg">{{ post.user.username|slice:":1"|upper }}</span>
-                </div>
-                <div>
-                    <h3 class="font-bold text-gray-900">{{ post.user.username }}</h3>
-                    <p class="text-sm text-gray-500">
-                        {{ post.get_user_role }}
-                        {% if post.user.role == 'PLAYER' and post.user.player_profile %}
-                            • {{ post.user.player_profile.get_position_display }}
-                        {% elif post.user.role == 'MANAGER' and post.user.manager_profile %}
-                            • {{ post.user.manager_profile.current_role|default:"Manager" }}
-                        {% elif post.user.role == 'SCOUT' and post.user.scout_profile.is_scout_public %}
-                            • {{ post.user.scout_profile.organization|default:"Scout" }}
-                        {% endif %}
-                    </p>
-                    <p class="text-xs text-gray-400">{{ post.created_at|timesince }} ago</p>
-                </div>
+    <div class="p-4 sm:p-5 flex items-start justify-between">
+        <div class="flex items-center space-x-3">
+            <a href="#" class="block focus:outline-none">
+                {% if post.user.profile_picture %}
+                    <img src="{{ post.user.profile_picture.url }}" alt="{{ post.user.username }}" class="h-10 w-10 sm:h-12 sm:w-12 rounded-full object-cover border border-gray-200">
+                {% else %}
+                    <div class="h-10 w-10 sm:h-12 sm:w-12 bg-gray-100 rounded-full flex items-center justify-center border border-gray-200">
+                        <span class="text-gray-700 font-bold text-lg">{{ post.user.username|slice:":1"|upper }}</span>
+                    </div>
+                {% endif %}
+            </a>
+            <div>
+                <a href="#" class="font-bold text-gray-900 hover:underline text-sm sm:text-base focus:outline-none">{{ post.user.username }}</a>
+                <p class="text-xs text-gray-500 flex items-center gap-1">
+                    <span>{{ post.get_user_role }}</span>
+                    {% if post.user.role == 'PLAYER' and post.user.player_profile %}
+                        <span class="text-gray-300">•</span>
+                        <span>{{ post.user.player_profile.get_position_display }}</span>
+                    {% elif post.user.role == 'MANAGER' and post.user.manager_profile %}
+                        <span class="text-gray-300">•</span>
+                        <span>{{ post.user.manager_profile.current_role|default:"Manager" }}</span>
+                    {% elif post.user.role == 'SCOUT' and post.user.scout_profile.is_scout_public %}
+                        <span class="text-gray-300">•</span>
+                        <span>{{ post.user.scout_profile.organization|default:"Scout" }}</span>
+                    {% endif %}
+                </p>
+                <p class="text-[11px] text-gray-400 mt-0.5">{{ post.created_at|timesince }} ago</p>
             </div>
-            <div class="flex items-center space-x-2">
-                <span class="px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
-                    {{ post.get_post_type_display }}
-                </span>
-                {% if user.is_authenticated %}
+        </div>
+        <div class="flex items-center space-x-2">
+            <span class="px-2.5 py-1 bg-gray-100 text-gray-600 text-[10px] sm:text-xs font-semibold rounded-md uppercase tracking-wide">
+                {{ post.get_post_type_display }}
+            </span>
+            {% if user.is_authenticated %}
                 <!-- 3-Dot Dropdown Menu -->
                 <div class="relative">
                     <button onclick="togglePostMenu({{ post.pk }})"
@@ -67,8 +75,8 @@
     </div>
 
     <!-- Post Content -->
-    <div class="px-6 pb-4">
-        <p class="text-gray-800 whitespace-pre-line">{{ post.caption }}</p>
+    <div class="px-4 sm:px-5 pb-3">
+        <p class="text-sm sm:text-base text-gray-800 whitespace-pre-line leading-relaxed">{{ post.caption }}</p>
     </div>
 
     <!-- Achievement Stats -->
