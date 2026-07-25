@@ -17,7 +17,7 @@
 
         <!-- Sign Up Card -->
         <div class="bg-gray-800 rounded-2xl shadow-2xl p-8 border border-gray-700">
-            <form method="post" class="space-y-6">
+            <form method="post" enctype="multipart/form-data" class="space-y-6">
                 {% csrf_token %}
                 
                 {% if form.non_field_errors %}
@@ -87,6 +87,21 @@
                            required>
                     {% if form.password2.errors %}
                         <p class="mt-2 text-sm text-red-400">{{ form.password2.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Profile Picture Field -->
+                <div>
+                    <label for="{{ form.profile_picture.id_for_label }}" class="block text-sm font-medium text-gray-300 mb-2">
+                        <i class="fas fa-image mr-2 text-emerald-400"></i>Profile Picture (Optional)
+                    </label>
+                    <input type="file" 
+                           name="profile_picture" 
+                           id="{{ form.profile_picture.id_for_label }}"
+                           accept="image/*"
+                           class="w-full px-4 py-3 bg-gray-900 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition duration-200 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
+                    {% if form.profile_picture.errors %}
+                        <p class="mt-2 text-sm text-red-400">{{ form.profile_picture.errors.0 }}</p>
                     {% endif %}
                 </div>
 

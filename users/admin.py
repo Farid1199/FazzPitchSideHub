@@ -43,8 +43,8 @@ class ClubProfileAdmin(admin.ModelAdmin):
             'description': 'Enter the basic details for the club.'
         }),
         ('Website & Media', {
-            'fields': ('website_url', 'logo_url'),
-            'description': 'Add the club\'s official website and logo image URL.'
+            'fields': ('website_url', 'logo_image'),
+            'description': 'Add the club\'s official website and logo image.'
         }),
         ('RSS Feed Configuration', {
             'fields': ('rss_feed_url',),
@@ -104,8 +104,8 @@ class ClubSourceAdmin(admin.ModelAdmin):
             'description': 'Enter the basic details for the club RSS source.'
         }),
         ('Website & Media', {
-            'fields': ('website_url', 'logo_url'),
-            'description': 'Add the club\'s official website and logo image URL.'
+            'fields': ('website_url', 'logo_image'),
+            'description': 'Add the club\'s official website and logo image.'
         }),
         ('RSS Feed Configuration', {
             'fields': ('rss_url',),

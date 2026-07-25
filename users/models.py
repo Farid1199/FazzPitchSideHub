@@ -67,6 +67,13 @@ class User(AbstractUser):
         blank=True,
         help_text="Reason for current or most recent suspension."
     )
+    profile_picture = models.ImageField(
+        upload_to='profile_pictures/',
+        default='profile_pictures/default.png',
+        blank=True,
+        null=True,
+        help_text="Profile picture for the user."
+    )
 
     def __str__(self):
         return self.username
@@ -294,10 +301,11 @@ class ClubSource(models.Model):
         help_text="RSS feed URL for automatic news scraping.",
         blank=True
     )
-    logo_url = models.URLField(
-        max_length=500,
-        help_text="URL to the club's logo image.",
-        blank=True
+    logo_image = models.ImageField(
+        upload_to='club_logos/',
+        blank=True,
+        null=True,
+        help_text="Upload the official club logo."
     )
     region = models.CharField(
         max_length=100,
@@ -365,10 +373,11 @@ class ClubProfile(models.Model):
         help_text="RSS feed URL for club news (for news scraper).", 
         blank=True
     )
-    logo_url = models.URLField(
-        max_length=500,
-        help_text="URL to the club's logo image.",
-        blank=True
+    logo_image = models.ImageField(
+        upload_to='club_logos/',
+        blank=True,
+        null=True,
+        help_text="Upload the official club logo."
     )
     league = models.CharField(
         max_length=100, 

@@ -14,37 +14,30 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700;800&display=swap"
         rel="stylesheet">
 
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Compiled Tailwind CSS -->
+    <link rel="stylesheet" href="{% static 'css/tailwind.css' %}">
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+
+    <!-- HTMX for SPA-like interactions -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
 
     <!-- Alpine.js for interactive components -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-    <!-- Custom Tailwind Configuration -->
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#059669',
-                        secondary: '#10b981',
-                        accent: '#047857',
-                    },
-                    fontFamily: {
-                        heading: ['Montserrat', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-                        body: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-                    },
-                }
-            }
-        }
-    </script>
-
     <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- Custom Styles (accessibility, etc.) -->
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    
+    <!-- Custom CSS (appended at the end to ensure it can override if needed) -->
+    <style>
+        /* Base overrides missing from compiled tailwind due to custom fonts */
+        h1, h2, h3, h4, h5, h6 { font-family: 'Montserrat', sans-serif; }
+        body { font-family: 'Inter', sans-serif; }
+        .bg-primary { background-color: #059669; }
+        .text-primary { color: #059669; }
+        .border-primary { border-color: #059669; }
+        .hover\:bg-accent:hover { background-color: #047857; }
+    </style>
 
     {% block extra_head %}{% endblock %}
 </head>
@@ -52,152 +45,160 @@
 <body class="bg-gray-50 min-h-screen">
     <!-- Skip to Content -->
     <a href="#main-content"
-        class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[60] focus:bg-white focus:text-black focus:px-4 focus:py-2 focus:rounded focus:border-2 focus:border-black">
+        class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[60] focus:bg-white focus:text-black focus:px-4 focus:py-2 focus:rounded focus:border-2 border-black">
         Skip to main content
     </a>
 
-    <!-- ========== FACEBOOK-STYLE NAVIGATION BAR ========== -->
-    <nav class="fb-nav" aria-label="Main navigation">
-        <div class="fb-nav-inner">
+    <!-- ========== MODERN INSTAGRAM-STYLE TOP NAVIGATION ========== -->
+    <nav class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm transition-all duration-300 h-16" aria-label="Main navigation">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
+            <div class="flex justify-between items-center h-full">
 
-            <!-- LEFT ZONE: Brand -->
-            <a href="{% url 'home' %}" class="fb-nav-brand" aria-label="Fazz PitchSide Hub Home">
-                <img src="{% static 'images/logo.png' %}" alt="Fazz PitchSide Logo" style="height: 40px; width: 40px; border-radius: 50%; object-fit: cover; margin-right: 8px; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                <span class="fb-nav-brand-text">FazzPitchSide</span>
-            </a>
-
-            {% with request.resolver_match.url_name as url_name %}
-
-            <!-- CENTER ZONE: Icon Tab Strip (desktop) -->
-            <div class="fb-nav-tabs" role="tablist" aria-label="Primary navigation">
-                <a href="{% url 'home' %}" class="fb-nav-tab {% if url_name == 'home' %}active{% endif %}"
-                    aria-label="Home">
-                    <i class="fas fa-home" aria-hidden="true"></i>
-                    <span class="fb-tab-tooltip">Home</span>
-                </a>
-                <a href="{% url 'feeds' %}"
-                    class="fb-nav-tab {% if url_name == 'feeds' or url_name == 'feeds_trial' or url_name == 'feeds_general' or url_name == 'feeds_transfer' or url_name == 'feeds_match' or url_name == 'feeds_signals' %}active{% endif %}"
-                    aria-label="Feeds">
-                    <i class="fas fa-newspaper" aria-hidden="true"></i>
-                    <span class="fb-tab-tooltip">Feeds</span>
-                </a>
-                <a href="{% url 'community_hub' %}"
-                    class="fb-nav-tab {% if url_name == 'community_hub' %}active{% endif %}" aria-label="Opportunities">
-                    <i class="fas fa-futbol" aria-hidden="true"></i>
-                    <span class="fb-tab-tooltip">Opportunities</span>
-                </a>
-                <a href="{% url 'search_clubs' %}"
-                    class="fb-nav-tab {% if url_name == 'search_clubs' %}active{% endif %}" aria-label="Clubs">
-                    <i class="fas fa-shield-alt" aria-hidden="true"></i>
-                    <span class="fb-tab-tooltip">Clubs</span>
-                </a>
-                <a href="{% url 'search_players' %}"
-                    class="fb-nav-tab {% if url_name == 'search_players' or url_name == 'search_clubs' %}active{% endif %}"
-                    aria-label="Find People">
-                    <i class="fas fa-user-group" aria-hidden="true"></i>
-                    <span class="fb-tab-tooltip">Find People</span>
-                </a>
-                <a href="{% url 'pathways_home' %}"
-                    class="fb-nav-tab {% if url_name == 'pathways_home' or url_name == 'pathways_player' or url_name == 'pathways_manager' or url_name == 'pathways_scout' or url_name == 'pathways_non_league' or url_name == 'pathways_qualifications' %}active{% endif %}"
-                    aria-label="Football Pathways">
-                    <i class="fas fa-compass" aria-hidden="true"></i>
-                    <span class="fb-tab-tooltip">Pathways</span>
-                </a>
-                {% if user.is_authenticated %}
-                <a href="{% url 'social_feed' %}" class="fb-nav-tab {% if url_name == 'social_feed' %}active{% endif %}"
-                    aria-label="Social Feed">
-                    <i class="fas fa-users" aria-hidden="true"></i>
-                    <span class="fb-tab-tooltip">Social</span>
-                </a>
-                {% endif %}
-            </div>
-
-            <!-- RIGHT ZONE: Actions + Profile (desktop) -->
-            <div class="fb-nav-right">
-                {% if user.is_authenticated %}
-                <!-- Messages Icon -->
-                <a href="{% url 'inbox' %}" class="fb-nav-icon-btn" aria-label="Messages">
-                    <i class="fas fa-envelope" aria-hidden="true"></i>
-                    <span id="nav-msg-badge" class="fb-icon-badge hidden">0</span>
-                </a>
-
-                <!-- Notifications Icon -->
-                <div class="relative" id="notif-container">
-                    <button class="fb-nav-icon-btn" id="notif-button" aria-label="Notifications" aria-haspopup="true"
-                        aria-expanded="false">
-                        <i class="fas fa-bell" aria-hidden="true"></i>
-                        <span id="notif-badge" class="fb-icon-badge hidden">0</span>
-                    </button>
-                    <div class="fb-notif-dropdown" id="notif-dropdown">
-                        <div class="fb-notif-header">
-                            <span>Notifications</span>
-                            <button id="mark-all-read-btn" aria-label="Mark all notifications as read">Mark all
-                                read</button>
-                        </div>
-                        <div class="fb-notif-list" id="notif-list">
-                            <a href="#" class="text-gray-500 text-sm" style="text-align:center;">Loading...</a>
-                        </div>
-                        <div class="fb-notif-footer">
-                            <a href="{% url 'notifications' %}">View all notifications</a>
-                        </div>
-                    </div>
+                <!-- LEFT: Brand Logo -->
+                <div class="flex-shrink-0 flex items-center">
+                    <a href="{% url 'home' %}" class="flex items-center gap-2 group outline-none focus:ring-2 focus:ring-primary rounded-lg p-1" aria-label="Fazz PitchSide Hub Home">
+                        <img src="{% static 'images/logo.png' %}" alt="Fazz PitchSide Logo" class="h-10 w-10 md:h-11 md:w-11 object-cover rounded-full border border-gray-100 shadow-sm transition-transform duration-300 group-hover:scale-105">
+                        <span class="hidden sm:block text-xl font-bold font-heading text-gray-900 tracking-tight">FazzPitchSide</span>
+                    </a>
                 </div>
 
-                <!-- Profile Avatar + Dropdown -->
-                <div class="relative" id="user-menu-container">
-                    <button class="fb-nav-avatar" id="user-menu-button" aria-label="User menu" aria-haspopup="true"
-                        aria-expanded="false">
-                        <div class="fb-nav-avatar-circle">
-                            {{ user.username|make_list|first|upper }}
+                {% with request.resolver_match.url_name as url_name %}
+
+                <!-- CENTER: Icon Navigation Streamlined -->
+                <div class="hidden md:flex flex-1 justify-center items-center h-full space-x-2 lg:space-x-8 ml-6" role="tablist" aria-label="Primary navigation">
+                    <a href="{% url 'home' %}" class="relative flex items-center h-full px-4 text-gray-500 hover:text-primary transition-colors duration-200 group focus:outline-none" aria-label="Home">
+                        <div class="flex items-center gap-2 px-3 py-2 rounded-xl group-hover:bg-green-50 transition-colors {% if url_name == 'home' %}text-primary{% endif %}">
+                            <i class="fa{% if url_name == 'home' %}s{% else %}l{% endif %} fa-house text-xl"></i>
+                            <span class="font-medium text-sm hidden lg:block">Home</span>
                         </div>
-                        <span class="fb-nav-avatar-name">{{ user.username }}</span>
-                        <i class="fas fa-caret-down" style="color:#65676b; font-size:0.75rem;" aria-hidden="true"></i>
-                    </button>
-                    <div class="fb-nav-dropdown" id="user-menu-dropdown">
-                        <a href="{% url 'dashboard' %}" class="fb-nav-dropdown-item">
-                            <i class="fas fa-tachometer-alt"></i> Dashboard
-                        </a>
-                        <a href="{% url 'edit_profile' %}" class="fb-nav-dropdown-item">
-                            <i class="fas fa-user-edit"></i> Edit Profile
-                        </a>
-                        <a href="{% url 'security_settings' %}" class="fb-nav-dropdown-item">
-                            <i class="fas fa-cog"></i> Settings
-                        </a>
-                        <div class="fb-nav-dropdown-divider"></div>
-                        <a href="{% url 'about' %}" class="fb-nav-dropdown-item">
-                            <i class="fas fa-info-circle"></i> About Us
-                        </a>
-                        <a href="{% url 'contact' %}" class="fb-nav-dropdown-item">
-                            <i class="fas fa-envelope"></i> Contact Us
-                        </a>
-                        <div class="fb-nav-dropdown-divider"></div>
-                        <form method="post" action="{% url 'logout' %}">
-                            {% csrf_token %}
-                            <button type="submit" class="fb-nav-dropdown-item danger"
-                                style="width:100%; border:none; background:none; cursor:pointer;">
-                                <i class="fas fa-sign-out-alt"></i> Log Out
-                            </button>
-                        </form>
-                    </div>
+                        {% if url_name == 'home' %}<span class="absolute bottom-0 left-0 right-0 h-1 bg-primary rounded-t-lg"></span>{% endif %}
+                    </a>
+                    
+                    <a href="{% url 'social_feed' %}" class="relative flex items-center h-full px-4 text-gray-500 hover:text-primary transition-colors duration-200 group focus:outline-none" aria-label="Social Feed">
+                        <div class="flex items-center gap-2 px-3 py-2 rounded-xl group-hover:bg-green-50 transition-colors {% if url_name == 'social_feed' %}text-primary{% endif %}">
+                            <i class="fa{% if url_name == 'social_feed' %}s{% else %}l{% endif %} fa-users text-xl"></i>
+                            <span class="font-medium text-sm hidden lg:block">Community</span>
+                        </div>
+                        {% if url_name == 'social_feed' %}<span class="absolute bottom-0 left-0 right-0 h-1 bg-primary rounded-t-lg"></span>{% endif %}
+                    </a>
+
+                    <a href="{% url 'feeds' %}" class="relative flex items-center h-full px-4 text-gray-500 hover:text-primary transition-colors duration-200 group focus:outline-none" aria-label="Feeds">
+                        <div class="flex items-center gap-2 px-3 py-2 rounded-xl group-hover:bg-green-50 transition-colors {% if url_name == 'feeds' or url_name == 'feeds_trial' or url_name == 'feeds_general' or url_name == 'feeds_transfer' or url_name == 'feeds_match' or url_name == 'feeds_signals' %}text-primary{% endif %}">
+                            <i class="fa{% if url_name == 'feeds' or url_name == 'feeds_trial' or url_name == 'feeds_general' or url_name == 'feeds_transfer' or url_name == 'feeds_match' or url_name == 'feeds_signals' %}s{% else %}l{% endif %} fa-newspaper text-xl"></i>
+                            <span class="font-medium text-sm hidden lg:block">News Feeds</span>
+                        </div>
+                        {% if url_name == 'feeds' or url_name == 'feeds_trial' or url_name == 'feeds_general' or url_name == 'feeds_transfer' or url_name == 'feeds_match' or url_name == 'feeds_signals' %}<span class="absolute bottom-0 left-0 right-0 h-1 bg-primary rounded-t-lg"></span>{% endif %}
+                    </a>
+
+                    <a href="{% url 'pathways_home' %}" class="relative flex items-center h-full px-4 text-gray-500 hover:text-primary transition-colors duration-200 group focus:outline-none" aria-label="Football Pathways">
+                        <div class="flex items-center gap-2 px-3 py-2 rounded-xl group-hover:bg-green-50 transition-colors {% if 'pathways' in url_name %}text-primary{% endif %}">
+                            <i class="fa{% if 'pathways' in url_name %}s{% else %}l{% endif %} fa-compass text-xl"></i>
+                            <span class="font-medium text-sm hidden lg:block">Pathways</span>
+                        </div>
+                        {% if 'pathways' in url_name %}<span class="absolute bottom-0 left-0 right-0 h-1 bg-primary rounded-t-lg"></span>{% endif %}
+                    </a>
+                    
+                    <a href="{% url 'search_players' %}" class="relative flex items-center h-full px-4 text-gray-500 hover:text-primary transition-colors duration-200 group focus:outline-none" aria-label="Find People">
+                        <div class="flex items-center gap-2 px-3 py-2 rounded-xl group-hover:bg-green-50 transition-colors {% if url_name == 'search_players' or url_name == 'search_clubs' %}text-primary{% endif %}">
+                            <i class="fa{% if url_name == 'search_players' or url_name == 'search_clubs' %}s{% else %}l{% endif %} fa-magnifying-glass text-xl"></i>
+                            <span class="font-medium text-sm hidden lg:block">Search</span>
+                        </div>
+                        {% if url_name == 'search_players' or url_name == 'search_clubs' %}<span class="absolute bottom-0 left-0 right-0 h-1 bg-primary rounded-t-lg"></span>{% endif %}
+                    </a>
                 </div>
 
-                {% else %}
-                <!-- Guest: About, Contact, Login, Sign Up -->
-                <a href="{% url 'about' %}" class="fb-nav-login-btn">About</a>
-                <a href="{% url 'contact' %}" class="fb-nav-login-btn">Contact</a>
-                <a href="{% url 'login' %}" class="fb-nav-login-btn"><i class="fas fa-sign-in-alt mr-1"></i> Log In</a>
-                <a href="{% url 'signup' %}" class="fb-nav-signup-btn"><i class="fas fa-user-plus mr-1"></i> Sign Up</a>
-                {% endif %}
+                <!-- RIGHT: Profile & Actions -->
+                <div class="flex items-center h-full gap-2 sm:gap-4 relative">
+                    {% if user.is_authenticated %}
+                    
+                    <!-- Search Icon (Mobile Only) -->
+                    <a href="{% url 'search_players' %}" class="md:hidden p-2 text-gray-900 hover:bg-gray-100 rounded-full transition-colors">
+                        <i class="fal fa-magnifying-glass text-xl"></i>
+                    </a>
+
+                    <!-- Messages -->
+                    <a href="{% url 'inbox' %}" class="relative p-2 text-gray-900 hover:bg-gray-100 rounded-full transition-colors focus:ring-2 focus:ring-primary outline-none" aria-label="Messages">
+                        <i class="{% if url_name == 'inbox' %}fas{% else %}fal{% endif %} fa-paper-plane text-xl"></i>
+                        <span id="nav-msg-badge" class="hidden absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-sm ring-2 ring-white">0</span>
+                    </a>
+
+                    <!-- Notifications Dropdown (Alpine.js handled) -->
+                    <div x-data="{ open: false }" class="relative flex items-center h-full">
+                        <button @click="open = !open; if(open) setTimeout(() => document.getElementById('mark-all-read-btn')?.focus(), 100);" @keydown.escape="open = false" class="relative p-2 text-gray-900 hover:bg-gray-100 rounded-full transition-colors focus:ring-2 focus:ring-primary outline-none" id="notif-button" aria-label="Notifications" aria-haspopup="true" :aria-expanded="open">
+                            <i class="{% if url_name == 'notifications' %}fas{% else %}fal{% endif %} fa-heart text-xl"></i>
+                            <span id="notif-badge" class="hidden absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-sm ring-2 ring-white">0</span>
+                        </button>
+                        
+                        <!-- Notification Dropdown Panel -->
+                        <div x-show="open" @click.away="open = false" x-transition.opacity.duration.200ms class="absolute right-0 top-14 w-80 sm:w-96 bg-white rounded-xl shadow-xl ring-1 ring-black ring-opacity-5 overflow-hidden z-50 transform origin-top-right">
+                            <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                                <h3 class="text-base font-bold text-gray-900">Notifications</h3>
+                                <button id="mark-all-read-btn" class="text-sm font-medium text-primary hover:text-emerald-800 transition-colors">Clear all</button>
+                            </div>
+                            <div class="max-h-[60vh] overflow-y-auto overscroll-contain custom-scrollbar" id="notif-list">
+                                <div class="px-4 py-8 text-center text-sm text-gray-500">
+                                     <i class="fal fa-spinner-third fa-spin text-xl mb-2 text-gray-400"></i><br>Loading...
+                                </div>
+                            </div>
+                            <a href="{% url 'notifications' %}" class="block p-3 text-center text-sm font-medium text-primary hover:bg-gray-50 border-t border-gray-100 transition-colors">See all notifications</a>
+                        </div>
+                    </div>
+
+                    <!-- Profile Dropdown (Alpine.js handled) -->
+                    <div x-data="{ open: false }" class="relative flex items-center h-full ml-1">
+                        <button @click="open = !open" @keydown.escape="open = false" class="flex items-center focus:ring-2 focus:ring-primary outline-none p-1 rounded-full transition-shadow" aria-label="User menu" aria-haspopup="true" :aria-expanded="open">
+                            {% if user.profile_picture %}
+                                <img src="{{ user.profile_picture.url }}" alt="{{ user.username }}" class="h-8 w-8 rounded-full object-cover border border-gray-200">
+                            {% else %}
+                                <div class="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center border border-gray-200 text-gray-700 font-bold text-sm">
+                                    {{ user.username|make_list|first|upper }}
+                                </div>
+                            {% endif %}
+                        </button>
+
+                        <div x-show="open" @click.away="open = false" x-transition.opacity.duration.200ms class="absolute right-0 top-14 w-64 bg-white rounded-xl shadow-xl ring-1 ring-black ring-opacity-5 overflow-hidden z-50 transform origin-top-right py-2">
+                            <!-- Dropdown Header -->
+                            <div class="px-4 py-3 border-b border-gray-100 mb-1">
+                                <p class="text-sm text-gray-500">Signed in as</p>
+                                <p class="text-sm font-bold text-gray-900 truncate">{{ user.username }}</p>
+                            </div>
+                            
+                            <a href="{% url 'dashboard' %}" class="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                <i class="fal fa-user w-6 text-gray-400"></i> Profile
+                            </a>
+                            <a href="{% url 'edit_profile' %}" class="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                <i class="fal fa-pen w-6 text-gray-400"></i> Edit Profile
+                            </a>
+                            <a href="{% url 'security_settings' %}" class="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                <i class="fal fa-gear w-6 text-gray-400"></i> Settings
+                            </a>
+                            
+                            <div class="h-px bg-gray-100 my-1"></div>
+                            
+                            <form method="post" action="{% url 'logout' %}" class="w-full">
+                                {% csrf_token %}
+                                <button type="submit" class="flex w-full items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors text-left">
+                                    <i class="fal fa-arrow-right-from-bracket w-6 text-red-400"></i> Log Out
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    {% else %}
+                    <!-- Guest Navigation Navigation -->
+                    <div class="hidden sm:flex items-center space-x-4 mr-2">
+                        <a href="{% url 'about' %}" class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">About</a>
+                        <a href="{% url 'contact' %}" class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">Contact</a>
+                    </div>
+                    <a href="{% url 'login' %}" class="text-sm font-medium text-gray-700 hover:text-primary transition-colors hidden sm:block">Log In</a>
+                    <a href="{% url 'signup' %}" class="text-sm font-medium bg-primary hover:bg-accent text-white px-4 py-2 rounded-lg transition-colors shadow-sm">Sign Up</a>
+                    {% endif %}
+                </div>
             </div>
-
-            {% endwith %}
-
-            <!-- Mobile Menu Button -->
-            <button id="mobile-menu-button" class="fb-nav-mobile-btn" aria-label="Open navigation menu"
-                aria-expanded="false">
-                <i class="fas fa-bars" aria-hidden="true"></i>
-            </button>
         </div>
+
+        {% endwith %}
+    </nav>
 
         <!-- SECONDARY Navigation Bar (Feeds page only) -->
         {% if is_feeds_page %}

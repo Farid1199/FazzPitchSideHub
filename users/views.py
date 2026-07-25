@@ -492,7 +492,7 @@ def feeds_view(request, category=None):
             league_pyramid[level] = []
         league_pyramid[level].append({
             'name': club.club_name,
-            'logo_url': club.logo_url if hasattr(club, 'logo_url') else None,
+            'logo_url': club.logo_image.url if club.logo_image else None,
             'website_url': club.website_url if hasattr(club, 'website_url') else None,
             'type': 'club',
             'is_registered': club.is_registered if hasattr(club, 'is_registered') else True

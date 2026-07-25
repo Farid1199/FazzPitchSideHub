@@ -40,10 +40,15 @@ class CustomUserCreationForm(UserCreationForm):
         label='I agree to follow the Community Guidelines and Code of Conduct',
         error_messages={'required': 'You must agree to the Community Guidelines to create an account.'},
     )
+    profile_picture = forms.ImageField(
+        required=False,
+        help_text='Upload a profile picture (optional).',
+        widget=forms.FileInput(attrs={'accept': 'image/*'})
+    )
 
     class Meta:
         model = User
-        fields = ['username', 'email']
+        fields = ['username', 'email', 'profile_picture']
 
 class PlayerProfileForm(forms.ModelForm):
     """
@@ -113,15 +118,23 @@ class ClubProfileForm(forms.ModelForm):
     Form for creating/updating a Club Profile.
     Used when clubs sign up and create their profiles.
     """
+    logo_image = forms.ImageField(
+        required=False,
+        help_text='Upload the official club logo. (optional)',
+        widget=forms.FileInput(attrs={'accept': 'image/*'})
+    )
+
     class Meta:
         model = ClubProfile
         fields = [
             'club_name', 
+            'logo_image',
             'league_level', 
             'location_postcode',
             'league',
             'location',
             'rss_feed_url',
+            'website_url',
             'founded_year'
         ]
         
