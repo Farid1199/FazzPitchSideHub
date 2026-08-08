@@ -9,7 +9,7 @@ from .views import (
     opportunity_detail, express_interest, withdraw_interest, verify_opportunity,
     news_detail, player_profile, manager_profile, community_hub,
     create_post, social_feed, like_post, save_post, delete_post, my_posts,
-    add_comment, delete_comment,
+    add_comment, delete_comment, toggle_endorsement,
     submit_scout_verification, scout_verification_status, protected_scout_media,
     protected_manager_media,
     # Part 3 – Follow
@@ -85,6 +85,7 @@ urlpatterns = [
     path('posts/feed/', social_feed, name='social_feed'),
     path('posts/my-posts/', my_posts, name='my_posts'),
     path('posts/<int:post_id>/like/', like_post, name='like_post'),
+    path('endorse/<str:username>/<int:skill_id>/', toggle_endorsement, name='toggle_endorsement'),
     path('posts/<int:post_id>/save/', save_post, name='save_post'),
     path('posts/<int:post_id>/comment/', add_comment, name='add_comment'),
     path('posts/<int:post_id>/delete/', delete_post, name='delete_post'),

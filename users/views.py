@@ -368,6 +368,21 @@ def dashboard_view(request):
         return redirect('select_role')
     
     context = {'user': request.user}
+    
+    # Calculate Profile Views for Analytics
+    from .models import ProfileView
+    from django.utils import timezone
+    from datetime import timedelta
+    
+    seven_days_ago = timezone.now() - timedelta(days=7)
+    recent_views = ProfileView.objects.filter(viewed=request.user, viewed_at__gte=seven_days_ago).count()
+    total_views = ProfileView.objects.filter(viewed=request.user).count()
+    
+    context['profile_analytics'] = {
+        'recent_views': recent_views,
+        'total_views': total_views
+    }
+    
     if request.user.role == 'PLAYER' and hasattr(request.user, 'player_profile'):
         recommended_trials = get_recommendations(request.user.player_profile)
         context['recommended_trials'] = recommended_trials
@@ -1152,8 +1167,12 @@ def player_profile(request, username):
     """
     Display full player profile with option to message them.
     """
+    from .utils_social import track_profile_view
     player_user = get_object_or_404(User, username=username, role='PLAYER')
     player = get_object_or_404(PlayerProfile, user=player_user)
+    
+    # Track the profile view
+    track_profile_view(request, player_user)
     
     # Position color mapping
     position_colors = {
@@ -1201,8 +1220,12 @@ def manager_profile(request, username):
     """
     Display a manager's public profile including verification status.
     """
+    from .utils_social import track_profile_view
     manager_user = get_object_or_404(User, username=username, role='MANAGER')
     manager = get_object_or_404(ManagerProfile, user=manager_user)
+    
+    # Track the profile view
+    track_profile_view(request, manager_user)
 
     # Get their most recent APPROVED verification (if any)
     approved_verification = QualificationVerification.objects.filter(
@@ -1281,6 +1304,7 @@ def create_post(request):
     """
     from .forms import PostForm
     from .models import Post
+    from .utils_social import parse_post_content_for_tags_and_mentions
     
     if request.method == 'POST':
         form = PostForm(request.POST, request.FILES)
@@ -1288,6 +1312,7 @@ def create_post(request):
             post = form.save(commit=False)
             post.user = request.user
             post.save()
+            parse_post_content_for_tags_and_mentions(post)
             messages.success(request, 'Post created successfully!')
             return redirect('social_feed')
         else:
@@ -1745,6 +1770,56 @@ def protected_manager_media(request, path):
 
     return FileResponse(open(full_path, 'rb'))
 
+
+# ===================================================================
+
+@login_required
+def toggle_endorsement(request, username, skill_id):
+    """
+    AJAX view for toggling an endorsement on a user's skill.
+    """
+    from .models import Endorsement, Skill, User
+    from django.http import JsonResponse
+    
+    if request.method == 'POST':
+        try:
+            target_user = get_object_or_404(User, username=username)
+            skill = get_object_or_404(Skill, pk=skill_id)
+            
+            # You can't endorse yourself
+            if target_user == request.user:
+                return JsonResponse({'success': False, 'error': 'You cannot endorse yourself.'}, status=400)
+                
+            endorsement = Endorsement.objects.filter(
+                skill=skill,
+                endorsed_user=target_user,
+                endorser=request.user
+            ).first()
+            
+            if endorsement:
+                endorsement.delete()
+                action = 'removed'
+            else:
+                Endorsement.objects.create(
+                    skill=skill,
+                    endorsed_user=target_user,
+                    endorser=request.user
+                )
+                action = 'added'
+                
+            # Get updated count
+            new_count = Endorsement.objects.filter(skill=skill, endorsed_user=target_user).count()
+            
+            return JsonResponse({
+                'success': True,
+                'action': action,
+                'new_count': new_count
+            })
+            
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+            
+    return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=400)
 
 # ===================================================================
 # Part 3 – Follow System

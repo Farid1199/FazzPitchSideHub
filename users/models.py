@@ -85,6 +85,44 @@ class User(AbstractUser):
         return self.get_role_display() if self.role else 'User'
 
 
+class Skill(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+    category = models.CharField(max_length=50, blank=True, help_text="e.g. Technical, Tactical, Physical, Coaching")
+    
+    def __str__(self):
+        return self.name
+
+class Hashtag(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"#{self.name}"
+
+class Endorsement(models.Model):
+    skill = models.ForeignKey(Skill, on_delete=models.CASCADE, related_name='endorsements')
+    endorsed_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='received_endorsements')
+    endorser = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='given_endorsements')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('skill', 'endorsed_user', 'endorser')
+
+    def __str__(self):
+        return f"{self.endorser.username} endorsed {self.endorsed_user.username} for {self.skill.name}"
+
+class ProfileView(models.Model):
+    viewer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile_views_made')
+    viewed = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile_views_received')
+    viewed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-viewed_at']
+
+    def __str__(self):
+        return f"{self.viewer.username} viewed {self.viewed.username}"
+
+
 class PlayerProfile(models.Model):
     """
     Profile model for Players.
@@ -187,6 +225,7 @@ class PlayerProfile(models.Model):
         default=False,
         help_text="Whether the player is looking for a club."
     )
+    skills = models.ManyToManyField(Skill, blank=True, related_name="players")
 
     AVAILABILITY_CHOICES = [
         ('AVAILABLE', 'Available — Actively Looking'),
@@ -449,6 +488,7 @@ class ScoutProfile(models.Model):
         default=False,
         help_text="If True, others can see this account is a Scout. If False (default), the role is hidden."
     )
+    skills = models.ManyToManyField(Skill, blank=True, related_name="scouts")
 
     def __str__(self):
         return f"Scout: {self.user.username}"
@@ -555,6 +595,7 @@ class ManagerProfile(models.Model):
         default='EMPLOYED',
         help_text="Current employment status."
     )
+    skills = models.ManyToManyField(Skill, blank=True, related_name="managers")
 
     def __str__(self):
         return f"Manager: {self.user.username}"
@@ -1223,6 +1264,24 @@ class Post(models.Model):
         blank=True,
         help_text="Users who liked this post"
     )
+    mentions = models.ManyToManyField(
+        User,
+        related_name='mentioned_in_posts',
+        blank=True,
+        help_text="Users mentioned in the post body"
+    )
+    hashtags = models.ManyToManyField(
+        Hashtag,
+        related_name='posts',
+        blank=True,
+        help_text="Hashtags used in the post"
+    )
+    trending_score = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0.00,
+        help_text="Calculated score for trending algorithms"
+    )
     
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
@@ -1271,6 +1330,24 @@ class Post(models.Model):
 # ===================================================================
 # Post Comments
 # ===================================================================
+
+class Reaction(models.Model):
+    REACTION_TYPES = [
+        ('LIKE', 'Like'),
+        ('FIRE', 'Fire'),
+        ('CLAP', 'Clap'),
+        ('SUPPORT', 'Support'),
+    ]
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='reactions')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reactions')
+    reaction_type = models.CharField(max_length=15, choices=REACTION_TYPES, default='LIKE')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('post', 'user', 'reaction_type')
+
+    def __str__(self):
+        return f"{self.user.username} reacted {self.get_reaction_type_display()} on {self.post.pk}"
 
 class Comment(models.Model):
     """Comment on a social post."""

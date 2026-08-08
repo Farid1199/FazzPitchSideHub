@@ -568,6 +568,35 @@
                         })();
                     </script>
 
+                    <script>
+                        function toggleEndorsement(username, skillId) {
+                            fetch(`/endorse/${username}/${skillId}/`, {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRFToken': '{{ csrf_token }}',
+                                    'Content-Type': 'application/json',
+                                },
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.status === 'success') {
+                                    document.getElementById(`skill-count-${skillId}`).innerText = data.count;
+                                    const btn = document.getElementById(`endorse-btn-${skillId}`);
+                                    if (data.action === 'added') {
+                                        btn.classList.remove('bg-blue-50', 'text-blue-600');
+                                        btn.classList.add('bg-blue-600', 'text-white');
+                                        btn.innerHTML = '<i class="fas fa-check"></i>';
+                                    } else {
+                                        btn.classList.remove('bg-blue-600', 'text-white');
+                                        btn.classList.add('bg-blue-50', 'text-blue-600');
+                                        btn.innerHTML = '<i class="fas fa-plus"></i>';
+                                    }
+                                }
+                            })
+                            .catch(error => console.error('Error:', error));
+                        }
+                    </script>
+
                     {% block extra_scripts %}{% endblock %}
 </body>
 

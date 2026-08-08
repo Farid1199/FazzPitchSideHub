@@ -8,21 +8,41 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         <!-- Header -->
-        <div class="mb-8">
-            <h1 class="text-4xl font-bold text-gray-900 mb-2">Welcome, {{ user.username }}!</h1>
-            <p class="text-gray-600">
-                {% if user.role == 'PLAYER' %}
-                Player Dashboard
-                {% elif user.role == 'CLUB' %}
-                Club Dashboard
-                {% elif user.role == 'SCOUT' %}
-                Scout Dashboard
-                {% elif user.role == 'MANAGER' %}
-                Manager Dashboard
-                {% elif user.role == 'FAN' %}
-                Fan Dashboard
-                {% endif %}
-            </p>
+        <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <h1 class="text-4xl font-bold text-gray-900 mb-2">Welcome, {{ user.username }}!</h1>
+                <p class="text-gray-600">
+                    {% if user.role == 'PLAYER' %}
+                    Player Dashboard
+                    {% elif user.role == 'CLUB' %}
+                    Club Dashboard
+                    {% elif user.role == 'SCOUT' %}
+                    Scout Dashboard
+                    {% elif user.role == 'MANAGER' %}
+                    Manager Dashboard
+                    {% elif user.role == 'FAN' %}
+                    Fan Dashboard
+                    {% endif %}
+                </p>
+            </div>
+            
+            <!-- Analytics Widget -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex items-center space-x-6 min-w-fit">
+                <div>
+                    <p class="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-1">Profile Views (7 Days)</p>
+                    <div class="flex items-baseline space-x-2">
+                        <span class="text-2xl font-bold text-emerald-600">{{ profile_analytics.recent_views }}</span>
+                        {% if profile_analytics.recent_views > 0 %}
+                            <span class="text-xs text-emerald-500 flex items-center"><i class="fas fa-arrow-up mr-1 text-[10px]"></i> Active</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="h-10 w-px bg-gray-200"></div>
+                <div>
+                    <p class="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-1">Total All Time</p>
+                    <span class="text-2xl font-bold text-gray-800">{{ profile_analytics.total_views }}</span>
+                </div>
+            </div>
         </div>
 
         {% if user.role == 'PLAYER' %}

@@ -75,8 +75,9 @@
     </div>
 
     <!-- Post Content -->
+    {% load social_filters %}
     <div class="px-4 sm:px-5 pb-3">
-        <p class="text-sm sm:text-base text-gray-800 whitespace-pre-line leading-relaxed">{{ post.caption }}</p>
+        <p class="text-sm sm:text-base text-gray-800 whitespace-pre-line leading-relaxed">{{ post.caption|linkify_social }}</p>
     </div>
 
     <!-- Achievement Stats -->

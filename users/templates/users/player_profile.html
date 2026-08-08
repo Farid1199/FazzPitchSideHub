@@ -235,6 +235,47 @@
                     {% endif %}
                 </div>
                 
+                <!-- Endorsements & Skills Section -->
+                <div class="mt-8 border-t border-gray-200 pt-8">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center justify-between">
+                        <div>
+                            <i class="fas fa-medal mr-2 text-blue-500"></i> Skills & Endorsements
+                        </div>
+                        {% if user.is_authenticated and user == player_user %}
+                            <button class="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded-md font-semibold transition">
+                                <i class="fas fa-plus mr-1"></i> Add Skill
+                            </button>
+                        {% endif %}
+                    </h2>
+                    
+                    {% if player.skills.all %}
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {% for skill in player.skills.all %}
+                            <div class="p-4 rounded-xl border border-gray-200 bg-white flex items-center justify-between group hover:shadow-md transition">
+                                <div>
+                                    <h4 class="font-bold text-gray-900 text-lg">{{ skill.name }}</h4>
+                                    <p class="text-xs text-gray-500"><span id="skill-count-{{ skill.id }}">{{ skill.endorsement_set.count }}</span> endorsement{{ skill.endorsement_set.count|pluralize }}</p>
+                                </div>
+                                {% if user.is_authenticated and user != player_user %}
+                                    <button onclick="toggleEndorsement('{{ player_user.username }}', '{{ skill.id }}')"
+                                            id="endorse-btn-{{ skill.id }}"
+                                            class="text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white rounded-full w-10 h-10 flex items-center justify-center transition" title="Endorse">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="bg-gray-50 rounded-xl p-6 text-center border border-gray-100">
+                            <p class="text-gray-500 mb-2">No skills added yet.</p>
+                            {% if user.is_authenticated and user == player_user %}
+                                <p class="text-sm">Add skills like "Finishing", "Pace", or "Leadership" to get endorsed by managers and peers.</p>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+
                 <!-- Timeline Section -->
                 {% if posts %}
                 <div class="mt-8 border-t border-gray-200 pt-8">
