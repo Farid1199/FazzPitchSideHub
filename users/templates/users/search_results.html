@@ -149,37 +149,27 @@
             </p>
             
             <!-- Position Color Legend -->
-            <div class="flex items-center space-x-4 text-sm">
-                <span class="text-gray-600 font-medium">Positions:</span>
+            <div class="flex items-center space-x-4 text-sm mt-2 sm:mt-0">
+                <span class="text-gray-500 font-medium">Positions:</span>
                 <div class="flex items-center space-x-1.5" title="Goalkeeper">
-                    <div class="w-6 h-6 rounded-full bg-yellow-500 flex items-center justify-center" role="img" aria-label="Goalkeeper">
-                        <i class="fas fa-hands text-white text-xs" aria-hidden="true"></i>
-                    </div>
-                    <span class="text-gray-600">GK</span>
+                    <div class="w-2.5 h-2.5 rounded-full bg-slate-400" role="img" aria-label="Goalkeeper"></div>
+                    <span class="text-gray-500 text-xs font-semibold">GK</span>
                 </div>
                 <div class="flex items-center space-x-1.5" title="Defender">
-                    <div class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center" role="img" aria-label="Defender">
-                        <i class="fas fa-shield-halved text-white text-xs" aria-hidden="true"></i>
-                    </div>
-                    <span class="text-gray-600">DEF</span>
+                    <div class="w-2.5 h-2.5 rounded-full bg-slate-500" role="img" aria-label="Defender"></div>
+                    <span class="text-gray-500 text-xs font-semibold">DEF</span>
                 </div>
                 <div class="flex items-center space-x-1.5" title="Midfielder">
-                    <div class="w-6 h-6 rounded-full bg-green-600 flex items-center justify-center" role="img" aria-label="Midfielder">
-                        <i class="fas fa-compass text-white text-xs" aria-hidden="true"></i>
-                    </div>
-                    <span class="text-gray-600">MID</span>
+                    <div class="w-2.5 h-2.5 rounded-full bg-emerald-600" role="img" aria-label="Midfielder"></div>
+                    <span class="text-gray-500 text-xs font-semibold">MID</span>
                 </div>
                 <div class="flex items-center space-x-1.5" title="Winger">
-                    <div class="w-6 h-6 rounded-full bg-red-500 flex items-center justify-center" role="img" aria-label="Winger">
-                        <i class="fas fa-bolt text-white text-xs" aria-hidden="true"></i>
-                    </div>
-                    <span class="text-gray-600">WING</span>
+                    <div class="w-2.5 h-2.5 rounded-full bg-emerald-500" role="img" aria-label="Winger"></div>
+                    <span class="text-gray-500 text-xs font-semibold">WING</span>
                 </div>
                 <div class="flex items-center space-x-1.5" title="Forward">
-                    <div class="w-6 h-6 rounded-full bg-purple-600 flex items-center justify-center" role="img" aria-label="Forward">
-                        <i class="fas fa-bullseye text-white text-xs" aria-hidden="true"></i>
-                    </div>
-                    <span class="text-gray-600">FWD</span>
+                    <div class="w-2.5 h-2.5 rounded-full bg-slate-700" role="img" aria-label="Forward"></div>
+                    <span class="text-gray-500 text-xs font-semibold">FWD</span>
                 </div>
             </div>
         </div>
@@ -240,54 +230,55 @@
         {% if players %}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {% for player in players %}
-                    <div class="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden relative">
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200 overflow-hidden relative group">
                         <!-- Position Icon Badge - Top Right -->
-                        <div class="absolute top-4 right-4 z-10">
+                        <div class="absolute top-4 right-4 z-10 opacity-90 group-hover:opacity-100 transition-opacity">
                             {% if player.position == 'GK' %}
-                                <div class="bg-yellow-500 text-white rounded-full w-11 h-11 flex items-center justify-center shadow-lg" role="img" aria-label="Goalkeeper">
-                                    <i class="fas fa-hands text-lg" aria-hidden="true"></i>
+                                <div class="bg-slate-400 text-white rounded-full px-3 py-1 text-xs font-bold shadow-sm">
+                                    GK
                                 </div>
                             {% elif player.position == 'LB' or player.position == 'CB' or player.position == 'RB' or player.position == 'LWB' or player.position == 'RWB' %}
-                                <div class="bg-blue-600 text-white rounded-full w-11 h-11 flex items-center justify-center shadow-lg" role="img" aria-label="Defender">
-                                    <i class="fas fa-shield-halved text-lg" aria-hidden="true"></i>
+                                <div class="bg-slate-500 text-white rounded-full px-3 py-1 text-xs font-bold shadow-sm">
+                                    DEF
                                 </div>
                             {% elif player.position == 'CDM' or player.position == 'CM' or player.position == 'CAM' or player.position == 'LM' or player.position == 'RM' %}
-                                <div class="bg-green-600 text-white rounded-full w-11 h-11 flex items-center justify-center shadow-lg" role="img" aria-label="Midfielder">
-                                    <i class="fas fa-compass text-lg" aria-hidden="true"></i>
+                                <div class="bg-emerald-600 text-white rounded-full px-3 py-1 text-xs font-bold shadow-sm">
+                                    MID
                                 </div>
                             {% elif player.position == 'LW' or player.position == 'RW' %}
-                                <div class="bg-red-500 text-white rounded-full w-11 h-11 flex items-center justify-center shadow-lg" role="img" aria-label="Winger">
-                                    <i class="fas fa-bolt text-lg" aria-hidden="true"></i>
+                                <div class="bg-emerald-500 text-white rounded-full px-3 py-1 text-xs font-bold shadow-sm">
+                                    WING
                                 </div>
                             {% else %}
-                                <div class="bg-purple-600 text-white rounded-full w-11 h-11 flex items-center justify-center shadow-lg" role="img" aria-label="Forward">
-                                    <i class="fas fa-bullseye text-lg" aria-hidden="true"></i>
+                                <div class="bg-slate-700 text-white rounded-full px-3 py-1 text-xs font-bold shadow-sm">
+                                    FWD
                                 </div>
                             {% endif %}
                         </div>
 
                         <!-- Player Header with Avatar -->
-                        <div class="bg-gradient-to-r from-green-500 to-green-600 p-6">
-                            <div class="flex items-center space-x-4">
-                                <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-lg">
-                                    <svg class="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                    </svg>
+                        <div class="bg-gray-50/50 p-6 border-b border-gray-50 flex items-start space-x-4">
+                            {% if player.user.profile_picture %}
+                                <img src="{{ player.user.profile_picture.url }}" alt="{{ player.user.username }}" class="w-14 h-14 rounded-full object-cover border-2 border-white shadow-sm">
+                            {% else %}
+                                <div class="w-14 h-14 rounded-full bg-emerald-50 flex items-center justify-center border-2 border-white shadow-sm text-emerald-600 font-bold text-lg">
+                                    {{ player.user.username|make_list|first|upper }}
                                 </div>
-                                <div class="flex-1">
-                                    <h3 class="text-xl font-bold text-white">{{ player.user.username }}</h3>
-                                    <p class="text-green-100 text-sm">{{ player.get_position_display }}</p>
-                                    {% if player.availability_status %}
-                                    <span class="inline-block mt-1 text-xs font-semibold px-2 py-0.5 rounded
-                                        {% if player.availability_status == 'AVAILABLE' %}bg-green-200 text-green-900
-                                        {% elif player.availability_status == 'TRIALING' %}bg-yellow-200 text-yellow-900
-                                        {% elif player.availability_status == 'SIGNED' %}bg-blue-200 text-blue-900
-                                        {% elif player.availability_status == 'INJURED' %}bg-red-200 text-red-900
-                                        {% else %}bg-gray-200 text-gray-900{% endif %}">
-                                        {{ player.get_availability_status_display }}
-                                    </span>
-                                    {% endif %}
-                                </div>
+                            {% endif %}
+                            
+                            <div class="flex-1 min-w-0 pt-1">
+                                <h3 class="text-lg font-bold text-gray-900 truncate">{{ player.user.get_full_name|default:player.user.username }}</h3>
+                                <p class="text-gray-500 text-sm truncate">@{{ player.user.username }}</p>
+                                {% if player.availability_status %}
+                                <span class="inline-block mt-2 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider
+                                    {% if player.availability_status == 'AVAILABLE' %}bg-green-100 text-green-800
+                                    {% elif player.availability_status == 'TRIALING' %}bg-yellow-100 text-yellow-800
+                                    {% elif player.availability_status == 'SIGNED' %}bg-blue-100 text-blue-800
+                                    {% elif player.availability_status == 'INJURED' %}bg-red-100 text-red-800
+                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    {{ player.get_availability_status_display }}
+                                </span>
+                                {% endif %}
                             </div>
                         </div>
 

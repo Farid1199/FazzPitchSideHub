@@ -733,22 +733,46 @@ def search_players(request):
         players = players.filter(playing_level=level)
     
     if postcode:
-        # Basic postcode filtering - match players whose postcode starts with the search term
-        players = players.filter(location_postcode__istartswith=postcode.strip())
+        import re
+        cleaned = postcode.strip().upper()
+        outward_match = re.match(r'^([A-Z]{1,2})(\d{1,2}[A-Z]?)', cleaned)
+        
+        if outward_match:
+            area = outward_match.group(1)
+            outward = outward_match.group(0)
+            
+            exact_district = players.filter(location_postcode__istartswith=outward)
+            same_area = players.filter(location_postcode__istartswith=area).exclude(
+                pk__in=exact_district.values_list('pk', flat=True)
+            )
+            players = list(exact_district.order_by('user__username')) + list(same_area.order_by('user__username'))
+        else:
+            players = players.filter(location_postcode__istartswith=cleaned)
     
     if name:
         # Search by username (case-insensitive partial match)
-        players = players.filter(user__username__icontains=name.strip())
+        if isinstance(players, list):
+            name_lower = name.strip().lower()
+            players = [p for p in players if name_lower in p.user.username.lower() or name_lower in p.user.first_name.lower() or name_lower in p.user.last_name.lower()]
+        else:
+            players = players.filter(
+                Q(user__username__icontains=name.strip()) |
+                Q(user__first_name__icontains=name.strip()) |
+                Q(user__last_name__icontains=name.strip())
+            )
 
     if availability:
-        players = players.filter(availability_status=availability)
+        if isinstance(players, list):
+            players = [p for p in players if p.availability_status == availability]
+        else:
+            players = players.filter(availability_status=availability)
     
-    # Sort by postcode if postcode search is active
-    if postcode:
-        players = players.order_by('location_postcode')
-    else:
-        # Default sort by username
-        players = players.order_by('user__username')
+    # Sorting
+    if not isinstance(players, list):
+        if postcode:
+            players = players.order_by('location_postcode')
+        else:
+            players = players.order_by('user__username')
     
     # Get choices for the filter form
     position_choices = PlayerProfile.POSITION_CHOICES
@@ -784,7 +808,7 @@ def search_players(request):
         'search_name': name,
         'search_availability': availability,
         'search_manager_name': manager_name,
-        'total_results': players.count(),
+        'total_results': len(players) if isinstance(players, list) else players.count(),
     }
     
     return render(request, 'users/search_results.html', context)
